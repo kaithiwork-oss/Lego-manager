@@ -1,0 +1,5 @@
+# Patterns are relative to rootDir (src/).
+# Only appsscript.json and .js/.ts/.html files are pushed to Apps Script.
+**/node_modules/**
+**/*.md
+**/.gitkeep
