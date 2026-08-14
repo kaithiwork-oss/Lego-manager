@@ -12,6 +12,7 @@
  *   npm run deploy -- -d "Sửa bug ảnh"  # kèm mô tả cho version mới
  *   npm run deploy -- --id AKfycb...    # ghim một deployment ID cụ thể
  *   npm run deploy -- --no-push         # chỉ deploy, không push code
+ *   npm run deploy:pin <link /exec>     # ghim link đang dùng, chưa deploy
  *   npm run deploy:url                  # chỉ in ra URL đang dùng
  */
 
@@ -74,14 +75,32 @@ function isHead(deployment) {
   return deployment.versionNumber === undefined || deployment.versionNumber === null;
 }
 
+/**
+ * Nhận cả deployment ID trần lẫn nguyên link web app —
+ * cái người dùng có sẵn trong tay thường là link `/macros/s/<ID>/exec`.
+ */
+function toDeploymentId(value) {
+  const input = (value ?? '').trim();
+  if (!input) return '';
+  // Link thường: /macros/s/<ID>/exec — link Workspace: /a/macros/<domain>/s/<ID>/exec
+  const fromUrl = input.match(/\/macros\/(?:[^/]+\/)*s\/([A-Za-z0-9_-]+)/) || input.match(/\/s\/([A-Za-z0-9_-]+)/);
+  const id = fromUrl ? fromUrl[1] : input;
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) {
+    throw new Error(`Deployment ID không hợp lệ: ${input}\n  Dán link dạng https://script.google.com/macros/s/<ID>/exec hoặc chính <ID>.`);
+  }
+  return id;
+}
+
 function parseArgs(argv) {
-  const args = {description: '', deploymentId: '', push: true, urlOnly: false};
+  const args = {description: '', deploymentId: '', push: true, urlOnly: false, pinOnly: false};
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '-d' || arg === '--description') args.description = argv[++i] ?? '';
-    else if (arg === '-i' || arg === '--id' || arg === '--deploymentId') args.deploymentId = argv[++i] ?? '';
+    else if (arg === '-i' || arg === '--id' || arg === '--deploymentId') args.deploymentId = toDeploymentId(argv[++i]);
     else if (arg === '--no-push') args.push = false;
     else if (arg === '--url') args.urlOnly = true;
+    else if (arg === '--pin') args.pinOnly = true;
+    else if (args.pinOnly && !args.deploymentId) args.deploymentId = toDeploymentId(arg);
     else throw new Error(`Không hiểu tham số: ${arg}`);
   }
   return args;
@@ -107,6 +126,23 @@ function main() {
     return;
   }
 
+  if (args.pinOnly) {
+    // Ghim thì phải nói rõ ghim cái nào — không im lặng lấy lại giá trị cũ.
+    deploymentId = args.deploymentId;
+    if (!deploymentId) {
+      console.error(
+        'Thiếu link. Dùng: npm run deploy:pin -- "https://script.google.com/macros/s/<ID>/exec"',
+      );
+      process.exitCode = 1;
+      return;
+    }
+    const saved = writeConfig(deploymentId);
+    console.log(`✓ Đã ghim link hiện tại vào ${path.basename(CONFIG_FILE)}`);
+    console.log(`  URL: ${saved.webAppUrl}`);
+    console.log('  Từ giờ `npm run deploy` sẽ luôn deploy vào đúng link này. Nhớ commit file này.');
+    return;
+  }
+
   if (args.push) {
     console.log('→ Đẩy code lên Apps Script...');
     clasp(['push', '-f']);
@@ -121,6 +157,17 @@ function main() {
         '  - Muốn dùng deployment khác: npm run deploy -- --id <deploymentId>\n' +
         `  - Chấp nhận URL mới: xoá ${path.basename(CONFIG_FILE)} rồi chạy lại.\n` +
         `  Deployment hiện có:\n${deployments.map(d => `    - ${d.deploymentId} ${isHead(d) ? '@HEAD' : `@${d.versionNumber}`}`).join('\n')}`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const pinned = deployments.find(d => d.deploymentId === deploymentId);
+  if (pinned && isHead(pinned)) {
+    console.error(
+      `\n✗ ${deploymentId} là deployment @HEAD (link /dev, luôn chạy code mới nhất) — Apps Script không cho phát hành vào đó.\n` +
+        '  Ghim link /exec của bản đang dùng thay vì link /dev:\n' +
+        '    npm run deploy:pin -- "https://script.google.com/macros/s/<ID>/exec"',
     );
     process.exitCode = 1;
     return;

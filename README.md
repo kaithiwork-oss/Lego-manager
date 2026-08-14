@@ -54,6 +54,7 @@ Code trên Apps Script sẽ được tải về thư mục `src/`. Sau đó comm
 | `npm run logs` | Xem log thực thi |
 | `npm run deploy` | Push + deploy, **giữ nguyên link URL** |
 | `npm run deploy:url` | In ra link web app đang dùng |
+| `npm run deploy:pin` | Ghim link `/exec` hiện tại để deploy không đổi link |
 | `npm run deployments` | Liệt kê các deployment |
 
 > **Lưu ý:** `clasp pull` sẽ ghi đè file trong `src/` bằng bản trên server, kể cả `appsscript.json`. Commit trước khi pull để không mất thay đổi local.
@@ -69,16 +70,23 @@ npm run deploy -- --no-push          # chỉ deploy lại code đã push
 npm run deploy:url                   # xem link web app hiện tại
 ```
 
-### Lần đầu chạy
+### Giữ đúng link đang dùng
 
-- Nếu Apps Script **đã có sẵn 1 deployment**, script tự nhận nó và ghi vào `deployment.json`.
-- Nếu có **nhiều deployment**, script dừng lại và liệt kê ra; chọn đúng cái đang dùng (chính là phần `<ID>` trong link `https://script.google.com/macros/s/<ID>/exec`) rồi chạy một lần:
+Cách chắc nhất: dán thẳng link `/exec` đang chia sẻ cho mọi người vào lệnh pin (chạy một lần duy nhất, chưa deploy gì cả):
 
-  ```bash
-  npm run deploy -- --id AKfycb...
-  ```
+```bash
+npm run deploy:pin -- "https://script.google.com/macros/s/AKfycb.../exec"
+```
 
-- Nếu **chưa có deployment nào**, script tạo mới rồi ghim lại cho các lần sau.
+Nhận cả link Workspace (`/a/macros/<domain>/s/<ID>/exec`) lẫn ID trần. Sau đó mọi lần `npm run deploy` đều bắn code mới vào đúng link đó.
+
+Nếu không pin sẵn thì lần đầu chạy `npm run deploy`:
+
+- Apps Script **đã có sẵn 1 deployment** → script tự nhận và ghi vào `deployment.json`.
+- Có **nhiều deployment** → script dừng lại, liệt kê ra để chọn đúng cái đang dùng: `npm run deploy -- --id <link hoặc ID>`.
+- **Chưa có deployment nào** → tạo mới rồi ghim lại cho các lần sau.
+
+> Nhớ dùng link `/exec`, đừng dùng link `/dev`. Link `/dev` trỏ tới deployment `@HEAD` — Apps Script không cho phát hành vào đó, và script sẽ báo lỗi nếu bạn ghim nhầm.
 
 Sau đó **commit `deployment.json`** để cả máy khác cũng deploy vào đúng URL đó. Có thể ghi đè bằng biến môi trường `CLASP_DEPLOYMENT_ID` nếu cần deploy sang bản khác (ví dụ bản staging).
 

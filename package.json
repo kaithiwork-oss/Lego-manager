@@ -14,6 +14,7 @@
     "logs": "clasp tail-logs",
     "deploy": "node scripts/deploy.js",
     "deploy:url": "node scripts/deploy.js --url",
+    "deploy:pin": "node scripts/deploy.js --pin",
     "deploy:new": "clasp create-deployment",
     "deployments": "clasp list-deployments"
   },
