@@ -52,9 +52,39 @@ Code trên Apps Script sẽ được tải về thư mục `src/`. Sau đó comm
 | `npm run status` | Xem file nào sẽ được push |
 | `npm run open` | Mở project trong trình duyệt |
 | `npm run logs` | Xem log thực thi |
-| `npm run deploy` | Tạo deployment mới |
+| `npm run deploy` | Push + deploy, **giữ nguyên link URL** |
+| `npm run deploy:url` | In ra link web app đang dùng |
+| `npm run deployments` | Liệt kê các deployment |
 
 > **Lưu ý:** `clasp pull` sẽ ghi đè file trong `src/` bằng bản trên server, kể cả `appsscript.json`. Commit trước khi pull để không mất thay đổi local.
+
+## Deploy không đổi link URL
+
+Mặc định `clasp create-deployment` tạo một deployment **mới** mỗi lần chạy, nên URL `/exec` cũng đổi theo — ai đang dùng link cũ sẽ thấy code cũ. `npm run deploy` giải quyết việc đó: deployment ID được ghim trong `deployment.json` và mọi lần deploy đều redeploy đúng deployment đó (`clasp create-deployment -i <id>`), nên **link không bao giờ đổi**.
+
+```bash
+npm run deploy                       # push code + deploy, giữ nguyên URL
+npm run deploy -- -d "Sửa bug ảnh"   # kèm mô tả cho version mới
+npm run deploy -- --no-push          # chỉ deploy lại code đã push
+npm run deploy:url                   # xem link web app hiện tại
+```
+
+### Lần đầu chạy
+
+- Nếu Apps Script **đã có sẵn 1 deployment**, script tự nhận nó và ghi vào `deployment.json`.
+- Nếu có **nhiều deployment**, script dừng lại và liệt kê ra; chọn đúng cái đang dùng (chính là phần `<ID>` trong link `https://script.google.com/macros/s/<ID>/exec`) rồi chạy một lần:
+
+  ```bash
+  npm run deploy -- --id AKfycb...
+  ```
+
+- Nếu **chưa có deployment nào**, script tạo mới rồi ghim lại cho các lần sau.
+
+Sau đó **commit `deployment.json`** để cả máy khác cũng deploy vào đúng URL đó. Có thể ghi đè bằng biến môi trường `CLASP_DEPLOYMENT_ID` nếu cần deploy sang bản khác (ví dụ bản staging).
+
+> Nếu deployment đã ghim bị xoá trên Apps Script, script sẽ **dừng lại** thay vì âm thầm tạo URL mới. Muốn tạo deployment mới hẳn thì dùng `npm run deploy:new`.
+
+> Khi sửa `appsscript.json` (đổi quyền, đổi scope, đổi `webapp.access`), Apps Script vẫn giữ URL cũ nhưng người dùng có thể phải authorize lại.
 
 ## Cấu trúc
 
