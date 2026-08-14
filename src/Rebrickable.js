@@ -11,7 +11,6 @@
 //   - resetDuyet(): xoá trắng cột J để duyệt lại từ đầu
 //
 // CHUẨN BỊ: Script Property RB_API_KEY
-//   + SHEET_ID (file này dùng _sheetId() khai báo trong Code.gs)
 // =============================================
 
 var TAB_ANH = 'AnhSanPham';
@@ -303,7 +302,7 @@ function timUngVien(loai, tuKhoa) {
 // =============================================
 
 function _getAnhSheet() {
-  var ss = SpreadsheetApp.openById(_sheetId());
+  var ss = _openSS();
   var sh = ss.getSheetByName(TAB_ANH);
   if (!sh) {
     sh = ss.insertSheet(TAB_ANH);
@@ -528,7 +527,7 @@ function resetDuyet() {
 
 function getDanhSachDuyet() {
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var sh = ss.getSheetByName(TAB_ANH);
     if (!sh || sh.getLastRow() < 2) return { success: true, data: [] };
 
@@ -583,7 +582,7 @@ function backfillAnhThongMinh(gioiHan) {
     var MAX_MS = 4.5 * 60 * 1000;
     gioiHan = gioiHan || 250;
 
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet || gdSheet.getLastRow() < 2) {
       return { success: true, message: 'Chưa có dữ liệu giao dịch', them: 0, conLai: 0 };
@@ -672,7 +671,7 @@ function chayBackfill() {
 
 function getAnhMap() {
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var sh = ss.getSheetByName(TAB_ANH);
     if (!sh || sh.getLastRow() < 2) return { success: true, data: {} };
 
@@ -731,7 +730,7 @@ function xoaCacheHong() {
 
 function kiemTraAnh() {
   var out = [];
-  var ss = SpreadsheetApp.openById(_sheetId());
+  var ss = _openSS();
 
   var sh = ss.getSheetByName(TAB_ANH);
   if (!sh) {
@@ -781,7 +780,7 @@ function kiemTraAnh() {
 }
 
 function thongKePhanLoai() {
-  var ss = SpreadsheetApp.openById(_sheetId());
+  var ss = _openSS();
   var gd = ss.getSheetByName(TAB_GIAODICH);
   if (!gd || gd.getLastRow() < 2) return 'Chưa có dữ liệu';
 

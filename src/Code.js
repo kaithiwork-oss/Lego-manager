@@ -1,38 +1,83 @@
 // =============================================
-// LEGO TRANSACTION MANAGER - Code.gs v5
+// LEGO TRANSACTION MANAGER - Code.gs v4
 // v4: + CacheService (giảm đọc Sheet), invalidate khi ghi
-// v5: + PropertiesService — SHEET_ID và ANTHROPIC_API_KEY
-//     không còn nằm trong source code
-// =============================================
-//
-// CHUẨN BỊ: vào ⚙️ Project Settings > Script Properties, thêm:
-//   SHEET_ID          = 11bWeMGaOb9cR9hFV78cYlUvybkgxAT1HxUoLrKcpOF4
-//   ANTHROPIC_API_KEY = sk-ant-...
-//   RB_API_KEY        = ...  (đã có sẵn, dùng cho Rebrickable.gs)
 // =============================================
 
 
-// =============================================
+// ---------------------------------------------
 // CẤU HÌNH — đọc từ Script Properties
-// _PROPS_CACHE giữ giá trị trong 1 lần chạy, nên dù SHEET_ID
-// được dùng ở mấy chục chỗ vẫn chỉ đọc Properties đúng 1 lần.
-// =============================================
+// (Project Settings → Script Properties)
+//   SHEET_ID           : ID Google Sheet
+//   ANTHROPIC_API_KEY  : API key để đọc ảnh bill
+//   RB_API_KEY         : dùng ở Rebrickable.gs
+// Fallback bên dưới chỉ dùng khi chưa set property.
+// ---------------------------------------------
 
-var _PROPS_CACHE = {};
+var SHEET_ID_FALLBACK = '11bWeMGaOb9cR9hFV78cYlUvybkgxAT1HxUoLrKcpOF4';
+
 
 function _prop(key) {
-  if (_PROPS_CACHE[key] === undefined) {
-    _PROPS_CACHE[key] = PropertiesService.getScriptProperties().getProperty(key) || '';
+  try {
+    var v = PropertiesService.getScriptProperties().getProperty(key);
+    return v ? String(v).trim() : '';
+  } catch (e) {
+    return '';
   }
-  return _PROPS_CACHE[key];
 }
 
-function _sheetId() {
-  var v = _prop('SHEET_ID');
-  if (!v) throw new Error('Thiếu Script Property: SHEET_ID');
-  return v;
+
+function getSheetId() {
+  var id = _prop('SHEET_ID') || SHEET_ID_FALLBACK;
+  if (!id) throw new Error('Thiếu Script Property: SHEET_ID');
+  return id;
 }
 
+
+function getAnthropicKey() {
+  var k = _prop('ANTHROPIC_API_KEY');
+  if (!k) throw new Error('Thiếu Script Property: ANTHROPIC_API_KEY');
+  return k;
+}
+
+
+/** Mở spreadsheet — dùng ở mọi nơi thay cho openById trực tiếp */
+function _openSS() {
+  return SpreadsheetApp.openById(getSheetId());
+}
+
+
+/** Chạy tay từ editor để kiểm tra 3 Script Properties đã set đúng chưa */
+function kiemTraCauHinh() {
+  var out = [];
+
+  var id = _prop('SHEET_ID');
+  if (id) {
+    try {
+      out.push('✓ SHEET_ID hợp lệ — "' + SpreadsheetApp.openById(id).getName() + '"');
+    } catch (e) {
+      out.push('✗ SHEET_ID có giá trị nhưng không mở được: ' + e.message);
+    }
+  } else {
+    out.push('⚠ Chưa set SHEET_ID — đang dùng fallback trong code');
+  }
+
+  var ak = _prop('ANTHROPIC_API_KEY');
+  if (!ak) {
+    out.push('✗ Chưa set ANTHROPIC_API_KEY — chức năng đọc ảnh bill sẽ lỗi');
+  } else if (ak.indexOf('sk-ant-') !== 0) {
+    out.push('⚠ ANTHROPIC_API_KEY đã set nhưng không có dạng "sk-ant-..." (dài ' + ak.length + ' ký tự) — nhiều khả năng là giá trị tạm');
+  } else {
+    out.push('✓ ANTHROPIC_API_KEY đã set (' + ak.length + ' ký tự)');
+  }
+
+  var rb = _prop('RB_API_KEY');
+  out.push(rb ? '✓ RB_API_KEY đã set (' + rb.length + ' ký tự)'
+              : '✗ Chưa set RB_API_KEY — tra ảnh Rebrickable sẽ lỗi');
+
+  var msg = out.join('\n');
+  Logger.log(msg);
+  return msg;
+}
 
 var TAB_GIAODICH  = 'DataGiaoDich';
 var TAB_THANHTOAN = 'DataThanhToan';
@@ -148,7 +193,7 @@ function invalidateDashCache() {
 
 function setupSheets() {
 
-  var ss = SpreadsheetApp.openById(_sheetId());
+  var ss = _openSS();
 
   var gdSheet = ss.getSheetByName(TAB_GIAODICH);
   if (!gdSheet) {
@@ -214,7 +259,7 @@ function setupSheets() {
 // =============================================
 
 function ensureSchemaV3() {
-  var ss = SpreadsheetApp.openById(_sheetId());
+  var ss = _openSS();
   var sh = ss.getSheetByName(TAB_GIAODICH);
   if (!sh) return { success: false, message: 'Chưa có tab DataGiaoDich' };
 
@@ -237,7 +282,7 @@ function ensureSchemaV3() {
 
 function debugChieu(maGD) {
   maGD = maGD || '';
-  var ss = SpreadsheetApp.openById(_sheetId());
+  var ss = _openSS();
   var sh = ss.getSheetByName(TAB_GIAODICH);
   if (!sh) return 'Không tìm thấy tab DataGiaoDich';
 
@@ -294,7 +339,9 @@ function setupThongKeSheet(sheet) {
   sheet.getRange('B4').setFormula('=IFERROR(SUMIF(DataGiaoDich!E:E,"BÁN",DataGiaoDich!I:I),0)').setNumberFormat('#,##0');
   sheet.getRange('A5').setValue('Tổng đã thu (VND)');
   sheet.getRange('B5').setFormula('=IFERROR(SUM(DataThanhToan!D:D),0)').setNumberFormat('#,##0');
-  sheet.getRange('A7').setValue('Xem chi tiết tại các tab: TheoNguon | TheoNguoiGD | TheoThang').setFontStyle('italic');
+  sheet.getRange('A6').setValue('Tổng giá trị ĐƯỢC TẶNG (VND) — không tính vào tiền bỏ ra');
+  sheet.getRange('B6').setFormula('=IFERROR(SUMIF(DataGiaoDich!E:E,"ĐƯỢC TẶNG",DataGiaoDich!I:I),0)').setNumberFormat('#,##0');
+  sheet.getRange('A8').setValue('Xem chi tiết tại các tab: TheoNguon | TheoNguoiGD | TheoThang').setFontStyle('italic');
   formatHeaderRow(sheet);
 }
 
@@ -413,7 +460,7 @@ function syncContactLinkForShop(ss, tenShop, linkLH) {
 function saveTransaction(data) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet) return { success: false, message: 'Không tìm thấy tab DataGiaoDich' };
 
@@ -476,7 +523,7 @@ function saveTransaction(data) {
 function saveBulkTransactions(bills) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var ttSheet = ss.getSheetByName(TAB_THANHTOAN);
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!ttSheet || !gdSheet) return { success: false, message: 'Không tìm thấy tab dữ liệu' };
@@ -484,7 +531,8 @@ function saveBulkTransactions(bills) {
     var ttRows = [], gdRows = [];
 
     bills.forEach(function(bill) {
-      ttRows.push([bill.maGD, bill.ngay, bill.tenShop, parseFloat(bill.soTien) || 0, bill.loaiTT || '', bill.nguon || '', bill.ghiChu || '']);
+      var _gift = String(bill.loaiGD || '').toUpperCase() === 'ĐƯỢC TẶNG';
+      ttRows.push([bill.maGD, bill.ngay, bill.tenShop, _gift ? 0 : (parseFloat(bill.soTien) || 0), _gift ? 'Được tặng' : (bill.loaiTT || ''), bill.nguon || '', bill.ghiChu || '']);
       var products = bill.products || [];
       if (products.length === 0) {
         gdRows.push([bill.maGD, bill.ngay, bill.tenShop, '', bill.loaiGD || '', '', '', '', parseFloat(bill.soTien) || 0, bill.nguon || '', '', '', '', '', '', bill.maGDGoc || '', '', '']);
@@ -523,7 +571,7 @@ function saveBulkTransactions(bills) {
 function getHistory(limit) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var ttSheet = ss.getSheetByName(TAB_THANHTOAN);
     if (!ttSheet || ttSheet.getLastRow() < 2) return { success: true, data: [] };
 
@@ -562,7 +610,7 @@ function getHistory(limit) {
 function deleteTransaction(maGD) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var deleted = 0;
 
     [TAB_THANHTOAN, TAB_GIAODICH].forEach(function(tabName) {
@@ -594,11 +642,6 @@ function deleteTransaction(maGD) {
 function readBillImage(base64Image, mimeType) {
 
   try {
-    var apiKey = _prop('ANTHROPIC_API_KEY');
-    if (!apiKey) {
-      return { success: false, message: 'Chưa cấu hình ANTHROPIC_API_KEY trong Script Properties' };
-    }
-
     var payload = {
       model: 'claude-sonnet-4-6',
       max_tokens: 1000,
@@ -620,7 +663,7 @@ function readBillImage(base64Image, mimeType) {
     var options = {
       method: 'post',
       contentType: 'application/json',
-      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      headers: { 'x-api-key': getAnthropicKey(), 'anthropic-version': '2023-06-01' },
       payload: JSON.stringify(payload),
       muteHttpExceptions: true
     };
@@ -646,7 +689,7 @@ function readBillImage(base64Image, mimeType) {
 function importFromExcel(rows) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var ttSheet = ss.getSheetByName(TAB_THANHTOAN);
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!ttSheet || !gdSheet) return { success: false, message: 'Không tìm thấy tab dữ liệu' };
@@ -654,13 +697,15 @@ function importFromExcel(rows) {
     var today = Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy');
 
     // DataThanhToan: ghi riêng từng dòng theo từng mã GD để khớp đúng khi tính "đã thu"
+    // ĐƯỢC TẶNG: giá trị vẫn ghi ở DataGiaoDich, nhưng số tiền thanh toán = 0
+    var _isGift = function(l){ return String(l || '').toUpperCase() === 'ĐƯỢC TẶNG'; };
     var ttRowsToAdd = rows.map(function(row) {
       return [
         row.maGD || '',
         row.ngay || today,
         row.tenShop || '',
-        parseFloat(row.soTien) || 0,
-        row.loaiTT || 'Thanh toán full 1 lần',
+        _isGift(row.loaiGD) ? 0 : (parseFloat(row.soTien) || 0),
+        _isGift(row.loaiGD) ? 'Được tặng' : (row.loaiTT || 'Thanh toán full 1 lần'),
         row.nguon || '',
         'Import từ Excel'
       ];
@@ -684,7 +729,7 @@ function importFromExcel(rows) {
         row.nguon || '',
         '',
         '',
-        row.loaiTT || '',
+        _isGift(row.loaiGD) ? 'Được tặng' : (row.loaiTT || ''),
         '',
         '',
         '',
@@ -711,7 +756,7 @@ function importFromExcel(rows) {
 function getTransactionByMaGD(maGD) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet || gdSheet.getLastRow() < 2) return { success: false, message: 'Không tìm thấy dữ liệu' };
 
@@ -760,7 +805,7 @@ function getTransactionByMaGD(maGD) {
 function updateTransaction(maGD, info, products, soTienLanNay) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet) return { success: false, message: 'Không tìm thấy tab DataGiaoDich' };
 
@@ -970,7 +1015,7 @@ function getDashboardData() {
 function _buildDashboardData() {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     var ttSheet = ss.getSheetByName(TAB_THANHTOAN);
 
@@ -1054,7 +1099,7 @@ function _buildDashboardData() {
 function getNextMaGD() {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet || gdSheet.getLastRow() < 2) return { success: true, maGD: 'GD001' };
 
@@ -1098,7 +1143,7 @@ function getNextMaGD() {
 function repairContactLinks() {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet || gdSheet.getLastRow() < 2) return { success: true, message: 'Không có dữ liệu để sửa' };
 
@@ -1145,7 +1190,7 @@ function repairContactLinks() {
 function repairMissingPayments() {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     var ttSheet = ss.getSheetByName(TAB_THANHTOAN);
     if (!gdSheet || !ttSheet) return { success: false, message: 'Không tìm thấy tab dữ liệu' };
@@ -1169,7 +1214,9 @@ function repairMissingPayments() {
     gdData.forEach(function(row) {
       var maGD = String(row[0] || '').trim();
       if (!maGD || ttMaGDSet[maGD]) return; // đã có rồi, bỏ qua
-      if (String(row[4] || '').toUpperCase() === 'TRAO ĐỔI') return; // đơn trao đổi: không có tiền
+      var _loai = String(row[4] || '').toUpperCase();
+      if (_loai === 'TRAO ĐỔI') return;   // đơn trao đổi: không có tiền
+      if (_loai === 'ĐƯỢC TẶNG') return;  // đơn được tặng: có giá trị nhưng không chi tiền
       if (!missing[maGD]) {
         missing[maGD] = {
           tongTien: 0,
@@ -1206,7 +1253,7 @@ function repairMissingPayments() {
 function getKnownContacts() {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet || gdSheet.getLastRow() < 2) return { success: true, data: [] };
 
@@ -1241,7 +1288,7 @@ function updateContactInfo(oldTenShop, newTenShop, newLinkLH) {
     if (!oldTenShop) return { success: false, message: 'Thiếu tên người giao dịch cũ' };
     if (!newTenShop) return { success: false, message: 'Tên người giao dịch không được để trống' };
 
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var updatedGD = 0;
     var updatedTT = 0;
 
@@ -1303,7 +1350,7 @@ function updateContactInfo(oldTenShop, newTenShop, newLinkLH) {
 
 function refreshTheoNguoiGD() {
 
-  var ss = SpreadsheetApp.openById(_sheetId());
+  var ss = _openSS();
   var sheet = ss.getSheetByName(TAB_NGUOIGD);
   if (!sheet) { sheet = ss.insertSheet(TAB_NGUOIGD); }
   setupTheoNguoiSheet(sheet);
@@ -1318,7 +1365,7 @@ function refreshTheoNguoiGD() {
 function getShippingData() {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet || gdSheet.getLastRow() < 2) return { success: true, data: [] };
 
@@ -1413,7 +1460,7 @@ function getShippingData() {
 function updateShippingBulk(maGDList, newMaVanDon, newTrangThaiDon, ngayTrangThai) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var gdSheet = ss.getSheetByName(TAB_GIAODICH);
     if (!gdSheet) return { success: false, message: 'Không tìm thấy tab DataGiaoDich' };
 
@@ -1480,7 +1527,7 @@ function updateShippingBulk(maGDList, newMaVanDon, newTrangThaiDon, ngayTrangTha
 function getTransactionLog(maGD) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var logSheet = ss.getSheetByName(TAB_DATALOG);
     if (!logSheet || logSheet.getLastRow() < 2) return { success: true, data: [] };
 
@@ -1517,7 +1564,7 @@ function getTransactionLog(maGD) {
 function getAllLogs() {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var logSheet = ss.getSheetByName(TAB_DATALOG);
     if (!logSheet || logSheet.getLastRow() < 2) return { success: true, data: [] };
 
@@ -1555,7 +1602,7 @@ function getAllLogs() {
 function getStatusHistory(maGD) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var logSheet = ss.getSheetByName(TAB_DATALOG);
     if (!logSheet || logSheet.getLastRow() < 2) return { success: true, data: [] };
 
@@ -1610,7 +1657,7 @@ function getOrderSidebarData(maGD) {
 function revertChange(logId) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var logSheet = ss.getSheetByName(TAB_DATALOG);
     if (!logSheet || logSheet.getLastRow() < 2) return { success: false, message: 'Không tìm thấy log' };
 
@@ -1684,7 +1731,7 @@ function revertChange(logId) {
 function getPaymentsByMaGD(maGD) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var ttSheet = ss.getSheetByName(TAB_THANHTOAN);
     if (!ttSheet || ttSheet.getLastRow() < 2) return { success: true, data: [] };
 
@@ -1718,7 +1765,7 @@ function getPaymentsByMaGD(maGD) {
 function updatePayment(rowIndex, maGD, fields) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var ttSheet = ss.getSheetByName(TAB_THANHTOAN);
     if (!ttSheet) return { success: false, message: 'Không tìm thấy tab DataThanhToan' };
 
@@ -1758,7 +1805,7 @@ function updatePayment(rowIndex, maGD, fields) {
 function deletePayment(rowIndex, maGD) {
 
   try {
-    var ss = SpreadsheetApp.openById(_sheetId());
+    var ss = _openSS();
     var ttSheet = ss.getSheetByName(TAB_THANHTOAN);
     if (!ttSheet) return { success: false, message: 'Không tìm thấy tab DataThanhToan' };
 
