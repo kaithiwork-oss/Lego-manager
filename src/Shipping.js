@@ -124,8 +124,9 @@ var SHIP_STATUS_KEYS = [
   // Viettel Post
   'ORDER_STATUS_NAME', 'STATUS_NAME', 'STATUSNAME', 'TEN_TRANG_THAI',
   'TRANG_THAI', 'ORDER_STATUS_TEXT',
-  // Shopee Express
-  'MILESTONE_NAME', 'CURRENT_STATUS', 'TRACKING_STATUS', 'STATUS_TEXT',
+  // Shopee Express — milestone_name là trạng thái gọn ("In transit", "Delivered"),
+  // tracking_code_group_name là trạng thái tổng của đơn, dùng khi records rỗng
+  'MILESTONE_NAME', 'TRACKING_CODE_GROUP_NAME', 'CURRENT_STATUS', 'TRACKING_STATUS', 'STATUS_TEXT',
   // chung
   'DESCRIPTION', 'NOTE'
 ];
@@ -282,15 +283,15 @@ function _shipEndpointsVtp(c) {
 }
 
 
-/** Danh sách endpoint tra cứu của Shopee Express */
+/**
+ * Endpoint tra cứu của Shopee Express.
+ * Đã kiểm bằng mã thật: trả JSON, records sắp xếp mới nhất trước,
+ * trạng thái gọn nằm ở records[].milestone_name.
+ */
 function _shipEndpointsSpx(c) {
   return [
     {
       url: 'https://spx.vn/shipment/order/open/order/get_order_info?spx_tn=' + encodeURIComponent(c),
-      method: 'get'
-    },
-    {
-      url: 'https://spx.vn/api/v1/order/tracking/get_tracking_info?spx_tn=' + encodeURIComponent(c),
       method: 'get'
     }
   ];
@@ -587,4 +588,65 @@ function debugTrackingSpx(code) {
   var c = String(code || '').trim();
   if (!c) return 'Truyền vào 1 mã SPX thật, vd: debugTrackingSpx("SPXVN...")';
   return _shipDebug(c, _shipEndpointsSpx(c), 'Shopee');
+}
+
+
+/**
+ * DÒ ENDPOINT VIETTEL POST.
+ * Hai endpoint ban đầu đều trả 405 Method Not Allowed — đúng path nhưng sai
+ * method: getOrderByOrderNumber từ chối GET, /order/tracking từ chối POST.
+ * Hàm này thử đảo lại method và vài tên tham số, in gọn để khỏi tràn log.
+ *
+ * Chạy từ dropdown editor, rồi gửi lại bảng kết quả.
+ */
+function debugProbeVtp() {
+  var c = '149554355818';
+  var base = 'https://partner.viettelpost.vn/v2/order/';
+
+  var probes = [
+    { m: 'post', u: base + 'getOrderByOrderNumber?orderNumber=' + c },
+    { m: 'post', u: base + 'getOrderByOrderNumber', body: { ORDER_NUMBER: c } },
+    { m: 'post', u: base + 'getOrderByOrderNumber', body: { orderNumber: c } },
+    { m: 'get',  u: base + 'tracking?orderNumber=' + c },
+    { m: 'get',  u: base + 'tracking?ORDER_NUMBER=' + c },
+    { m: 'get',  u: base + 'tracking?billcode=' + c },
+    { m: 'get',  u: base + 'tracking?order_number=' + c }
+  ];
+
+  var out = ['DÒ ENDPOINT VTP — mã ' + c, ''];
+
+  probes.forEach(function (p, i) {
+    var line = (i + 1) + '. ' + p.m.toUpperCase() + ' ' +
+      p.u.replace('https://partner.viettelpost.vn/v2/order/', '') +
+      (p.body ? ' body=' + JSON.stringify(p.body) : '');
+    try {
+      var opt = {
+        method: p.m, muteHttpExceptions: true, followRedirects: true,
+        headers: { 'Accept': 'application/json', 'User-Agent': SHIP_UA }
+      };
+      if (p.body) { opt.contentType = 'application/json'; opt.payload = JSON.stringify(p.body); }
+
+      var res = UrlFetchApp.fetch(p.u, opt);
+      var http = res.getResponseCode();
+      var body = res.getContentText().replace(/\s+/g, ' ').trim();
+      var isJson = false;
+      try { JSON.parse(body); isJson = true; } catch (e) {}
+
+      // HTML lỗi của Tomcat rất dài -> chỉ lấy dòng tiêu đề
+      var brief = isJson ? body.slice(0, 400)
+                         : (body.match(/HTTP Status [0-9]+ [^<]*/) || [body.slice(0, 120)])[0];
+
+      out.push(line + '\n   → HTTP ' + http + (isJson ? ' [JSON] ' : ' [không phải JSON] ') + brief);
+      if (isJson) {
+        var st = _shipExtractStatusText(JSON.parse(body));
+        out.push('   → trạng thái: "' + st + '" → map: "' + shipMapStatusText(st) + '"');
+      }
+    } catch (e) {
+      out.push(line + '\n   → Lỗi: ' + e.toString().slice(0, 150));
+    }
+  });
+
+  var msg = out.join('\n');
+  Logger.log(msg);
+  return msg;
 }

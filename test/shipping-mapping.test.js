@@ -113,5 +113,57 @@ eq(_shipExtractStatusText({
     ] }
   }), 'Delivered', 'timestamp so bằng số chứ không so chuỗi (9 số vs 10 số)');
 
+console.log('\n== payload SPX THẬT (mã SPXVN063728919538) ==');
+// Rút gọn từ response thật: records sắp xếp mới nhất TRƯỚC, có current_location/next_location lồng bên trong
+const SPX_THAT = {
+  retcode: 0,
+  data: {
+    parcel_info: { customer_tracking_no: '' },
+    order_info: {
+      sls_tn: 'VN262530859209X', spx_tn: 'SPXVN063728919538',
+      tracking_code_group_name: 'In Transit', tracking_code_subgroup_name: 'In Transit',
+      order_id: 132758861181, order_max_update_limit: 3
+    },
+    sls_tracking_info: {
+      sls_tn: 'VN262530859209X', client_order_id: '132758861181',
+      receiver_name: '', receiver_type_name: '',
+      records: [
+        { tracking_code: 'F515', tracking_name: 'Packed in Domestic Sorting Centre',
+          description: 'Parcel is packed in domestic sorting centre and is ready for transit to next station',
+          actual_time: 1786780847, reason_code: 'R00', reason_desc: 'R00',
+          current_location: { location_name: '', lng: '', lat: '', full_address: '' },
+          next_location: { location_name: '', lng: '', lat: '', full_address: '' },
+          milestone_code: 5, milestone_name: 'In transit' },
+        { tracking_code: 'F510', tracking_name: 'Enter Domestic Sorting Center',
+          description: 'Parcel has arrived at station :BN B Mega SOC',
+          actual_time: 1786683128, reason_code: 'R00', reason_desc: 'R00',
+          current_location: { location_name: 'BN B Mega SOC', lng: '105.976847', lat: '21.074560',
+            full_address: 'VN Tỉnh Bắc Ninh Phường Từ Sơn ...' },
+          next_location: { location_name: 'BN A Mega SOC', lng: '105.976847', lat: '21.074560',
+            full_address: 'VN Tỉnh Bắc Ninh Phường Từ Sơn ...' },
+          milestone_code: 5, milestone_name: 'In transit' },
+        { tracking_code: 'F580', tracking_name: 'Domestic Line Haul End',
+          description: 'System reminder: Not in use, no need edit yet.',
+          actual_time: 1786677783, reason_code: 'R00', milestone_code: 5, milestone_name: 'In transit' }
+      ]
+    }
+  }
+};
+eq(_shipExtractStatusText(SPX_THAT), 'In transit', 'đọc đúng milestone_name của mốc mới nhất');
+eq(shipMapStatusText(_shipExtractStatusText(SPX_THAT)), 'Đang vận chuyển', 'map ra Đang vận chuyển');
+
+// Nếu records rỗng thì rơi về trạng thái tổng của đơn
+const SPX_RONG = JSON.parse(JSON.stringify(SPX_THAT));
+SPX_RONG.data.sls_tracking_info.records = [];
+eq(_shipExtractStatusText(SPX_RONG), 'In Transit', 'records rỗng -> dùng tracking_code_group_name');
+
+// Mốc mới nhất là Delivered thì phải thắng, kể cả khi nó không nằm đầu mảng
+const SPX_GIAO = JSON.parse(JSON.stringify(SPX_THAT));
+SPX_GIAO.data.sls_tracking_info.records.push(
+  { tracking_code: 'F900', actual_time: 1786999999, milestone_name: 'Delivered',
+    description: 'Parcel has been delivered' });
+eq(shipMapStatusText(_shipExtractStatusText(SPX_GIAO)), 'Đã nhận hàng',
+  'mốc Delivered mới nhất nằm cuối mảng vẫn thắng');
+
 console.log('\n' + (fail ? '✗ ' + fail + ' case sai' : '✓ Tất cả case đúng'));
 process.exit(fail ? 1 : 0);
