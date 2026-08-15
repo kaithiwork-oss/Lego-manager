@@ -267,18 +267,25 @@ function _shipTryEndpoints(endpoints) {
 }
 
 
-/** Danh sách endpoint tra cứu của Viettel Post */
+/**
+ * Endpoint tra cứu của Viettel Post.
+ *
+ * Bản đầu đoán sai method: cả hai đều trả 405 Method Not Allowed, mà nội dung
+ * 405 nói rõ path đúng nhưng method sai — getOrderByOrderNumber từ chối GET,
+ * order/tracking từ chối POST. Nên ở đây đảo lại.
+ *
+ * Còn vài biến thể tên tham số vì chưa xác nhận được cái nào đúng;
+ * _shipTryEndpoints dừng ở cái đầu tiên trả JSON có trạng thái.
+ * Chạy debugProbeVtp() để chốt rồi rút danh sách này còn 1 dòng.
+ */
 function _shipEndpointsVtp(c) {
+  var base = 'https://partner.viettelpost.vn/v2/order/';
+  var q = encodeURIComponent(c);
   return [
-    {
-      url: 'https://partner.viettelpost.vn/v2/order/getOrderByOrderNumber?orderNumber=' + encodeURIComponent(c),
-      method: 'get'
-    },
-    {
-      url: 'https://partner.viettelpost.vn/v2/order/tracking',
-      method: 'post',
-      payload: JSON.stringify({ ORDER_NUMBER: c, TYPE: 0 })
-    }
+    { url: base + 'tracking?orderNumber=' + q, method: 'get' },
+    { url: base + 'getOrderByOrderNumber?orderNumber=' + q, method: 'post' },
+    { url: base + 'getOrderByOrderNumber', method: 'post', payload: JSON.stringify({ ORDER_NUMBER: c }) },
+    { url: base + 'tracking?ORDER_NUMBER=' + q, method: 'get' }
   ];
 }
 
