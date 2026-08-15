@@ -2702,7 +2702,7 @@ function detectCarrier(code, nguon){
 }
 function getTrackingUrl(code, nguon){
   var carrier=detectCarrier(code, nguon);
-  if(carrier==='shopee') return 'https://spx.vn/track?'+encodeURIComponent(code);
+  if(carrier==='shopee') return 'https://spx.vn/track?spx_tn='+encodeURIComponent(code);
   if(carrier==='vtp')    return 'https://viettelpost.com.vn/tra-cuu-hanh-trinh-don-hang/?billcode='+encodeURIComponent(code);
   return null;
 }

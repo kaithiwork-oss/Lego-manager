@@ -24,6 +24,9 @@ eq(shipDetectCarrier('249554355818', ''), 'unknown', '12 số nhưng bắt đầ
 eq(shipDetectCarrier('14955435581', ''), 'unknown', 'chỉ 11 số');
 eq(shipDetectCarrier('1495543558123', ''), 'unknown', '13 số');
 eq(shipDetectCarrier('VTP123456', ''), 'vtp', 'tiền tố VTP');
+eq(shipDetectCarrier('SPXVN063728919538', ''), 'shopee', 'mã SPX thật: SPXVN + 12 số');
+eq(shipDetectCarrier('SPXVN063728919538', 'Bank'), 'shopee', 'mã SPX thắng nguồn Bank');
+eq(shipDetectCarrier(' spxvn063728919538 ', ''), 'shopee', 'mã SPX viết thường + khoảng trắng');
 eq(shipDetectCarrier('SPXVN123', ''), 'shopee', 'tiền tố SPX');
 eq(shipDetectCarrier('12345678901234567890', ''), 'shopee', 'mã 20 số vẫn là Shopee');
 eq(shipDetectCarrier('GHN999', ''), 'other', 'GHN');
