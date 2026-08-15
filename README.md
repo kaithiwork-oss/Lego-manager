@@ -125,6 +125,7 @@ Sau khi `npm run push`, mở Apps Script editor và chạy tay 1 lần:
 | `shippingSyncStatus()` | Xem đã cài lịch chưa + kết quả lần chạy gần nhất |
 | `autoSyncShippingStatus()` | Chạy đồng bộ ngay, không đợi tới 0h |
 | `removeShippingSyncTrigger()` | Gỡ lịch |
+| `debugVtpLogin()` | Kiểm tra đăng nhập VTP + thử tra 1 mã kèm token |
 | `debugTracking()` | Tra thử 1 mã VTP + 1 mã SPX, in payload thô ra Execution log |
 
 > Dropdown chọn hàm trong Apps Script editor **không truyền được tham số**, nên hàm nào
@@ -143,6 +144,37 @@ Lần chạy đầu sẽ hỏi quyền `UrlFetchApp` (gọi ra ngoài) và quy�
 | `GHN…`, `GHTK…`, `J&T…` | hiện chỉ hiện tên, **chưa tra tự động** |
 
 Hãng chưa hỗ trợ thì đơn được bỏ qua, không ghi gì vào sheet.
+
+### Trạng thái hỗ trợ tra tự động
+
+| Hãng | Tra tự động | Ghi chú |
+|---|---|---|
+| **Shopee Express** | ✅ chạy được | Đã kiểm bằng mã thật, không cần tài khoản |
+| **Viettel Post** | ⚠️ cần tài khoản | Xem mục dưới |
+| GHN / GHTK / J&T | ❌ chưa làm | Bỏ qua, cập nhật tay |
+
+#### Viettel Post cần đăng nhập
+
+Gọi trần vào `partner.viettelpost.vn` đều trả **405** kèm header `Allow: OPTIONS`
+(cổng API `Cloudrity` chặn request không xác thực). Trang tra cứu công khai thì
+render bằng JS, HTML rỗng, WAF chặn client không phải trình duyệt. Nên đường duy
+nhất là đăng nhập lấy token.
+
+Vào **Project Settings → Script Properties**, thêm:
+
+| Property | Giá trị |
+|---|---|
+| `VTP_USERNAME` | số điện thoại / email đăng nhập VTP |
+| `VTP_PASSWORD` | mật khẩu |
+
+Rồi chạy `debugVtpLogin()` để xem đăng nhập có qua không.
+
+**Chưa set thì đơn VTP tự động bị bỏ qua** — không gọi mạng, không ghi gì vào
+sheet, không ảnh hưởng đơn SPX. Token được cache 6 tiếng, hết hạn thì tự đăng
+nhập lại.
+
+> Chưa xác nhận tài khoản người mua có qua được cổng partner hay không —
+> `debugVtpLogin()` sẽ trả lời.
 
 ### Mapping trạng thái
 

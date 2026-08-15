@@ -165,5 +165,19 @@ SPX_GIAO.data.sls_tracking_info.records.push(
 eq(shipMapStatusText(_shipExtractStatusText(SPX_GIAO)), 'Đã nhận hàng',
   'mốc Delivered mới nhất nằm cuối mảng vẫn thắng');
 
+console.log('\n== VTP khi chưa điền tài khoản ==');
+global.CacheService = { getScriptCache: () => ({ get: () => null, put() {} }) };
+global._prop = () => '';                  // chưa set VTP_USERNAME / VTP_PASSWORD
+let daGoiMang = false;
+global.UrlFetchApp = { fetch() { daGoiMang = true; throw new Error('không được gọi mạng'); } };
+
+const rVtp = shipFetchVtp('149554355818');
+eq(rVtp.ok, false, 'không có tài khoản -> trả ok:false');
+eq(rVtp.message.indexOf('VTP_USERNAME') >= 0, true, 'báo rõ thiếu property nào');
+eq(daGoiMang, false, 'KHÔNG gọi mạng khi chưa có tài khoản (khỏi phí request mỗi đêm)');
+
+const rDieuPhoi = shipFetchStatus('149554355818', '');
+eq(rDieuPhoi.ok, false, 'shipFetchStatus cũng trả ok:false -> đơn bị bỏ qua, sheet không bị đụng');
+
 console.log('\n' + (fail ? '✗ ' + fail + ' case sai' : '✓ Tất cả case đúng'));
 process.exit(fail ? 1 : 0);

@@ -237,7 +237,7 @@ function _shipTryEndpoints(endpoints) {
         method: ep.method,
         muteHttpExceptions: true,
         followRedirects: true,
-        headers: { 'Accept': 'application/json', 'User-Agent': SHIP_UA }
+        headers: ep.headers || { 'Accept': 'application/json', 'User-Agent': SHIP_UA }
       };
       if (ep.payload) {
         opt.contentType = 'application/json';
@@ -267,25 +267,99 @@ function _shipTryEndpoints(endpoints) {
 }
 
 
+// ---------------------------------------------------------------
+// VIETTEL POST — CẦN TOKEN
+//
+// Đã kiểm bằng mã thật 149554355818, gọi trần (không xác thực) đều hỏng:
+//
+//   /v2/order/tracking             GET/POST -> 405
+//   /v2/order/getOrderByOrderNumber GET/POST -> 405
+//     (thử cả orderNumber / ORDER_NUMBER / billcode / order_number và body JSON)
+//
+// Header trả về `Allow: OPTIONS`, server `Cloudrity` (cổng API/WAF) — endpoint
+// chỉ mở OPTIONS cho request không xác thực, tức là ĐÒI TOKEN.
+//
+//   viettelpost.com.vn/tra-cuu-hanh-trinh-don-hang/?billcode=... -> HTTP 200
+//     nhưng HTML chỉ dài 177 ký tự, không có trạng thái: trang render bằng JS
+//     và WAF chặn client không phải trình duyệt. Đọc HTML cũng không xong.
+//
+// Nên đường còn lại là đăng nhập lấy token. Tài khoản để ở Script Properties:
+//   VTP_USERNAME  : số điện thoại / email đăng nhập VTP
+//   VTP_PASSWORD  : mật khẩu
+// Không set thì đơn VTP tự động bị bỏ qua, không ảnh hưởng đơn SPX.
+//
+// CHƯA XÁC NHẬN tài khoản người mua có qua được cổng partner hay không —
+// chạy debugVtpLogin() để biết.
+// ---------------------------------------------------------------
+
+var SHIP_VTP_USER_KEY  = 'VTP_USERNAME';
+var SHIP_VTP_PASS_KEY  = 'VTP_PASSWORD';
+var SHIP_VTP_TOKEN_KEY = 'vtp_token';       // cache, không phải Script Property
+var SHIP_VTP_TOKEN_TTL = 6 * 3600;          // giây
+
+
 /**
- * Endpoint tra cứu của Viettel Post.
- *
- * Bản đầu đoán sai method: cả hai đều trả 405 Method Not Allowed, mà nội dung
- * 405 nói rõ path đúng nhưng method sai — getOrderByOrderNumber từ chối GET,
- * order/tracking từ chối POST. Nên ở đây đảo lại.
- *
- * Còn vài biến thể tên tham số vì chưa xác nhận được cái nào đúng;
- * _shipTryEndpoints dừng ở cái đầu tiên trả JSON có trạng thái.
- * Chạy debugProbeVtp() để chốt rồi rút danh sách này còn 1 dòng.
+ * Lấy token VTP (có cache để khỏi đăng nhập lại mỗi lần tra).
+ * @return {{ok:boolean, token:string, message:string}}
  */
-function _shipEndpointsVtp(c) {
+function _vtpToken(forceLogin) {
+  var cache = null;
+  try { cache = CacheService.getScriptCache(); } catch (e) {}
+
+  if (!forceLogin && cache) {
+    var hit = cache.get(SHIP_VTP_TOKEN_KEY);
+    if (hit) return { ok: true, token: hit, message: '(dùng token đã cache)' };
+  }
+
+  var user = _prop(SHIP_VTP_USER_KEY);
+  var pass = _prop(SHIP_VTP_PASS_KEY);
+  if (!user || !pass) {
+    return { ok: false, token: '', message: 'Chưa set Script Property ' + SHIP_VTP_USER_KEY + ' / ' + SHIP_VTP_PASS_KEY };
+  }
+
+  try {
+    var res = UrlFetchApp.fetch('https://partner.viettelpost.vn/v2/user/Login', {
+      method: 'post',
+      contentType: 'application/json',
+      muteHttpExceptions: true,
+      headers: { 'Accept': 'application/json', 'User-Agent': SHIP_UA },
+      payload: JSON.stringify({ USERNAME: user, PASSWORD: pass })
+    });
+
+    var http = res.getResponseCode();
+    var body = res.getContentText();
+    if (http < 200 || http >= 300) {
+      return { ok: false, token: '', message: 'Login HTTP ' + http + ' — ' + body.replace(/\s+/g, ' ').slice(0, 120) };
+    }
+
+    var json = null;
+    try { json = JSON.parse(body); } catch (e) {
+      return { ok: false, token: '', message: 'Login trả về không phải JSON' };
+    }
+
+    // token nằm ở data.token, có bản để thẳng ở token
+    var tk = (json && json.data && (json.data.token || json.data.TOKEN)) || json.token || json.TOKEN || '';
+    if (!tk) {
+      return { ok: false, token: '', message: 'Login OK nhưng không thấy token: ' + body.replace(/\s+/g, ' ').slice(0, 160) };
+    }
+
+    if (cache) { try { cache.put(SHIP_VTP_TOKEN_KEY, String(tk), SHIP_VTP_TOKEN_TTL); } catch (e) {} }
+    return { ok: true, token: String(tk), message: 'Đăng nhập mới' };
+  } catch (e) {
+    return { ok: false, token: '', message: 'Login lỗi: ' + e.toString().slice(0, 150) };
+  }
+}
+
+
+/** Endpoint tra cứu VTP, gọi kèm token */
+function _shipEndpointsVtp(c, token) {
   var base = 'https://partner.viettelpost.vn/v2/order/';
   var q = encodeURIComponent(c);
+  var hdr = { 'Accept': 'application/json', 'User-Agent': SHIP_UA, 'Token': token };
   return [
-    { url: base + 'tracking?orderNumber=' + q, method: 'get' },
-    { url: base + 'getOrderByOrderNumber?orderNumber=' + q, method: 'post' },
-    { url: base + 'getOrderByOrderNumber', method: 'post', payload: JSON.stringify({ ORDER_NUMBER: c }) },
-    { url: base + 'tracking?ORDER_NUMBER=' + q, method: 'get' }
+    { url: base + 'getOrderByOrderNumber?orderNumber=' + q, method: 'get',  headers: hdr },
+    { url: base + 'tracking', method: 'post', headers: hdr, payload: JSON.stringify({ ORDER_NUMBER: c, TYPE: 0 }) },
+    { url: base + 'tracking?orderNumber=' + q, method: 'get', headers: hdr }
   ];
 }
 
@@ -305,11 +379,23 @@ function _shipEndpointsSpx(c) {
 }
 
 
-/** Tra 1 mã vận đơn Viettel Post */
+/** Tra 1 mã vận đơn Viettel Post (cần token, xem khối ghi chú ở trên) */
 function shipFetchVtp(code) {
   var c = String(code || '').trim();
   if (!c) return { ok: false, message: 'Thiếu mã vận đơn' };
-  return _shipTryEndpoints(_shipEndpointsVtp(c));
+
+  var tk = _vtpToken(false);
+  if (!tk.ok) return { ok: false, message: 'VTP: ' + tk.message };
+
+  var r = _shipTryEndpoints(_shipEndpointsVtp(c, tk.token));
+
+  // Token hết hạn -> đăng nhập lại 1 lần rồi thử lại
+  if (!r.ok && /HTTP (401|403)/.test(r.message || '')) {
+    var tk2 = _vtpToken(true);
+    if (!tk2.ok) return { ok: false, message: 'VTP: ' + tk2.message };
+    r = _shipTryEndpoints(_shipEndpointsVtp(c, tk2.token));
+  }
+  return r;
 }
 
 
@@ -587,7 +673,60 @@ function debugTracking() {
 
 function debugTrackingVtp(code) {
   var c = String(code || '149554355818').trim();
-  return _shipDebug(c, _shipEndpointsVtp(c));
+  var tk = _vtpToken(false);
+  if (!tk.ok) return 'Không lấy được token: ' + tk.message;
+  return _shipDebug(c, _shipEndpointsVtp(c, tk.token));
+}
+
+
+/**
+ * KIỂM TRA ĐĂNG NHẬP VTP — chạy hàm này trước tiên.
+ * Không in mật khẩu, token chỉ in vài ký tự đầu để đối chiếu.
+ */
+function debugVtpLogin() {
+  var out = [];
+  var user = _prop(SHIP_VTP_USER_KEY);
+  var pass = _prop(SHIP_VTP_PASS_KEY);
+
+  out.push('VTP_USERNAME: ' + (user ? user.slice(0, 3) + '***(' + user.length + ' ký tự)' : 'CHƯA SET'));
+  out.push('VTP_PASSWORD: ' + (pass ? '***(' + pass.length + ' ký tự)' : 'CHƯA SET'));
+
+  if (!user || !pass) {
+    out.push('\n→ Vào Project Settings → Script Properties, thêm 2 property trên rồi chạy lại.');
+    Logger.log(out.join('\n'));
+    return out.join('\n');
+  }
+
+  var tk = _vtpToken(true);   // ép đăng nhập mới, bỏ qua cache
+  out.push('\nĐăng nhập: ' + (tk.ok ? 'OK — token ' + tk.token.slice(0, 12) + '…' : 'HỎNG — ' + tk.message));
+
+  if (tk.ok) {
+    out.push('\nThử tra mã 149554355818 kèm token:');
+    _shipEndpointsVtp('149554355818', tk.token).forEach(function (ep, i) {
+      try {
+        var opt = { method: ep.method, muteHttpExceptions: true, followRedirects: true, headers: ep.headers };
+        if (ep.payload) { opt.contentType = 'application/json'; opt.payload = ep.payload; }
+        var res = UrlFetchApp.fetch(ep.url, opt);
+        var body = res.getContentText().replace(/\s+/g, ' ');
+        var isJson = false;
+        try { JSON.parse(body); isJson = true; } catch (e) {}
+        out.push('  ' + (i + 1) + '. ' + ep.method.toUpperCase() + ' ' +
+          ep.url.replace('https://partner.viettelpost.vn/v2/order/', '') +
+          '\n     HTTP ' + res.getResponseCode() + (isJson ? ' [JSON] ' : ' [HTML] ') +
+          (isJson ? body.slice(0, 300) : (body.match(/HTTP Status [0-9]+ [^<]*/) || [''])[0]));
+        if (isJson) {
+          var st = _shipExtractStatusText(JSON.parse(body));
+          out.push('     → trạng thái: "' + st + '" → map: "' + shipMapStatusText(st) + '"');
+        }
+      } catch (e) {
+        out.push('  ' + (i + 1) + '. Lỗi: ' + e.toString().slice(0, 120));
+      }
+    });
+  }
+
+  var msg = out.join('\n');
+  Logger.log(msg);
+  return msg;
 }
 
 
@@ -598,126 +737,5 @@ function debugTrackingSpx(code) {
 }
 
 
-/**
- * DÒ VÒNG 2 CHO VIETTEL POST.
- *
- * Vòng 1 thử 7 tổ hợp method/tham số đều ra 405 — cả GET lẫn POST đều bị từ
- * chối trên cả hai path, nên không phải chuyện sai method đơn thuần.
- *
- * Lần này đọc HEADER thay vì body: response 405 bắt buộc kèm header `Allow`
- * liệt kê đúng method được phép. Kèm thử luôn trang tra cứu công khai xem
- * HTML có sẵn trạng thái không (nếu có thì khỏi cần API).
- */
-function debugProbeVtp2() {
-  var c = '149554355818';
-  var targets = [
-    { m: 'get',  u: 'https://partner.viettelpost.vn/v2/order/tracking?orderNumber=' + c },
-    { m: 'get',  u: 'https://partner.viettelpost.vn/v2/order/getOrderByOrderNumber?orderNumber=' + c },
-    { m: 'head', u: 'https://partner.viettelpost.vn/v2/order/tracking' },
-    { m: 'get',  u: 'https://viettelpost.com.vn/tra-cuu-hanh-trinh-don-hang/?billcode=' + c, html: true }
-  ];
-
-  var out = ['DÒ VÒNG 2 — mã ' + c, ''];
-
-  targets.forEach(function (t, i) {
-    out.push((i + 1) + '. ' + t.m.toUpperCase() + ' ' + t.u);
-    try {
-      var res = UrlFetchApp.fetch(t.u, {
-        method: t.m, muteHttpExceptions: true, followRedirects: true,
-        headers: { 'Accept': '*/*', 'User-Agent': SHIP_UA }
-      });
-
-      out.push('   HTTP ' + res.getResponseCode());
-
-      // Header quan trọng nhất: Allow (405 phải có), rồi Content-Type
-      var h = res.getAllHeaders();
-      var keep = [];
-      for (var k in h) {
-        if (!h.hasOwnProperty(k)) continue;
-        if (/^(allow|content-type|location|www-authenticate|server)$/i.test(k)) {
-          keep.push(k + ': ' + h[k]);
-        }
-      }
-      out.push('   ' + (keep.length ? keep.join(' | ') : '(không có header đáng chú ý)'));
-
-      var body = res.getContentText();
-      if (t.html) {
-        // Trang SPA thì HTML không chứa trạng thái; kiểm bằng từ khoá
-        var hits = ['giao thành công', 'đang giao', 'lấy hàng', 'luân chuyển', 'bưu cục', 'hoàn']
-          .filter(function (w) { return body.toLowerCase().indexOf(w) >= 0; });
-        out.push('   HTML dài ' + body.length +
-          ' — từ khoá trạng thái tìm thấy: ' + (hits.length ? hits.join(', ') : 'KHÔNG CÓ (trang render bằng JS)'));
-      } else {
-        out.push('   body: ' + body.replace(/\s+/g, ' ').slice(0, 150));
-      }
-    } catch (e) {
-      out.push('   Lỗi: ' + e.toString().slice(0, 150));
-    }
-    out.push('');
-  });
-
-  var msg = out.join('\n');
-  Logger.log(msg);
-  return msg;
-}
 
 
-/**
- * DÒ ENDPOINT VIETTEL POST.
- * Hai endpoint ban đầu đều trả 405 Method Not Allowed — đúng path nhưng sai
- * method: getOrderByOrderNumber từ chối GET, /order/tracking từ chối POST.
- * Hàm này thử đảo lại method và vài tên tham số, in gọn để khỏi tràn log.
- *
- * Chạy từ dropdown editor, rồi gửi lại bảng kết quả.
- */
-function debugProbeVtp() {
-  var c = '149554355818';
-  var base = 'https://partner.viettelpost.vn/v2/order/';
-
-  var probes = [
-    { m: 'post', u: base + 'getOrderByOrderNumber?orderNumber=' + c },
-    { m: 'post', u: base + 'getOrderByOrderNumber', body: { ORDER_NUMBER: c } },
-    { m: 'post', u: base + 'getOrderByOrderNumber', body: { orderNumber: c } },
-    { m: 'get',  u: base + 'tracking?orderNumber=' + c },
-    { m: 'get',  u: base + 'tracking?ORDER_NUMBER=' + c },
-    { m: 'get',  u: base + 'tracking?billcode=' + c },
-    { m: 'get',  u: base + 'tracking?order_number=' + c }
-  ];
-
-  var out = ['DÒ ENDPOINT VTP — mã ' + c, ''];
-
-  probes.forEach(function (p, i) {
-    var line = (i + 1) + '. ' + p.m.toUpperCase() + ' ' +
-      p.u.replace('https://partner.viettelpost.vn/v2/order/', '') +
-      (p.body ? ' body=' + JSON.stringify(p.body) : '');
-    try {
-      var opt = {
-        method: p.m, muteHttpExceptions: true, followRedirects: true,
-        headers: { 'Accept': 'application/json', 'User-Agent': SHIP_UA }
-      };
-      if (p.body) { opt.contentType = 'application/json'; opt.payload = JSON.stringify(p.body); }
-
-      var res = UrlFetchApp.fetch(p.u, opt);
-      var http = res.getResponseCode();
-      var body = res.getContentText().replace(/\s+/g, ' ').trim();
-      var isJson = false;
-      try { JSON.parse(body); isJson = true; } catch (e) {}
-
-      // HTML lỗi của Tomcat rất dài -> chỉ lấy dòng tiêu đề
-      var brief = isJson ? body.slice(0, 400)
-                         : (body.match(/HTTP Status [0-9]+ [^<]*/) || [body.slice(0, 120)])[0];
-
-      out.push(line + '\n   → HTTP ' + http + (isJson ? ' [JSON] ' : ' [không phải JSON] ') + brief);
-      if (isJson) {
-        var st = _shipExtractStatusText(JSON.parse(body));
-        out.push('   → trạng thái: "' + st + '" → map: "' + shipMapStatusText(st) + '"');
-      }
-    } catch (e) {
-      out.push(line + '\n   → Lỗi: ' + e.toString().slice(0, 150));
-    }
-  });
-
-  var msg = out.join('\n');
-  Logger.log(msg);
-  return msg;
-}
