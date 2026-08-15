@@ -13,7 +13,10 @@
     "status": "clasp show-file-status",
     "open": "clasp open-script",
     "logs": "clasp tail-logs",
-    "deploy": "clasp create-deployment",
+    "deploy": "node scripts/deploy.js",
+    "deploy:url": "node scripts/deploy.js --url",
+    "deploy:pin": "node scripts/deploy.js --pin",
+    "deploy:new": "clasp create-deployment",
     "deployments": "clasp list-deployments"
   },
   "devDependencies": {

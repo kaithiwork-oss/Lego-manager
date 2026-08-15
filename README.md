@@ -53,9 +53,47 @@ Code trên Apps Script sẽ được tải về thư mục `src/`. Sau đó comm
 | `npm run status` | Xem file nào sẽ được push |
 | `npm run open` | Mở project trong trình duyệt |
 | `npm run logs` | Xem log thực thi |
-| `npm run deploy` | Tạo deployment mới |
+| `npm run deploy` | Push + deploy, **giữ nguyên link URL** |
+| `npm run deploy:url` | In ra link web app đang dùng |
+| `npm run deploy:pin` | Ghim link `/exec` hiện tại để deploy không đổi link |
+| `npm run deployments` | Liệt kê các deployment |
 
 > **Lưu ý:** `clasp pull` sẽ ghi đè file trong `src/` bằng bản trên server, kể cả `appsscript.json`. Commit trước khi pull để không mất thay đổi local.
+
+## Deploy không đổi link URL
+
+Mặc định `clasp create-deployment` tạo một deployment **mới** mỗi lần chạy, nên URL `/exec` cũng đổi theo — ai đang dùng link cũ sẽ thấy code cũ. `npm run deploy` giải quyết việc đó: deployment ID được ghim trong `deployment.json` và mọi lần deploy đều redeploy đúng deployment đó (`clasp create-deployment -i <id>`), nên **link không bao giờ đổi**.
+
+```bash
+npm run deploy                       # push code + deploy, giữ nguyên URL
+npm run deploy -- -d "Sửa bug ảnh"   # kèm mô tả cho version mới
+npm run deploy -- --no-push          # chỉ deploy lại code đã push
+npm run deploy:url                   # xem link web app hiện tại
+```
+
+### Giữ đúng link đang dùng
+
+Cách chắc nhất: dán thẳng link `/exec` đang chia sẻ cho mọi người vào lệnh pin (chạy một lần duy nhất, chưa deploy gì cả):
+
+```bash
+npm run deploy:pin -- "https://script.google.com/macros/s/AKfycb.../exec"
+```
+
+Nhận cả link Workspace (`/a/macros/<domain>/s/<ID>/exec`) lẫn ID trần. Sau đó mọi lần `npm run deploy` đều bắn code mới vào đúng link đó.
+
+Nếu không pin sẵn thì lần đầu chạy `npm run deploy`:
+
+- Apps Script **đã có sẵn 1 deployment** → script tự nhận và ghi vào `deployment.json`.
+- Có **nhiều deployment** → script dừng lại, liệt kê ra để chọn đúng cái đang dùng: `npm run deploy -- --id <link hoặc ID>`.
+- **Chưa có deployment nào** → tạo mới rồi ghim lại cho các lần sau.
+
+> Nhớ dùng link `/exec`, đừng dùng link `/dev`. Link `/dev` trỏ tới deployment `@HEAD` — Apps Script không cho phát hành vào đó, và script sẽ báo lỗi nếu bạn ghim nhầm.
+
+Sau đó **commit `deployment.json`** để cả máy khác cũng deploy vào đúng URL đó. Có thể ghi đè bằng biến môi trường `CLASP_DEPLOYMENT_ID` nếu cần deploy sang bản khác (ví dụ bản staging).
+
+> Nếu deployment đã ghim bị xoá trên Apps Script, script sẽ **dừng lại** thay vì âm thầm tạo URL mới. Muốn tạo deployment mới hẳn thì dùng `npm run deploy:new`.
+
+> Khi sửa `appsscript.json` (đổi quyền, đổi scope, đổi `webapp.access`), Apps Script vẫn giữ URL cũ nhưng người dùng có thể phải authorize lại.
 
 ## Cấu trúc
 

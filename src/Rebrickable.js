@@ -667,22 +667,26 @@ function chayBackfill() {
 
 // =============================================
 // MAP ẢNH CHO FRONTEND
+//   data      : CHỈ ảnh đã duyệt (cột J = ✓) — dùng để hiển thị ở mọi màn
+//   dataTatCa : mọi ảnh có URL kể cả chưa duyệt — chỉ dùng cho sidebar sửa ảnh
 // =============================================
 
 function getAnhMap() {
   try {
     var ss = _openSS();
     var sh = ss.getSheetByName(TAB_ANH);
-    if (!sh || sh.getLastRow() < 2) return { success: true, data: {} };
+    if (!sh || sh.getLastRow() < 2) return { success: true, data: {}, dataTatCa: {} };
 
     var rows = sh.getRange(2, 1, sh.getLastRow() - 1, SO_COT_ANH).getValues();
-    var map = {};
+    var map = {}, tatCa = {};
     rows.forEach(function(r) {
       var k = _boDau(r[0]).trim();
       var u = String(r[4] || '').trim();
-      if (k && u) map[k] = u;
+      if (!k || !u) return;
+      tatCa[k] = u;
+      if (String(r[9] || '').trim() === '✓') map[k] = u;
     });
-    return { success: true, data: map };
+    return { success: true, data: map, dataTatCa: tatCa };
   } catch (e) {
     return { success: false, message: e.toString() };
   }
