@@ -74,32 +74,38 @@ function shipMapStatusText(raw) {
   if (!s) return '';
 
   // 1. Giao hụt / delay — vẫn đang trên đường, phải xét TRƯỚC "thành công"
-  if (/(khong thanh cong|khong lien lac|khong gap|cho giao lai|giao lai|delay|hen giao lai|chua giao duoc)/.test(s)) {
+  if (/(khong thanh cong|khong lien lac|khong gap|cho giao lai|giao lai|delay|hen giao lai|chua giao duoc)/.test(s) ||
+      /(delivery failed|failed delivery|delivery attempt|attempt failed|unsuccessful|reschedul)/.test(s)) {
     return 'Đang vận chuyển';
   }
 
   // 2. Lấy hàng thành công = mới rời người gửi, chưa phải đã giao
-  if (/(lay hang thanh cong|da lay hang|nhan hang tu nguoi gui|nhan tu nguoi gui|da tiep nhan hang)/.test(s)) {
+  if (/(lay hang thanh cong|da lay hang|nhan hang tu nguoi gui|nhan tu nguoi gui|da tiep nhan hang)/.test(s) ||
+      /(picked up|pickup done|pickup success|collected from seller)/.test(s)) {
     return 'Đang vận chuyển';
   }
 
   // 3. Hoàn / trả / hủy — "da hoan" không được nuốt "đã hoàn thành"
-  if (/(chuyen hoan|dang hoan|hoan hang|hoan buu gui|tra hang|huy don|da huy|da hoan(?!\s*(thanh|tat)))/.test(s)) {
+  if (/(chuyen hoan|dang hoan|hoan hang|hoan buu gui|tra hang|huy don|da huy|da hoan(?!\s*(thanh|tat)))/.test(s) ||
+      /(return to sender|returned|returning|cancell?ed|refund)/.test(s)) {
     return 'Hoàn trả';
   }
 
   // 4. Giao xong
-  if (/(giao thanh cong|phat thanh cong|giao hang thanh cong|da giao hang|nguoi nhan da nhan|da nhan hang|hoan thanh|hoan tat|thanh cong)/.test(s)) {
+  if (/(giao thanh cong|phat thanh cong|giao hang thanh cong|da giao hang|nguoi nhan da nhan|da nhan hang|hoan thanh|hoan tat|thanh cong)/.test(s) ||
+      /(delivered|received by|order completed|completed)/.test(s)) {
     return 'Đã nhận hàng';
   }
 
   // 5. Đang trên đường
-  if (/(dang giao|di giao|dang van chuyen|luan chuyen|van chuyen|xuat kho|nhap kho|den buu cuc|roi buu cuc|tren duong|dang trung chuyen)/.test(s)) {
+  if (/(dang giao|di giao|dang van chuyen|luan chuyen|van chuyen|xuat kho|nhap kho|den buu cuc|roi buu cuc|tren duong|dang trung chuyen)/.test(s) ||
+      /(in transit|on the way|out for delivery|arrived at|departed|sorting|shipped|on vehicle|received at)/.test(s)) {
     return 'Đang vận chuyển';
   }
 
   // 6. Chờ lấy hàng / mới tạo
-  if (/(cho lay hang|chua lay hang|cho xu ly|dang cho|tiep nhan|tao don|chuan bi hang|cho lay)/.test(s)) {
+  if (/(cho lay hang|chua lay hang|cho xu ly|dang cho|tiep nhan|tao don|chuan bi hang|cho lay)/.test(s) ||
+      /(order created|pending pickup|ready to ship|waiting for|to be picked|order placed)/.test(s)) {
     return 'Chờ hàng';
   }
 
@@ -108,99 +114,121 @@ function shipMapStatusText(raw) {
 
 
 // =============================================
-// TRA TRẠNG THÁI: VIETTEL POST
+// ĐỌC TRẠNG THÁI TỪ PAYLOAD CỦA HÃNG
 // =============================================
+
+// Tên trường chứa chữ trạng thái. Xếp theo độ cụ thể giảm dần.
+// Cố ý KHÔNG lấy 'MESSAGE' (hay là "success" của lớp bọc) và 'STATUS'
+// (hay là số) để khỏi đọc nhầm.
+var SHIP_STATUS_KEYS = [
+  // Viettel Post
+  'ORDER_STATUS_NAME', 'STATUS_NAME', 'STATUSNAME', 'TEN_TRANG_THAI',
+  'TRANG_THAI', 'ORDER_STATUS_TEXT',
+  // Shopee Express
+  'MILESTONE_NAME', 'CURRENT_STATUS', 'TRACKING_STATUS', 'STATUS_TEXT',
+  // chung
+  'DESCRIPTION', 'NOTE'
+];
+
+var SHIP_DATE_KEYS = [
+  'ORDER_DATE', 'STATUS_DATE', 'ACTUAL_TIME', 'UPDATED_DATE',
+  'CREATED_DATE', 'TIMESTAMP', 'DATE', 'TIME'
+];
+
+var SHIP_SCAN_MAX_DEPTH = 6;
+
 
 /**
  * Lấy chuỗi trạng thái mới nhất từ payload tra cứu.
- * Payload của hãng có 2 dạng: 1 object đơn hàng, hoặc mảng hành trình.
- * Với mảng thì lấy mốc thời gian mới nhất.
+ *
+ * Payload mỗi hãng một kiểu: VTP trả 1 object đơn hàng hoặc mảng hành trình
+ * ngay dưới `data`, SPX chôn mảng hành trình sâu hơn (data.sls_tracking_info.records).
+ * Nên quét đệ quy tìm mọi node có trường trạng thái, rồi:
+ *   - có mốc thời gian  -> lấy node mới nhất
+ *   - không có mốc nào  -> lấy node nông nhất (thường là trạng thái tổng của đơn)
  */
 function _shipExtractStatusText(json) {
   if (!json) return '';
 
-  var STATUS_KEYS = ['ORDER_STATUS_NAME', 'STATUS_NAME', 'STATUSNAME', 'TEN_TRANG_THAI',
-                     'TRANG_THAI', 'STATUS_TEXT', 'NOTE', 'ORDER_STATUS_TEXT', 'DESCRIPTION'];
-  var DATE_KEYS   = ['ORDER_DATE', 'STATUS_DATE', 'DATE', 'TIME', 'CREATED_DATE', 'UPDATED_DATE'];
-
-  function pickStatus(obj) {
+  function pickByKeys(obj, keys) {
     if (!obj || typeof obj !== 'object') return '';
-    for (var i = 0; i < STATUS_KEYS.length; i++) {
-      var k = STATUS_KEYS[i];
-      // so khớp không phân biệt hoa/thường
+    for (var i = 0; i < keys.length; i++) {
       for (var real in obj) {
         if (!obj.hasOwnProperty(real)) continue;
-        if (String(real).toUpperCase() === k && obj[real] && typeof obj[real] !== 'object') {
-          return String(obj[real]);
+        var v = obj[real];
+        if (String(real).toUpperCase() === keys[i] && v !== null && v !== '' && typeof v !== 'object') {
+          return String(v);
         }
       }
     }
     return '';
   }
 
-  function pickDate(obj) {
-    if (!obj || typeof obj !== 'object') return '';
-    for (var i = 0; i < DATE_KEYS.length; i++) {
-      for (var real in obj) {
-        if (!obj.hasOwnProperty(real)) continue;
-        if (String(real).toUpperCase() === DATE_KEYS[i] && obj[real]) return String(obj[real]);
-      }
-    }
-    return '';
+  /** Mốc thời gian so sánh được: unix timestamp thì so bằng số, còn lại so chuỗi */
+  function dateRank(raw) {
+    if (!raw) return null;
+    var s = String(raw);
+    if (/^[0-9]{9,}$/.test(s)) return { num: Number(s) };
+    return { str: s };
   }
 
-  var data = (json && json.data !== undefined) ? json.data : json;
+  function newer(a, b) {          // a mới hơn b?
+    if (!b) return true;
+    if (!a) return false;
+    if (a.num !== undefined && b.num !== undefined) return a.num > b.num;
+    if (a.num !== undefined) return true;    // có timestamp số thì ưu tiên
+    if (b.num !== undefined) return false;
+    return a.str > b.str;
+  }
 
-  if (Array.isArray(data)) {
-    if (!data.length) return '';
-    var best = null, bestDate = '';
-    data.forEach(function (item) {
-      var d = pickDate(item);
-      if (!best || (d && d > bestDate)) { best = item; bestDate = d; }
+  var best = null;                // { text, rank, depth }
+  var seen = [];                  // chặn vòng lặp tham chiếu
+
+  function walk(node, depth) {
+    if (!node || typeof node !== 'object' || depth > SHIP_SCAN_MAX_DEPTH) return;
+    if (seen.indexOf(node) >= 0) return;
+    seen.push(node);
+
+    if (!Array.isArray(node)) {
+      var text = pickByKeys(node, SHIP_STATUS_KEYS);
+      if (text) {
+        var rank = dateRank(pickByKeys(node, SHIP_DATE_KEYS));
+        var take = false;
+        if (!best) take = true;
+        else if (rank && best.rank) take = newer(rank, best.rank);
+        else if (rank && !best.rank) take = true;             // có ngày thắng không ngày
+        // Cùng không có ngày: node nông hơn (trạng thái tổng của đơn) thắng node sâu hơn;
+        // cùng độ sâu thì lấy node gặp sau, vì mục cuối mảng hành trình là mục mới nhất.
+        else if (!rank && !best.rank) take = depth <= best.depth;
+        if (take) best = { text: text, rank: rank, depth: depth };
+      }
+    }
+
+    var keys = Array.isArray(node) ? node.map(function (_, i) { return i; }) : Object.keys(node);
+    keys.forEach(function (k) {
+      var child = node[k];
+      if (child && typeof child === 'object') walk(child, depth + 1);
     });
-    // không có trường ngày nào -> coi phần tử cuối là mới nhất
-    return pickStatus(best) || pickStatus(data[data.length - 1]);
   }
 
-  var direct = pickStatus(data);
-  if (direct) return direct;
-
-  // đôi khi hành trình nằm trong 1 mảng con
-  if (data && typeof data === 'object') {
-    for (var key in data) {
-      if (!data.hasOwnProperty(key)) continue;
-      if (Array.isArray(data[key]) && data[key].length) {
-        var nested = _shipExtractStatusText({ data: data[key] });
-        if (nested) return nested;
-      }
-    }
-  }
-  return '';
+  walk((json.data !== undefined && json.data !== null) ? json.data : json, 0);
+  return best ? best.text : '';
 }
 
 
+// Vài endpoint chặn request không có User-Agent trình duyệt
+var SHIP_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+              '(KHTML, like Gecko) Chrome/126.0 Safari/537.36';
+
+
 /**
- * Tra 1 mã vận đơn Viettel Post.
- * Thử lần lượt các endpoint công khai, cái nào ra trạng thái thì dùng.
+ * Thử lần lượt danh sách endpoint, cái nào ra chữ trạng thái thì dùng.
+ * @param {Array} endpoints  [{ url, method, payload? }]
  * @return {{ok:boolean, statusText:string, message:string}}
  */
-function shipFetchVtp(code) {
-  var c = String(code || '').trim();
-  if (!c) return { ok: false, message: 'Thiếu mã vận đơn' };
-
-  var endpoints = [
-    {
-      url: 'https://partner.viettelpost.vn/v2/order/getOrderByOrderNumber?orderNumber=' + encodeURIComponent(c),
-      method: 'get'
-    },
-    {
-      url: 'https://partner.viettelpost.vn/v2/order/tracking',
-      method: 'post',
-      payload: JSON.stringify({ ORDER_NUMBER: c, TYPE: 0 })
-    }
-  ];
-
+function _shipTryEndpoints(endpoints) {
   var lastErr = '';
+
   for (var i = 0; i < endpoints.length; i++) {
     var ep = endpoints[i];
     try {
@@ -208,7 +236,7 @@ function shipFetchVtp(code) {
         method: ep.method,
         muteHttpExceptions: true,
         followRedirects: true,
-        headers: { 'Accept': 'application/json' }
+        headers: { 'Accept': 'application/json', 'User-Agent': SHIP_UA }
       };
       if (ep.payload) {
         opt.contentType = 'application/json';
@@ -238,10 +266,58 @@ function shipFetchVtp(code) {
 }
 
 
+/** Danh sách endpoint tra cứu của Viettel Post */
+function _shipEndpointsVtp(c) {
+  return [
+    {
+      url: 'https://partner.viettelpost.vn/v2/order/getOrderByOrderNumber?orderNumber=' + encodeURIComponent(c),
+      method: 'get'
+    },
+    {
+      url: 'https://partner.viettelpost.vn/v2/order/tracking',
+      method: 'post',
+      payload: JSON.stringify({ ORDER_NUMBER: c, TYPE: 0 })
+    }
+  ];
+}
+
+
+/** Danh sách endpoint tra cứu của Shopee Express */
+function _shipEndpointsSpx(c) {
+  return [
+    {
+      url: 'https://spx.vn/shipment/order/open/order/get_order_info?spx_tn=' + encodeURIComponent(c),
+      method: 'get'
+    },
+    {
+      url: 'https://spx.vn/api/v1/order/tracking/get_tracking_info?spx_tn=' + encodeURIComponent(c),
+      method: 'get'
+    }
+  ];
+}
+
+
+/** Tra 1 mã vận đơn Viettel Post */
+function shipFetchVtp(code) {
+  var c = String(code || '').trim();
+  if (!c) return { ok: false, message: 'Thiếu mã vận đơn' };
+  return _shipTryEndpoints(_shipEndpointsVtp(c));
+}
+
+
+/** Tra 1 mã vận đơn Shopee Express */
+function shipFetchSpx(code) {
+  var c = String(code || '').trim();
+  if (!c) return { ok: false, message: 'Thiếu mã vận đơn' };
+  return _shipTryEndpoints(_shipEndpointsSpx(c));
+}
+
+
 /** Điều phối theo hãng. Hãng chưa hỗ trợ -> trả ok:false để bỏ qua, không ghi gì. */
 function shipFetchStatus(code, nguon) {
   var carrier = shipDetectCarrier(code, nguon);
   if (carrier === 'vtp') return shipFetchVtp(code);
+  if (carrier === 'shopee') return shipFetchSpx(code);
   return { ok: false, message: 'Chưa hỗ trợ tra tự động cho hãng: ' + carrier };
 }
 
@@ -448,18 +524,19 @@ function shippingSyncStatus() {
 // DEBUG — chạy tay trong editor để xem payload thật của hãng
 // =============================================
 
-function debugTrackingVtp(code) {
-  var c = String(code || '149554355818').trim();
-  var endpoints = [
-    { url: 'https://partner.viettelpost.vn/v2/order/getOrderByOrderNumber?orderNumber=' + encodeURIComponent(c), method: 'get' },
-    { url: 'https://partner.viettelpost.vn/v2/order/tracking', method: 'post', payload: JSON.stringify({ ORDER_NUMBER: c, TYPE: 0 }) }
-  ];
+/** In payload thô của từng endpoint + trạng thái đọc được, để chỉnh mapping */
+function _shipDebug(code, endpoints, nguon) {
+  var c = String(code || '').trim();
+  var out = ['Mã: ' + c + ' — hãng nhận dạng: ' + shipDetectCarrier(c, nguon || '')];
 
-  var out = ['Mã: ' + c + ' — hãng nhận dạng: ' + shipDetectCarrier(c, '')];
   endpoints.forEach(function (ep) {
     try {
-      var opt = { method: ep.method, muteHttpExceptions: true, followRedirects: true, headers: { 'Accept': 'application/json' } };
+      var opt = {
+        method: ep.method, muteHttpExceptions: true, followRedirects: true,
+        headers: { 'Accept': 'application/json', 'User-Agent': SHIP_UA }
+      };
       if (ep.payload) { opt.contentType = 'application/json'; opt.payload = ep.payload; }
+
       var res = UrlFetchApp.fetch(ep.url, opt);
       var body = res.getContentText();
       out.push('--- ' + ep.method.toUpperCase() + ' ' + ep.url +
@@ -479,4 +556,17 @@ function debugTrackingVtp(code) {
   var msg = out.join('\n\n');
   Logger.log(msg);
   return msg;
+}
+
+
+function debugTrackingVtp(code) {
+  var c = String(code || '149554355818').trim();
+  return _shipDebug(c, _shipEndpointsVtp(c));
+}
+
+
+function debugTrackingSpx(code) {
+  var c = String(code || '').trim();
+  if (!c) return 'Truyền vào 1 mã SPX thật, vd: debugTrackingSpx("SPXVN...")';
+  return _shipDebug(c, _shipEndpointsSpx(c), 'Shopee');
 }

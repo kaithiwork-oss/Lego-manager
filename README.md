@@ -87,7 +87,8 @@ Sau khi `npm run push`, mở Apps Script editor và chạy tay 1 lần:
 | `shippingSyncStatus()` | Xem đã cài lịch chưa + kết quả lần chạy gần nhất |
 | `autoSyncShippingStatus()` | Chạy đồng bộ ngay, không đợi tới 0h |
 | `removeShippingSyncTrigger()` | Gỡ lịch |
-| `debugTrackingVtp('149554355818')` | Xem response thật của hãng để chỉnh lại mapping |
+| `debugTrackingVtp('149554355818')` | Xem response thật của Viettel Post để chỉnh mapping |
+| `debugTrackingSpx('SPXVN...')` | Xem response thật của Shopee Express để chỉnh mapping |
 
 Lần chạy đầu sẽ hỏi quyền `UrlFetchApp` (gọi ra ngoài) và quyền tạo trigger — bấm cho phép.
 
@@ -105,13 +106,19 @@ Hãng chưa hỗ trợ thì đơn được bỏ qua, không ghi gì vào sheet.
 ### Mapping trạng thái
 
 Đọc theo **tên trạng thái** (chữ) chứ không theo mã số, vì mã số của hãng hay đổi.
-Quy về 4 trạng thái của app: `Chờ hàng`, `Đang vận chuyển`, `Đã nhận hàng`, `Hoàn trả`.
+Hiểu cả tiếng Việt (VTP) lẫn tiếng Anh (SPX), quy về 4 trạng thái của app:
+`Chờ hàng`, `Đang vận chuyển`, `Đã nhận hàng`, `Hoàn trả`.
 
 Vài chỗ dễ nhầm đã xử lý riêng:
 
-- *"Lấy hàng thành công"* → **Đang vận chuyển** (không phải đã giao)
-- *"Giao hàng không thành công"* → **Đang vận chuyển** (không phải hoàn)
+- *"Lấy hàng thành công"* / *"Picked up"* → **Đang vận chuyển** (không phải đã giao)
+- *"Giao hàng không thành công"* / *"Delivery failed"* → **Đang vận chuyển** (không phải hoàn)
+- *"Out for delivery"* → **Đang vận chuyển** (chưa giao xong)
 - *"Đã hoàn thành"* → **Đã nhận hàng** (không phải hoàn trả)
+
+Payload mỗi hãng một kiểu — VTP để trạng thái ngay dưới `data`, SPX chôn sâu trong
+`data.sls_tracking_info.records` — nên phần đọc quét đệ quy tìm mọi node có trường
+trạng thái rồi lấy node có mốc thời gian mới nhất (timestamp số so bằng số, không so chuỗi).
 
 Trạng thái lạ chưa map được thì **không ghi gì**, chỉ log lại để bổ sung sau —
 xem bằng `shippingSyncStatus()` hoặc `npm run logs`.

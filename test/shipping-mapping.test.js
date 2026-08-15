@@ -47,6 +47,22 @@ eq(shipMapStatusText('Xyz linh tinh'), '', 'không map được -> chuỗi rỗn
 eq(shipMapStatusText(''), '', 'rỗng');
 eq(shipMapStatusText(null), '', 'null');
 
+console.log('\n== shipMapStatusText: tiếng Anh (SPX) ==');
+eq(shipMapStatusText('Delivered'), 'Đã nhận hàng', 'Delivered');
+eq(shipMapStatusText('Parcel has been delivered'), 'Đã nhận hàng', 'has been delivered');
+eq(shipMapStatusText('Order completed'), 'Đã nhận hàng', 'Order completed');
+eq(shipMapStatusText('Delivery failed'), 'Đang vận chuyển', 'Delivery failed -> vẫn đang đi');
+eq(shipMapStatusText('Delivery attempt unsuccessful'), 'Đang vận chuyển', 'attempt unsuccessful');
+eq(shipMapStatusText('Out for delivery'), 'Đang vận chuyển', 'Out for delivery chưa phải đã giao');
+eq(shipMapStatusText('In transit'), 'Đang vận chuyển', 'In transit');
+eq(shipMapStatusText('Picked up'), 'Đang vận chuyển', 'Picked up');
+eq(shipMapStatusText('Arrived at sorting center'), 'Đang vận chuyển', 'Arrived at');
+eq(shipMapStatusText('Returned to sender'), 'Hoàn trả', 'Returned to sender');
+eq(shipMapStatusText('Order cancelled'), 'Hoàn trả', 'cancelled (2 chữ l)');
+eq(shipMapStatusText('Order canceled'), 'Hoàn trả', 'canceled (1 chữ l)');
+eq(shipMapStatusText('Order created'), 'Chờ hàng', 'Order created');
+eq(shipMapStatusText('Pending pickup'), 'Chờ hàng', 'Pending pickup');
+
 console.log('\n== _shipExtractStatusText ==');
 eq(_shipExtractStatusText({ data: { ORDER_NUMBER: '1', ORDER_STATUS_NAME: 'Đang giao hàng' } }),
   'Đang giao hàng', 'object đơn lẻ');
@@ -63,6 +79,36 @@ eq(_shipExtractStatusText({ data: { ORDER_NUMBER: '1', TRACKING: [{ STATUS_NAME:
 eq(_shipExtractStatusText({ data: [] }), '', 'mảng rỗng');
 eq(_shipExtractStatusText(null), '', 'null');
 eq(_shipExtractStatusText({ data: { ORDER_NUMBER: '1' } }), '', 'không có trường trạng thái');
+eq(_shipExtractStatusText({ data: [
+    { STATUS_NAME: 'Lấy hàng thành công' },
+    { STATUS_NAME: 'Đang giao hàng' }
+  ] }), 'Đang giao hàng', 'mảng không có ngày -> lấy mục cuối');
+eq(_shipExtractStatusText({ data: {
+    ORDER_STATUS_NAME: 'Đang giao hàng',
+    JOURNEY: [{ DESCRIPTION: 'Nhập kho' }]
+  } }), 'Đang giao hàng', 'trạng thái tổng (nông) thắng chi tiết (sâu) khi cả hai không ngày');
+
+console.log('\n== _shipExtractStatusText: payload kiểu SPX ==');
+eq(_shipExtractStatusText({
+    retcode: 0, message: 'success',
+    data: { sls_tracking_info: { records: [
+      { actual_time: 1755000000, milestone_name: 'Picked up' },
+      { actual_time: 1755200000, milestone_name: 'Delivered' },
+      { actual_time: 1755100000, milestone_name: 'In transit' }
+    ] } }
+  }), 'Delivered', 'mảng lồng sâu + timestamp số -> lấy mốc lớn nhất');
+eq(_shipExtractStatusText({
+    retcode: 0, message: 'success',
+    data: { sls_tracking_info: { current_status: 'In transit' } }
+  }), 'In transit', 'current_status lồng 2 tầng');
+eq(_shipExtractStatusText({ retcode: 0, message: 'success', data: {} }), '',
+  '"message":"success" của lớp bọc KHÔNG bị đọc nhầm thành trạng thái');
+eq(_shipExtractStatusText({
+    data: { records: [
+      { actual_time: 999999999, milestone_name: 'Picked up' },
+      { actual_time: 1755200000, milestone_name: 'Delivered' }
+    ] }
+  }), 'Delivered', 'timestamp so bằng số chứ không so chuỗi (9 số vs 10 số)');
 
 console.log('\n' + (fail ? '✗ ' + fail + ' case sai' : '✓ Tất cả case đúng'));
 process.exit(fail ? 1 : 0);

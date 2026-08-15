@@ -18,9 +18,10 @@ const rows = [
   mkRow('GD004', 'Bank',   '149000000003', 'Đã nhận hàng',    '2026-07-01'), // đã xong -> bỏ qua
   mkRow('GD005', 'Bank',   '149000000004', 'Hoàn trả',        '2026-07-02'), // đã xong -> bỏ qua
   mkRow('GD006', 'Bank',   '',             'Chờ hàng',        ''),           // không mã -> bỏ qua
-  mkRow('GD007', 'Shopee', 'SPXVN123456',  'Đang vận chuyển', '2026-08-02'), // hãng chưa hỗ trợ
+  mkRow('GD007', 'Shopee', 'SPXVN123456',  'Chờ hàng',        '2026-08-02'), // SPX -> Đang vận chuyển
   mkRow('GD008', 'Bank',   '149000000005', 'Đang vận chuyển', '2026-08-03'), // trạng thái lạ -> không ghi
   mkRow('GD009', 'Bank',   '149000000006', 'Đang vận chuyển', '2026-08-04'), // fetch lỗi
+  mkRow('GD010', 'Bank',   'GHN123456789', 'Đang vận chuyển', '2026-08-06'), // hãng chưa hỗ trợ
 ];
 
 const writes = [];
@@ -79,11 +80,17 @@ const FAKE = {
   '149000000002': { ok: true, statusText: 'Đang giao hàng' },
   '149000000005': { ok: true, statusText: 'Trạng thái lạ hoắc' },
   '149000000006': { ok: false, message: 'HTTP 500' },
+  'SPXVN123456':  { ok: true, statusText: 'In transit' },   // SPX trả tiếng Anh
 };
 let fetched = [];
+const carriers = [];
 shipFetchStatus = function (code, nguon) {
   fetched.push(code);
-  if (shipDetectCarrier(code, nguon) !== 'vtp') return { ok: false, message: 'Chưa hỗ trợ tra tự động' };
+  const carrier = shipDetectCarrier(code, nguon);
+  carriers.push(carrier);
+  if (carrier !== 'vtp' && carrier !== 'shopee') {
+    return { ok: false, message: 'Chưa hỗ trợ tra tự động cho hãng: ' + carrier };
+  }
   return FAKE[code] || { ok: false, message: 'không có dữ liệu giả' };
 };
 
@@ -97,20 +104,22 @@ function eq(a, b, label) {
 }
 
 console.log('== gom đơn cần tra ==');
-eq(res.pending, 5, 'số vận đơn cần tra (bỏ đơn đã xong + đơn không mã)');
-eq(fetched.slice().sort(), ['149000000002','149000000005','149000000006','149554355818','SPXVN123456'].sort(), 'đúng các mã được tra');
+eq(res.pending, 6, 'số vận đơn cần tra (bỏ đơn đã xong + đơn không mã)');
+eq(fetched.slice().sort(), ['149000000002','149000000005','149000000006','149554355818','GHN123456789','SPXVN123456'].sort(), 'đúng các mã được tra');
 eq(fetched.indexOf('149554355818') < fetched.indexOf('149000000002'), true, 'đơn cũ nhất tra trước');
+eq(carriers[fetched.indexOf('SPXVN123456')], 'shopee', 'mã SPX nhận đúng hãng shopee');
 
 console.log('\n== kết quả ghi ==');
-eq(res.updated, 3, 'số dòng được cập nhật (GD001, GD002, GD003)');
+eq(res.updated, 4, 'số dòng được cập nhật (GD001, GD002, GD003, GD007)');
 eq(rows[0][11], 'Đã nhận hàng', 'GD001 -> Đã nhận hàng');
 eq(rows[1][11], 'Đã nhận hàng', 'GD002 cùng vận đơn cũng đổi');
 eq(rows[2][11], 'Đang vận chuyển', 'GD003 Chờ hàng -> Đang vận chuyển');
 eq(rows[3][11], 'Đã nhận hàng', 'GD004 đã xong, giữ nguyên');
 eq(rows[4][11], 'Hoàn trả', 'GD005 đã xong, giữ nguyên');
-eq(rows[6][11], 'Đang vận chuyển', 'GD007 hãng chưa hỗ trợ, giữ nguyên');
+eq(rows[6][11], 'Đang vận chuyển', 'GD007 SPX "In transit" -> Đang vận chuyển');
 eq(rows[7][11], 'Đang vận chuyển', 'GD008 trạng thái lạ, giữ nguyên');
 eq(rows[8][11], 'Đang vận chuyển', 'GD009 fetch lỗi, giữ nguyên');
+eq(rows[9][11], 'Đang vận chuyển', 'GD010 hãng chưa hỗ trợ, giữ nguyên');
 
 console.log('\n== ngày cập nhật TT ==');
 const today = Utilities.formatDate(new Date(), 'x', 'yyyy-MM-dd');
@@ -119,7 +128,7 @@ eq(rows[3][16], '2026-07-01', 'GD004 không đổi giữ nguyên ngày cũ');
 eq(rows[7][16], '2026-08-03', 'GD008 không ghi thì không đụng ngày');
 
 console.log('\n== log + cache ==');
-eq(logCalls.length, 3, 'ghi 3 dòng DataLog');
+eq(logCalls.length, 4, 'ghi 4 dòng DataLog');
 eq(logCalls[0].details[0].field, 'trangThaiDon', 'log đúng field');
 eq(logCalls[0].details[0].old, 'Đang vận chuyển', 'log giữ trạng thái cũ');
 eq(logCalls[0].details[0]['new'], 'Đã nhận hàng', 'log trạng thái mới');
@@ -129,7 +138,9 @@ eq(writes.length, 2, 'chỉ ghi sheet 2 lần (cột L và cột Q)');
 
 console.log('\n== báo cáo ==');
 eq(res.unmapped, ['149000000005 → "Trạng thái lạ hoắc"'], 'báo trạng thái chưa map');
-eq(res.failed.length, 2, 'báo 2 mã tra không được (SPX + lỗi HTTP)');
+eq(res.failed.length, 2, 'báo 2 mã tra không được (GHN chưa hỗ trợ + lỗi HTTP)');
+eq(res.failed.some(m => m.indexOf('GHN123456789') === 0 && m.indexOf('other') > 0), true,
+  'báo rõ GHN chưa hỗ trợ tra tự động');
 
 console.log('\n' + (fail ? '✗ ' + fail + ' case sai' : '✓ Tất cả case đúng'));
 process.exit(fail ? 1 : 0);
