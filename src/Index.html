@@ -53,41 +53,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .side-foot-link.active{background:rgba(255,255,255,.12);color:#fff;box-shadow:none;font-weight:700;}
 .app-body{margin-left:220px;}
 
-/* KHU GIAO DỊCH: drill-down Tổng quan -> Danh sách -> Duyệt ảnh, chung 1 bộ lọc */
-.gd-shell{display:none;}
-.gd-shell.active{display:block;}
-.gd-shell .container{padding-bottom:0;}
-.gd-shell.active ~ .page.active > .container{padding-top:0;}
+/* KHU GIAO DỊCH: Tổng quan -> (xem chi tiết) -> Danh sách -> (Duyệt ảnh) -> Duyệt ảnh
+   Ba trang độc lập, mỗi trang bộ lọc riêng. */
+.gd-page-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.gd-head-left{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap;}
+.gd-page-title{display:inline-flex;align-items:center;gap:7px;font-size:18px;font-weight:800;color:var(--lego-navy);white-space:nowrap;}
+.gd-head-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.gd-linkbtn{font-size:13px;color:#8b8473;background:none;border:none;cursor:pointer;font-weight:700;white-space:nowrap;padding:0;}
+.gd-linkbtn:hover{text-decoration:underline;}
+.gd-linkbtn.red{color:var(--lego-red-dark);}
 
-/* Thanh ngữ cảnh: đường dẫn phân cấp (trái) + hành động (phải) */
-.gd-crumb-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-.gd-crumb{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap;}
+/* Nút quay lại (← Tổng quan / ← Danh sách) */
 .crumb-back{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 13px 0 11px;border:1.5px solid #e3ddc9;border-radius:100px;background:#fcfaf3;color:#6f6858;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,transform var(--t-fast) var(--ease-brick);}
 .crumb-back:hover{background:#f1ede2;color:#2b2618;}
 .crumb-back:active{transform:scale(.96);}
-.crumb-cur{display:inline-flex;align-items:center;gap:7px;font-size:16px;font-weight:800;color:var(--lego-navy);white-space:nowrap;}
-.crumb-cur .crumb-ic{font-size:17px;}
-.crumb-next{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 15px;margin-left:6px;border:none;border-radius:100px;background:var(--lego-navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 0 rgba(12,31,63,.35);transition:filter .15s,transform var(--t-fast) var(--ease-brick);}
+/* Nút khoan xuống (Duyệt ảnh →) */
+.crumb-next{position:relative;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 15px;border:none;border-radius:100px;background:var(--lego-navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 0 rgba(12,31,63,.35);transition:filter .15s,transform var(--t-fast) var(--ease-brick);}
 .crumb-next:hover{filter:brightness(1.12);}
 .crumb-next:active{transform:scale(.96);}
 .crumb-next .crumb-arrow{font-size:15px;line-height:1;}
 .crumb-next .nav-badge{position:static;margin:0 0 0 2px;background:var(--lego-yellow);color:#1a1200;}
-.gd-crumb-actions{display:flex;align-items:center;gap:10px;}
-.gd-hist-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:12px;border:1.5px solid #e3ddc9;background:#fcfaf3;font-size:17px;cursor:pointer;transition:background .15s,transform var(--t-fast) var(--ease-brick);}
+/* Icon lịch sử 🕓 góc phải khu Giao dịch */
+.gd-hist-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;border:1.5px solid #e3ddc9;background:#fcfaf3;font-size:16px;cursor:pointer;transition:background .15s,transform var(--t-fast) var(--ease-brick);}
 .gd-hist-btn:hover{background:#f1ede2;}
 .gd-hist-btn:active{transform:scale(.92);}
 
-/* Bộ lọc: dashboard chỉ Năm+Tháng (ẩn .gd-detail); Danh sách gập sau nút Bộ lọc */
-#gdFilters.time-only .gd-detail{display:none;}
-#gdFilters.gd-collapsed{display:none;}
-.gd-active-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
-.gd-fchip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 12px;border-radius:100px;background:#fff;border:1.5px solid #e3ddc9;font-size:12.5px;font-weight:700;color:#374151;}
-.gd-fchip button{width:18px;height:18px;border:none;border-radius:50%;background:#efe9da;color:#8b8473;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;}
-.gd-fchip button:hover{background:var(--lego-red);color:#fff;}
-.gd-fchip-clear{border:none;background:none;color:var(--lego-red-dark);font-size:12.5px;font-weight:700;cursor:pointer;padding:0 6px;align-self:center;}
+/* Preview "Danh sách" nhúng trong Tổng quan */
+.db-list-preview{margin-top:4px;}
+.db-lp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.db-lp-head h3{font-size:15px;font-weight:800;color:#2b2618;}
+.db-lp-more{margin-top:10px;text-align:center;}
+.db-more-btn{font-size:13px;font-weight:700;color:var(--lego-navy);background:#f1ede2;border:1.5px solid #e3ddc9;border-radius:100px;padding:8px 20px;cursor:pointer;transition:background .15s,transform var(--t-fast) var(--ease-brick);}
+.db-more-btn:hover{background:#e7e1d0;}
+.db-more-btn:active{transform:scale(.96);}
 @media(max-width:700px){
-  .gd-crumb-bar{margin-bottom:10px;}
-  .crumb-cur{font-size:15px;}
+  .gd-page-head{margin-bottom:10px;}
+  .gd-page-title{font-size:16px;}
 }
 
 /* PAGES */
@@ -673,22 +674,25 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 <div class="app-body">
 
-<!-- ====== KHU GIAO DỊCH: sub-nav + bộ lọc dùng chung ====== -->
-<div class="gd-shell active" id="gdShell">
+<!-- ====== TỔNG QUAN (khu Giao dịch) ====== -->
+<div class="page active" id="page-dashboard">
 <div class="container">
-  <div class="gd-crumb-bar">
-    <div class="gd-crumb" id="gdCrumb"><!-- dựng theo tab trong syncGdShell() --></div>
-    <div class="gd-crumb-actions">
+  <div class="gd-page-head">
+    <h2 class="gd-page-title">📊 Giao dịch</h2>
+    <div class="gd-head-actions">
+      <button class="gd-linkbtn" onclick="runRepair(this)" title="Quét và bổ sung dữ liệu thiếu">🔧 Kiểm tra dữ liệu</button>
+      <button class="gd-linkbtn red" onclick="loadDashboard()">🔄 Làm mới</button>
       <button class="gd-hist-btn" aria-label="Lịch sử thay đổi" title="Lịch sử thay đổi" onclick="switchTab('changelog')">🕓</button>
-      <button class="filter-icon-btn" id="gdFilterBtn" aria-label="Bộ lọc giao dịch" onclick="toggleGdFilter()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8Z"/></svg><span class="fi-dot"></span></button>
+      <button class="filter-icon-btn" aria-label="Bộ lọc" onclick="openFilterTray('dbFilters')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8Z"/></svg><span class="fi-dot"></span></button>
+      <button class="btn-primary" onclick="openSidebar('create')">＋ Tạo mới</button>
     </div>
   </div>
 
-  <div class="filter-bar filters-collapsible" id="gdFilters">
+  <div class="filter-bar filters-collapsible" id="dbFilters">
     <div style="min-width:140px;display:flex;align-items:center;gap:6px;"><span style="font-size:12px;color:#8b8473;font-weight:700;">Năm</span><div class="year-chip-row" id="fYearChips"></div></div>
     <div class="filter-bar-group">
       <label>Tháng</label>
-      <select id="fMonth" onchange="applyGdFilter()">
+      <select id="fMonth" onchange="applyFilters()">
         <option value="">Tất cả</option>
         <option value="01">T1</option><option value="02">T2</option><option value="03">T3</option>
         <option value="04">T4</option><option value="05">T5</option><option value="06">T6</option>
@@ -696,54 +700,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
         <option value="10">T10</option><option value="11">T11</option><option value="12">T12</option>
       </select>
     </div>
-    <div class="filter-bar-group gd-detail">
+    <div class="filter-bar-group">
       <label>Loại GD</label>
-      <select id="fLoai" onchange="applyGdFilter()">
+      <select id="fLoai" onchange="applyFilters()">
         <option value="">Tất cả</option><option value="MUA">Mua vào</option><option value="BÁN">Bán ra</option><option value="HOÀN">Hoàn</option><option value="TRAO ĐỔI">🔄 Trao đổi</option><option value="ĐƯỢC TẶNG">🎁 Được tặng</option>
       </select>
     </div>
-    <div class="filter-bar-group gd-detail">
+    <div class="filter-bar-group">
       <label>Hình thức GD</label>
-      <select id="fNguon" onchange="applyGdFilter()">
+      <select id="fNguon" onchange="applyFilters()">
         <option value="">Tất cả</option><option value="Bank">Bank</option>
         <option value="Shopee">Shopee</option><option value="GDTT">GDTT</option>
       </select>
     </div>
-    <div class="filter-bar-group gd-detail">
-      <label>Trạng thái TT</label>
-      <select id="fTT" onchange="applyGdFilter()">
-        <option value="">Tất cả</option>
-        <option value="Thanh toán full 1 lần">Full</option>
-        <option value="Đặt cọc">Đặt cọc</option>
-        <option value="Thanh toán nốt sau cọc">Trả nốt</option>
-        <option value="Trao đổi">Trao đổi</option>
-        <option value="Được tặng">Được tặng</option>
-      </select>
-    </div>
-    <div class="filter-bar-group gd-detail">
-      <label>Trạng thái đơn</label>
-      <select id="fDon" onchange="applyGdFilter()">
-        <option value="">Tất cả</option>
-        <option value="Chờ hàng">⏳ Chờ hàng</option>
-        <option value="Đang vận chuyển">🚚 Đang vận chuyển</option>
-        <option value="Đã nhận hàng">✅ Đã nhận hàng</option>
-        <option value="Hoàn trả">↩️ Hoàn trả</option>
-        <option value="__coc__">💰 Đặt cọc chưa đủ</option>
-      </select>
-    </div>
-    <button class="reset-btn" onclick="resetGdFilters()">✕ Xóa filter</button>
-  </div>
-  <div class="gd-active-chips" id="gdActiveChips" style="display:none;"></div>
-</div>
-</div>
-
-<!-- ====== DASHBOARD ====== -->
-<div class="page active" id="page-dashboard">
-<div class="container">
-  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
-    <button onclick="runRepair(this)" title="Quét và bổ sung dữ liệu thiếu" style="font-size:13px;color:#8b8473;background:none;border:none;cursor:pointer;font-weight:700;">🔧 Kiểm tra dữ liệu</button>
-    <button onclick="loadDashboard()" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
-    <button class="btn-primary" onclick="openSidebar('create')">＋ Tạo mới</button>
+    <button class="reset-btn" onclick="resetDBFilters()">✕ Xóa filter</button>
   </div>
 
   <div id="dbLoading" class="loading-state">⏳ Đang tải dữ liệu...</div>
@@ -754,34 +724,33 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="stat-card thu clickable" onclick="goToNguoiGD()"><div class="s-label">Người đã giao dịch</div><div class="s-value" id="sThu">—</div><div class="s-sub" id="sThuSub"></div></div>
       <div class="stat-card"><div class="s-label">Số đơn hàng</div><div class="s-value" id="sDon">—</div><div class="s-sub">mã GD</div></div>
     </div>
-    <div class="status-bar">
-      <div class="status-bar-item vc" onclick="goToShippingWithFilter('Đang vận chuyển')">
-        <span class="status-bar-ic">🚚</span>
-        <div class="status-bar-info">
-          <div class="status-bar-val" id="sVanChuyen">—</div>
-          <div class="status-bar-lbl">Đang vận chuyển</div>
-        </div>
-      </div>
-      <div class="status-bar-item ch" onclick="goToShippingWithFilter('Chờ hàng')">
-        <span class="status-bar-ic">⏳</span>
-        <div class="status-bar-info">
-          <div class="status-bar-val" id="sChoHang">—</div>
-          <div class="status-bar-lbl">Chờ hàng</div>
-        </div>
-      </div>
-      <div class="status-bar-item coc" onclick="goToListWithFilter('__coc__')">
-        <span class="status-bar-ic">💰</span>
-        <div class="status-bar-info">
-          <div class="status-bar-val" id="sCoc">—</div>
-          <div class="status-bar-lbl">Đặt cọc chưa đủ</div>
-        </div>
-      </div>
-    </div>
     <div class="chart-grid">
       <div class="chart-card"><h3>Dòng tiền theo tháng</h3><canvas id="cThang"></canvas></div>
       <div class="chart-card"><h3>Theo hình thức GD</h3><canvas id="cNguon"></canvas></div>
     </div>
     <div class="chart-card" style="margin-bottom:20px;"><h3>Top người giao dịch</h3><canvas id="cNguoi" height="100"></canvas></div>
+
+    <!-- Preview danh sách: 5 dòng mới nhất theo filter Tổng quan -->
+    <div class="db-list-preview">
+      <div class="db-lp-head">
+        <h3>Danh sách</h3>
+        <button class="gd-linkbtn" onclick="switchTab('list')">xem chi tiết →</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã GD</th><th>Ngày</th><th>Tên Shop</th><th>Mặt hàng</th>
+              <th>Loại</th><th>Hình thức GD</th><th style="text-align:right;">Số tiền</th>
+              <th>Trạng thái TT</th><th>Trạng thái đơn</th>
+              <th style="text-align:center;">Liên hệ</th><th style="text-align:center;">Vận đơn</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="dbPreviewBody"></tbody>
+        </table>
+      </div>
+      <div id="dbPreviewMore" class="db-lp-more"></div>
+    </div>
   </div>
 </div>
 </div>
@@ -789,11 +758,52 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ====== DANH SÁCH ====== -->
 <div class="page" id="page-list">
 <div class="container">
-  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;">
-    <button onclick="loadList(true)" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
+  <div class="gd-page-head">
+    <div class="gd-head-left">
+      <button class="crumb-back" onclick="switchTab('dashboard')">← Tổng quan</button>
+      <h2 class="gd-page-title">📋 Danh sách giao dịch</h2>
+    </div>
+    <div class="gd-head-actions">
+      <button class="crumb-next" onclick="switchTab('duyet')">Duyệt ảnh<span class="nav-badge" id="navBadgeDuyet3"></span><span class="crumb-arrow">→</span></button>
+      <button class="gd-linkbtn red" onclick="loadList(true)">🔄 Làm mới</button>
+    </div>
   </div>
   <div class="list-toolbar">
     <input type="text" class="search-input" id="listSearch" aria-label="Tìm giao dịch" placeholder="🔍 Tìm mã GD, tên shop, sản phẩm..." oninput="renderList()">
+    <button class="filter-icon-btn" aria-label="Bộ lọc" onclick="openFilterTray('listFilters')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8Z"/></svg><span class="fi-dot"></span></button>
+    <div class="filter-chips filters-collapsible" id="listFilters">
+      <select class="filter-chip" aria-label="Lọc theo tháng" id="lFilterThang" onchange="renderList()">
+        <option value="">Tất cả tháng</option>
+        <option value="01">Tháng 1</option><option value="02">Tháng 2</option>
+        <option value="03">Tháng 3</option><option value="04">Tháng 4</option>
+        <option value="05">Tháng 5</option><option value="06">Tháng 6</option>
+        <option value="07">Tháng 7</option><option value="08">Tháng 8</option>
+        <option value="09">Tháng 9</option><option value="10">Tháng 10</option>
+        <option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+      </select>
+      <select class="filter-chip" aria-label="Lọc theo loại giao dịch" id="lFilterLoai" onchange="renderList()">
+        <option value="">Tất cả loại</option><option value="MUA">Mua vào</option><option value="BÁN">Bán ra</option><option value="HOÀN">Hoàn</option><option value="TRAO ĐỔI">🔄 Trao đổi</option><option value="ĐƯỢC TẶNG">🎁 Được tặng</option>
+      </select>
+      <select class="filter-chip" aria-label="Lọc theo hình thức" id="lFilterNguon" onchange="renderList()">
+        <option value="">Tất cả hình thức</option><option value="Bank">Bank</option><option value="Shopee">Shopee</option><option value="GDTT">GDTT</option>
+      </select>
+      <select class="filter-chip" aria-label="Lọc theo trạng thái thanh toán" id="lFilterTT" onchange="renderList()">
+        <option value="">Tất cả TT</option>
+        <option value="Thanh toán full 1 lần">Full</option>
+        <option value="Đặt cọc">Đặt cọc</option>
+        <option value="Thanh toán nốt sau cọc">Trả nốt</option>
+        <option value="Trao đổi">Trao đổi</option>
+        <option value="Được tặng">Được tặng</option>
+      </select>
+      <select class="filter-chip" aria-label="Lọc theo trạng thái đơn" id="lFilterDon" onchange="renderList()">
+        <option value="">Tất cả trạng thái</option>
+        <option value="Chờ hàng">⏳ Chờ hàng</option>
+        <option value="Đang vận chuyển">🚚 Đang vận chuyển</option>
+        <option value="Đã nhận hàng">✅ Đã nhận hàng</option>
+        <option value="Hoàn trả">↩️ Hoàn trả</option>
+        <option value="__coc__">💰 Đặt cọc chưa đủ</option>
+      </select>
+    </div>
     <div class="btn-import-wrap">
       <button class="btn-primary" onclick="openSidebar('create')" style="border-radius:100px 0 0 100px;box-shadow:none;">＋ Tạo mới</button>
       <button class="btn-create-chev" aria-label="Thêm tùy chọn tạo / import" onclick="toggleCreateDD()" id="createChev">▾</button>
@@ -978,9 +988,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ====== DUYỆT ẢNH ====== -->
 <div class="page" id="page-duyet">
 <div class="container">
-  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
-    <button onclick="resetDuyetTatCa()" style="font-size:13px;color:#8b8473;background:none;border:none;cursor:pointer;font-weight:700;">↺ Duyệt lại từ đầu</button>
-    <button onclick="loadDuyet(true)" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
+  <div class="gd-page-head">
+    <div class="gd-head-left">
+      <button class="crumb-back" onclick="switchTab('list')">← Danh sách</button>
+      <h2 class="gd-page-title">🖼 Duyệt ảnh</h2>
+    </div>
+    <div class="gd-head-actions">
+      <button class="gd-linkbtn" onclick="resetDuyetTatCa()">↺ Duyệt lại từ đầu</button>
+      <button class="gd-linkbtn red" onclick="loadDuyet(true)">🔄 Làm mới</button>
+    </div>
   </div>
 
   <div class="list-toolbar">
@@ -1016,6 +1032,29 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
     <h2 style="font-size:18px;font-weight:700;">🚚 Vận chuyển</h2>
     <button onclick="refreshShipping()" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
+  </div>
+  <div class="status-bar">
+    <div class="status-bar-item vc" onclick="setShipFilterVal('Đang vận chuyển')">
+      <span class="status-bar-ic">🚚</span>
+      <div class="status-bar-info">
+        <div class="status-bar-val" id="sVanChuyen">—</div>
+        <div class="status-bar-lbl">Đang vận chuyển</div>
+      </div>
+    </div>
+    <div class="status-bar-item ch" onclick="setShipFilterVal('Chờ hàng')">
+      <span class="status-bar-ic">⏳</span>
+      <div class="status-bar-info">
+        <div class="status-bar-val" id="sChoHang">—</div>
+        <div class="status-bar-lbl">Chờ hàng</div>
+      </div>
+    </div>
+    <div class="status-bar-item coc" onclick="goToListWithFilter('__coc__')">
+      <span class="status-bar-ic">💰</span>
+      <div class="status-bar-info">
+        <div class="status-bar-val" id="sCoc">—</div>
+        <div class="status-bar-lbl">Đặt cọc chưa đủ</div>
+      </div>
+    </div>
   </div>
   <div class="list-toolbar">
     <input type="text" id="shipSearch" class="search-input" aria-label="Tìm vận đơn" placeholder="🔍 Tìm mã vận đơn, người GD, mặt hàng..." oninput="applyShippingView()">
@@ -1456,85 +1495,10 @@ function closeFabSheet(){
   document.getElementById('fabBtn').classList.remove('open');
 }
 
-/* Tab con -> nhóm ở nav chính. Mục cha "Giao dịch" sáng ở mọi tab con. */
+/* Tab con -> nhóm ở nav chính. Mục cha "Giao dịch" sáng ở Tổng quan/Danh sách/Duyệt ảnh.
+   Ba trang khoan xuống bằng nút trong trang (xem chi tiết / Duyệt ảnh →), quay lên bằng nút "←".
+   Mỗi trang có bộ lọc riêng, độc lập nhau. */
 var TAB_GROUP = { dashboard:'gd', list:'gd', duyet:'gd' };
-
-/* Đường dẫn phân cấp: khoan xuống bằng nút, quay lên bằng nút "←". */
-function renderGdCrumb(tab){
-  var c=document.getElementById('gdCrumb'); if(!c) return;
-  var html='';
-  if(tab==='dashboard'){
-    html='<span class="crumb-cur"><span class="crumb-ic">📊</span>Tổng quan</span>'
-       + '<button class="crumb-next" onclick="switchTab(\'list\')">Xem danh sách<span class="crumb-arrow">→</span></button>';
-  } else if(tab==='list'){
-    html='<button class="crumb-back" onclick="switchTab(\'dashboard\')">← Tổng quan</button>'
-       + '<span class="crumb-cur"><span class="crumb-ic">📋</span>Danh sách</span>'
-       + '<button class="crumb-next" onclick="switchTab(\'duyet\')">Duyệt ảnh<span class="nav-badge" id="navBadgeDuyet3"></span><span class="crumb-arrow">→</span></button>';
-  } else if(tab==='duyet'){
-    html='<button class="crumb-back" onclick="switchTab(\'list\')">← Danh sách</button>'
-       + '<span class="crumb-cur"><span class="crumb-ic">🖼</span>Duyệt ảnh</span>';
-  }
-  c.innerHTML=html;
-}
-
-/* Khu Giao dịch: dashboard chỉ Năm+Tháng; Danh sách gập bộ lọc sau nút phễu;
-   Duyệt ảnh không có bộ lọc GD (duyetData không có ngay/loaiGD/nguon). */
-function syncGdShell(tab){
-  var inGroup = TAB_GROUP[tab]==='gd';
-  document.getElementById('gdShell').classList.toggle('active', inGroup);
-  if(!inGroup) return;
-  renderGdCrumb(tab);
-  var f=document.getElementById('gdFilters');
-  var btn=document.getElementById('gdFilterBtn');
-  var chips=document.getElementById('gdActiveChips');
-  var isMobile = window.innerWidth<=700;
-  f.classList.remove('time-only','gd-collapsed');
-  if(tab==='dashboard'){
-    f.classList.add('time-only');                     // chỉ Năm + Tháng
-    f.style.display='';
-    btn.style.display = isMobile ? 'flex' : 'none';    // desktop hiện inline nên khỏi cần phễu
-    chips.style.display='none';
-  } else if(tab==='list'){
-    f.classList.add('gd-collapsed');                  // gập, mở bằng nút phễu
-    f.style.display='';
-    btn.style.display='flex';                          // hiện cả desktop lẫn mobile
-    renderGdActiveChips(); chips.style.display='';
-  } else {                                             // duyet
-    f.style.display='none';
-    btn.style.display='none';
-    chips.style.display='none';
-  }
-  capNhatBadgeDuyet();
-}
-
-/* Nút phễu: desktop gập/mở tại chỗ; mobile mượn tray trượt lên như cũ. */
-function toggleGdFilter(){
-  if(window.innerWidth<=700){ openFilterTray('gdFilters'); return; }
-  var f=document.getElementById('gdFilters');
-  f.classList.toggle('gd-collapsed');
-  var open=!f.classList.contains('gd-collapsed');
-  document.getElementById('gdActiveChips').style.display = open ? 'none' : '';  // khỏi trùng với panel
-}
-
-/* Chip tóm tắt "đang lọc gì" khi bộ lọc đang gập, bấm ✕ để bỏ từng cái. */
-function renderGdActiveChips(){
-  var box=document.getElementById('gdActiveChips'); if(!box) return;
-  var defs=[];
-  if(currentYearFilter) defs.push({key:'year', label:'Năm '+currentYearFilter});
-  ['fMonth','fLoai','fNguon','fTT','fDon'].forEach(function(id){
-    var sel=document.getElementById(id);
-    if(sel && sel.value) defs.push({key:id, label:sel.options[sel.selectedIndex].text});
-  });
-  if(!defs.length){ box.innerHTML='<span style="font-size:12.5px;color:#8b8473;font-weight:600;">Chưa lọc — bấm phễu để lọc</span>'; return; }
-  box.innerHTML = defs.map(function(d){
-    return '<span class="gd-fchip">'+escapeHtml(d.label)+'<button aria-label="Bỏ lọc" onclick="clearGdFilterKey(\''+d.key+'\')">✕</button></span>';
-  }).join('') + '<button class="gd-fchip-clear" onclick="resetGdFilters()">Xóa hết</button>';
-}
-function clearGdFilterKey(key){
-  if(key==='year'){ setYearFilter(''); return; }   // setYearFilter đã gọi applyGdFilter
-  var sel=document.getElementById(key); if(sel) sel.value='';
-  applyGdFilter();
-}
 
 /* ===== TRAY BỘ LỌC (mobile) =====
    Không nhân bản control — mượn chính node bộ lọc gốc đưa vào tray,
@@ -1601,13 +1565,6 @@ function syncFilterDots(){
     if(chips.length && !chips[0].classList.contains('active')) on=true;
     btn.classList.toggle('has-filter', on);
   });
-  /* Nút phễu khu Giao dịch dùng toggleGdFilter() nên không khớp regex trên */
-  var gdBtn=document.getElementById('gdFilterBtn'), gf=document.getElementById('gdFilters');
-  if(gdBtn && gf){
-    var gon = !!currentYearFilter;
-    gf.querySelectorAll('select').forEach(function(s){ if(s.value) gon=true; });
-    gdBtn.classList.toggle('has-filter', gon);
-  }
 }
 
 /* Tray "Xem thêm" đã bỏ (bottom nav nay đủ 4 mục). Giữ no-op vì vài chỗ
@@ -1763,12 +1720,6 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('sbNgay').value=new Date().toISOString().split('T')[0];
   addSbRow();
 
-  syncGdShell('dashboard');   // trang mở sẵn ở Tổng quan — dựng crumb + đặt chế độ lọc
-  /* Đổi bề ngang qua ngưỡng mobile/desktop thì funnel hiện/ẩn khác nhau — re-sync */
-  window.addEventListener('resize', function(){
-    var cur=['dashboard','list','duyet'].filter(function(t){ return document.getElementById('page-'+t).classList.contains('active'); })[0];
-    if(cur) syncGdShell(cur);
-  });
   loadAnhMap(veLaiAnh);   // ảnh đã duyệt — tải sớm để mọi màn có ngay
   napBadgeDuyet();        // Duyệt ảnh nằm trong tab con nên phải biết số tồn từ đầu
 
@@ -1813,7 +1764,7 @@ function switchTab(tab, el){
     t.classList.toggle('active', t.getAttribute('data-tab')===tab || (!!g && g===TAB_GROUP[tab]));
   });
   document.getElementById('page-'+tab).classList.add('active');
-  syncGdShell(tab);
+  capNhatBadgeDuyet();   // badge "Duyệt ảnh →" trên trang Danh sách vừa được vẽ
   closeMoreSheet(); closeFilterTray();
   if (el){ var ic=el.querySelector('.nav-ic')||el.querySelector('.bn-ic')||el.querySelector('svg'); pop(ic, 1.3); }
   loadAnhMap(veLaiAnh);   // ảnh đã duyệt dùng chung cho mọi màn
@@ -1895,70 +1846,100 @@ function populateYearFilter(){
   });
   document.getElementById('fYearChips').innerHTML=html;
 }
-function setYearFilter(y){ currentYearFilter=y; populateYearFilter(); applyGdFilter(); }
+function setYearFilter(y){ currentYearFilter=y; populateYearFilter(); applyFilters(); }
 
-/* Bộ lọc dùng chung cho Tổng quan + Danh sách. Đọc thẳng từ #gdFilters,
-   năm nằm ở currentYearFilter vì là chips chứ không phải select. */
-function readGdFilter(){
-  return {
-    year:  currentYearFilter,
-    month: document.getElementById('fMonth').value,
-    loai:  document.getElementById('fLoai').value,
-    nguon: document.getElementById('fNguon').value,
-    tt:    document.getElementById('fTT').value,
-    don:   document.getElementById('fDon').value
-  };
-}
-
-function matchGdFilter(r,f){
-  if(f.year&&!(r.ngay||'').startsWith(f.year)) return false;
-  if(f.month&&(r.ngay||'').substring(5,7)!==f.month) return false;
-  if(f.loai&&r.loaiGD!==f.loai) return false;
-  if(f.nguon&&r.nguon!==f.nguon) return false;
-  if(f.tt&&r.trangThaiTT!==f.tt) return false;
-  if(f.don==='__coc__'){ if(r.trangThaiTT!=='Đặt cọc') return false; }
-  else if(f.don&&r.trangThaiDon!==f.don) return false;
-  return true;
-}
-
-/* Gọi khi bất kỳ control lọc nào đổi: cập nhật sub-view đang mở. */
-function applyGdFilter(){
-  if(document.getElementById('page-list').classList.contains('active')) renderList();
-  else applyFilters();
-  syncFilterDots();
-  renderGdActiveChips();
-}
-
+/* ===== Bộ lọc TỔNG QUAN (Năm/Tháng/Loại/Hình thức) — độc lập với Danh sách ===== */
 function applyFilters(){
-  var f=readGdFilter();
-  dbFiltered=dbRawGD.filter(function(r){ return matchGdFilter(r,f); });
-
-  /* ttData chỉ có maGD/ngay/tenShop/soTien/loaiTT/nguon — không có trạng thái TT/đơn.
-     Nên lọc trực tiếp theo năm/tháng/hình thức, còn hai filter kia thì bám theo
-     tập mã GD đã lọc để hai bên không lệch nhau. */
-  var byStatus = !!(f.tt||f.don||f.loai);
-  var okMaGD={};
-  if(byStatus) dbFiltered.forEach(function(r){ okMaGD[r.maGD]=1; });
+  var f={year:currentYearFilter,month:document.getElementById('fMonth').value,
+         loai:document.getElementById('fLoai').value,nguon:document.getElementById('fNguon').value};
+  dbFiltered=dbRawGD.filter(function(r){
+    if(f.year&&!(r.ngay||'').startsWith(f.year)) return false;
+    if(f.month&&(r.ngay||'').substring(5,7)!==f.month) return false;
+    if(f.loai&&r.loaiGD!==f.loai) return false;
+    if(f.nguon&&r.nguon!==f.nguon) return false;
+    return true;
+  });
+  var byLoai=!!f.loai, okMaGD={};
+  if(byLoai) dbFiltered.forEach(function(r){ okMaGD[r.maGD]=1; });
   var ttF=dbRawTT.filter(function(r){
     if(f.year&&!(r.ngay||'').startsWith(f.year)) return false;
     if(f.month&&(r.ngay||'').substring(5,7)!==f.month) return false;
     if(f.nguon&&r.nguon!==f.nguon) return false;
-    if(byStatus&&!okMaGD[r.maGD]) return false;
+    if(byLoai&&!okMaGD[r.maGD]) return false;
     return true;
   });
 
   updateStats(dbFiltered,ttF);
+  dbPreviewCount=5;          // đổi filter thì preview về lại 5 dòng
+  renderDbPreview();
+  syncFilterDots();
   (function(g,t){
     var run=function(){ updateCharts(g,t); };
     if('requestIdleCallback' in window){ requestIdleCallback(run,{timeout:1500}); } else { setTimeout(run,150); }
   })(dbFiltered,ttF);
 }
 
-function resetGdFilters(){
+function resetDBFilters(){
   currentYearFilter='';
-  ['fMonth','fLoai','fNguon','fTT','fDon'].forEach(function(id){ document.getElementById(id).value=''; });
-  populateYearFilter(); applyGdFilter();
+  ['fMonth','fLoai','fNguon'].forEach(function(id){ document.getElementById(id).value=''; });
+  populateYearFilter(); applyFilters();
 }
+
+/* Gộp các dòng cùng mã GD thành 1 đơn — dùng cho cả preview lẫn Danh sách. */
+function groupByMaGD(rows){
+  var g={};
+  rows.forEach(function(r){
+    if(!g[r.maGD]) g[r.maGD]={ rep:r, spList:[], totalTien:0 };
+    if(r.tenSP) g[r.maGD].spList.push(r.tenSP);
+    g[r.maGD].totalTien+=(r.soTien||0);
+  });
+  return Object.values(g);
+}
+
+/* 1 hàng bảng — dùng chung cho preview Tổng quan và bảng Danh sách. */
+function listRowHtml(g){
+  var r=g.rep, spList=g.spList, totalTien=g.totalTien;
+  var spDisplay=spList.length
+    ? (spList[0]+(spList.length>1?' <span style="color:#aaa;font-size:11px;">+'+(spList.length-1)+' SP</span>':''))
+    : '—';
+  var spCell='<div class="sp-cell">'+anhStackHtml(spList,3)+'<span class="sp-cell-txt">'+spDisplay+'</span></div>';
+  var nb=r.nguon==='Bank'?'badge-bank':r.nguon==='Shopee'?'badge-shopee':'badge-cash';
+  var lb=r.loaiGD==='MUA'?'badge-mua':(r.loaiGD==='HOÀN'?'badge-hoan':(r.loaiGD==='TRAO ĐỔI'?'badge-td':(r.loaiGD==='ĐƯỢC TẶNG'?'badge-gift':'badge-ban')));
+  var soTienHtml=(r.loaiGD==='TRAO ĐỔI') ? '<span style="color:var(--lego-purple);">🔄 Trao đổi</span>' : (r.loaiGD==='ĐƯỢC TẶNG' ? '<span style="color:#0c6b62;" title="Giá trị ghi nhận — không tính vào tiền đã bỏ ra">🎁 '+fmtFull(totalTien)+'</span>' : fmtFull(totalTien));
+  return '<tr>'+
+    '<td><b>'+(r.maGD||'—')+'</b></td>'+
+    '<td>'+(r.ngay?r.ngay.split('-').reverse().join('/'):'—')+'</td>'+
+    '<td>'+(r.tenShop||'—')+'</td>'+
+    '<td style="max-width:230px;">'+spCell+'</td>'+
+    '<td><span class="badge '+lb+'">'+(r.loaiGD||'—')+'</span></td>'+
+    '<td><span class="badge '+nb+'">'+(r.nguon||'—')+'</span></td>'+
+    '<td style="text-align:right;font-weight:600;">'+soTienHtml+'</td>'+
+    '<td style="font-size:12px;color:#888;">'+(r.trangThaiTT||'—')+'</td>'+
+    '<td style="font-size:12px;color:#888;">'+(r.trangThaiDon||'—')+'</td>'+
+    '<td style="text-align:center;">'+contactBtnHtml(r.linkLH)+'</td>'+
+    '<td style="text-align:center;">'+trackingBtnHtml(r.maVanDon, r.nguon)+'</td>'+
+    '<td><div class="row-action"><button class="row-btn edit" onclick="openEditFromList(\''+r.maGD+'\')">Sửa</button><button class="row-btn del" onclick="deleteFromList(\''+r.maGD+'\')">Xóa</button></div></td>'+
+    '</tr>';
+}
+
+/* Preview 5 dòng mới nhất theo filter Tổng quan; "xem thêm" nạp thêm 5 dòng tại chỗ. */
+var dbPreviewCount=5;
+function renderDbPreview(){
+  var body=document.getElementById('dbPreviewBody'); if(!body) return;
+  var rows=groupByMaGD(dbFiltered).sort(function(a,b){
+    return String(b.rep.ngay||'').localeCompare(String(a.rep.ngay||''));
+  });
+  var show=Math.min(dbPreviewCount, rows.length);
+  body.innerHTML = show
+    ? rows.slice(0,show).map(listRowHtml).join('')
+    : '<tr><td colspan="12" style="text-align:center;color:#aaa;padding:22px;">Không có giao dịch phù hợp</td></tr>';
+  var moreEl=document.getElementById('dbPreviewMore');
+  var remain=rows.length-show;
+  moreEl.innerHTML = remain>0
+    ? '<button class="db-more-btn" onclick="dbShowMore()">xem thêm '+Math.min(5,remain)+' ▾</button>'
+    : '';
+}
+function dbShowMore(){ dbPreviewCount+=5; renderDbPreview(); }
 
 function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(0)+'K'; return n.toLocaleString('vi-VN'); }
 function fmtFull(n){ return (Number(n)||0).toLocaleString('vi-VN')+'đ'; }
@@ -1988,9 +1969,7 @@ function updateStats(gd,tt){
   countUp(document.getElementById('sBan'), ban, function(v){ return fmt(v)+'đ'; });
   countUp(document.getElementById('sThu'), Object.keys(seller).length, function(v){ return String(v); });
   countUp(document.getElementById('sDon'), Object.keys(don).length, function(v){ return String(v); });
-  countUp(document.getElementById('sVanChuyen'), Object.keys(vanChuyen).length, function(v){ return String(v); }, 500);
-  countUp(document.getElementById('sChoHang'),   Object.keys(choHang).length,   function(v){ return String(v); }, 500);
-  countUp(document.getElementById('sCoc'),       Object.keys(cocDon).length,    function(v){ return String(v); }, 500);
+  /* Thanh Đang VC / Chờ hàng / Đặt cọc đã dời sang tab Vận chuyển — updateShipStatusBar() lo */
 
   document.getElementById('sMuaSub').textContent=mc+' dòng · đã trừ hoàn · bấm để xem';
   document.getElementById('sBanSub').textContent=bc+' dòng · đã trừ hoàn · bấm để xem';
@@ -2130,16 +2109,25 @@ function loadList(force){
 
 function renderList(){
   var q=(document.getElementById('listSearch').value||'').toLowerCase();
-  var f=readGdFilter();
+  var fl=document.getElementById('lFilterLoai').value;
+  var fn=document.getElementById('lFilterNguon').value;
+  var ft=document.getElementById('lFilterTT').value;
+  var fd=document.getElementById('lFilterDon').value;
+  var fm=document.getElementById('lFilterThang').value;
   listFiltered=listData.filter(function(r){
-    if(!matchGdFilter(r,f)) return false;
+    if(fl&&r.loaiGD!==fl) return false;
+    if(fn&&r.nguon!==fn) return false;
+    if(ft&&r.trangThaiTT!==ft) return false;
+    if(fd==='__coc__'){ if(r.trangThaiTT!=='Đặt cọc') return false; }
+    else if(fd&&r.trangThaiDon!==fd) return false;
+    if(fm){ var mm=(r.ngay||'').split('-')[1]||''; if(mm!==fm) return false; }
     if(q&&!(r.maGD||'').toLowerCase().includes(q)&&!(r.tenShop||'').toLowerCase().includes(q)&&!(r.tenSP||'').toLowerCase().includes(q)) return false;
     return true;
   });
 
   var sumEl=document.getElementById('listSummary');
   var sumMua=0,sumBan=0,sumHoan=0,sumTang=0,demMua=0,demBan=0,demHoan=0,demTD=0,demTang=0;
-  var thangLabel=f.month ? 'Tháng '+parseInt(f.month,10) : 'Tất cả';
+  var thangLabel=fm ? 'Tháng '+parseInt(fm,10) : 'Tất cả';
   listFiltered.forEach(function(r){
     if(r.loaiGD==='MUA'){ sumMua+=r.soTien||0; demMua++; }
     else if(r.loaiGD==='BÁN'){ sumBan+=r.soTien||0; demBan++; }
@@ -2148,13 +2136,7 @@ function renderList(){
     else if(r.loaiGD==='ĐƯỢC TẶNG'){ sumTang+=r.soTien||0; demTang++; }
   });
 
-  var gdGroups={};
-  listFiltered.forEach(function(r){
-    if(!gdGroups[r.maGD]) gdGroups[r.maGD]={ rep:r, spList:[], totalTien:0 };
-    if(r.tenSP) gdGroups[r.maGD].spList.push(r.tenSP);
-    gdGroups[r.maGD].totalTien+=(r.soTien||0);
-  });
-  var groupedRows=Object.values(gdGroups);
+  var groupedRows=groupByMaGD(listFiltered);
 
   var parts=['<span style="font-weight:700;color:#555;">📋 '+thangLabel+':</span>',
     '<span><b>'+groupedRows.length+'</b> đơn</span>'];
@@ -2186,30 +2168,7 @@ function renderList(){
     tableWrap.style.display='none'; cardWrap.innerHTML=renderListCompact(rows); cardWrap.style.display='block';
   } else {
     cardWrap.style.display='none'; tableWrap.style.display='block';
-    document.getElementById('listBody').innerHTML=rows.map(function(g){
-      var r=g.rep, spList=g.spList, totalTien=g.totalTien;
-      var spDisplay=spList.length
-        ? (spList[0]+(spList.length>1?' <span style="color:#aaa;font-size:11px;">+'+(spList.length-1)+' SP</span>':''))
-        : '—';
-      var spCell='<div class="sp-cell">'+anhStackHtml(spList,3)+'<span class="sp-cell-txt">'+spDisplay+'</span></div>';
-      var nb=r.nguon==='Bank'?'badge-bank':r.nguon==='Shopee'?'badge-shopee':'badge-cash';
-      var lb=r.loaiGD==='MUA'?'badge-mua':(r.loaiGD==='HOÀN'?'badge-hoan':(r.loaiGD==='TRAO ĐỔI'?'badge-td':(r.loaiGD==='ĐƯỢC TẶNG'?'badge-gift':'badge-ban')));
-      var soTienHtml=(r.loaiGD==='TRAO ĐỔI') ? '<span style="color:var(--lego-purple);">🔄 Trao đổi</span>' : (r.loaiGD==='ĐƯỢC TẶNG' ? '<span style="color:#0c6b62;" title="Giá trị ghi nhận — không tính vào tiền đã bỏ ra">🎁 '+fmtFull(totalTien)+'</span>' : fmtFull(totalTien));
-      return '<tr>'+
-        '<td><b>'+(r.maGD||'—')+'</b></td>'+
-        '<td>'+(r.ngay?r.ngay.split('-').reverse().join('/'):'—')+'</td>'+
-        '<td>'+(r.tenShop||'—')+'</td>'+
-        '<td style="max-width:230px;">'+spCell+'</td>'+
-        '<td><span class="badge '+lb+'">'+(r.loaiGD||'—')+'</span></td>'+
-        '<td><span class="badge '+nb+'">'+(r.nguon||'—')+'</span></td>'+
-        '<td style="text-align:right;font-weight:600;">'+soTienHtml+'</td>'+
-        '<td style="font-size:12px;color:#888;">'+(r.trangThaiTT||'—')+'</td>'+
-        '<td style="font-size:12px;color:#888;">'+(r.trangThaiDon||'—')+'</td>'+
-        '<td style="text-align:center;">'+contactBtnHtml(r.linkLH)+'</td>'+
-        '<td style="text-align:center;">'+trackingBtnHtml(r.maVanDon, r.nguon)+'</td>'+
-        '<td><div class="row-action"><button class="row-btn edit" onclick="openEditFromList(\''+r.maGD+'\')">Sửa</button><button class="row-btn del" onclick="deleteFromList(\''+r.maGD+'\')">Xóa</button></div></td>'+
-        '</tr>';
-    }).join('');
+    document.getElementById('listBody').innerHTML=rows.map(listRowHtml).join('');
     updateSortIndicators('#listTable thead', listSortKey, listSortDir);
   }
 
@@ -2239,12 +2198,13 @@ function updateSortIndicators(containerSelector, sortKey, sortDir){
   });
 }
 
-/* Bấm từ thẻ số liệu ở Tổng quan: giữ nguyên năm/tháng đang lọc, chỉ thêm
-   điều kiện của thẻ rồi sang Danh sách — nay chung một bộ lọc nên không lệch. */
+/* Bấm thẻ số liệu / thanh trạng thái: sang Danh sách và áp bộ lọc của Danh sách.
+   Danh sách có bộ lọc riêng nên set thẳng lFilter* rồi render lại. */
 function goToListWithFilter(donFilter, loaiFilter){
-  document.getElementById('fDon').value=donFilter||'';
-  document.getElementById('fLoai').value=loaiFilter||'';
-  switchTab('list');
+  switchTab('list');                                 // loadList() -> renderList() lần đầu
+  document.getElementById('lFilterDon').value=donFilter||'';
+  document.getElementById('lFilterLoai').value=loaiFilter||'';
+  renderList();
   syncFilterDots();
 }
 function goToNguoiGD(){ switchTab('nguoigd'); }
@@ -3135,8 +3095,29 @@ function shipStatusBadge(s){
   return '<span style="font-size:11.5px;font-weight:700;border-radius:100px;padding:3px 10px;white-space:nowrap;background:'+st+'">'+(s||'—')+'</span>';
 }
 var shipStatusFilter='';
+
+/* Thanh đếm ở đầu tab Vận chuyển (dời từ Tổng quan sang). Đếm trên toàn bộ dữ liệu. */
+function updateShipStatusBar(){
+  var gd=(_appCache&&_appCache.gdData)||[];
+  var vc={},ch={},coc={};
+  gd.forEach(function(r){
+    if(r.trangThaiDon==='Đang vận chuyển') vc[r.maGD]=1;
+    if(r.trangThaiDon==='Chờ hàng') ch[r.maGD]=1;
+    if(r.trangThaiTT==='Đặt cọc') coc[r.maGD]=1;
+  });
+  var set=function(id,n){ var el=document.getElementById(id); if(el) el.textContent=String(n); };
+  set('sVanChuyen', Object.keys(vc).length);
+  set('sChoHang',   Object.keys(ch).length);
+  set('sCoc',       Object.keys(coc).length);
+}
+/* Bấm ô đếm -> lọc luôn danh sách vận chuyển theo trạng thái đó */
+function setShipFilterVal(val){
+  shipStatusFilter=val; _syncShipChips(); applyShippingView();
+}
+
 function applyShippingView(){
   capNhatBadgeShip();
+  updateShipStatusBar();
   var q=(document.getElementById('shipSearch').value||'').toLowerCase();
   var f=shipStatusFilter;
   var filtered=allShipping.filter(function(i){
@@ -3251,12 +3232,10 @@ function _syncShipChips(){
   wrap.querySelectorAll('.chip-btn').forEach(function(b){ b.classList.toggle('active', (b.getAttribute('data-val')||'')===shipStatusFilter); });
 }
 function goToShippingWithFilter(status){
-  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-tab')==='shipping'); });
-  document.getElementById('page-shipping').classList.add('active');
+  switchTab('shipping');
   shipStatusFilter=status||'';
   _syncShipChips();
-  loadShipping();
+  applyShippingView();
 }
 
 var _shipEditMaGDs=[], shipEditStatusVal='';
@@ -3923,7 +3902,7 @@ function _setBadge(ids, n){
 
 /* Duyệt ảnh nằm sâu hai cấp nên số tồn phải cuộn lên mục "Giao dịch"
    (navBadgeDuyet ở sidebar, navBadgeDuyet2 ở bottom nav), nếu không thì
-   khoan xuống là mất hút. navBadgeDuyet3 nằm trên nút "Duyệt ảnh →" ở crumb. */
+   khoan xuống là mất hút. navBadgeDuyet3 nằm trên nút "Duyệt ảnh →" ở trang Danh sách. */
 function capNhatBadgeDuyet(){
   var n=duyetData.filter(function(x){ return !(x.duyet||'').trim(); }).length;
   _setBadge(['navBadgeDuyet','navBadgeDuyet2','navBadgeDuyet3'], n);
