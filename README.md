@@ -87,8 +87,11 @@ Sau khi `npm run push`, mở Apps Script editor và chạy tay 1 lần:
 | `shippingSyncStatus()` | Xem đã cài lịch chưa + kết quả lần chạy gần nhất |
 | `autoSyncShippingStatus()` | Chạy đồng bộ ngay, không đợi tới 0h |
 | `removeShippingSyncTrigger()` | Gỡ lịch |
-| `debugTrackingVtp('149554355818')` | Xem response thật của Viettel Post để chỉnh mapping |
-| `debugTrackingSpx('SPXVN...')` | Xem response thật của Shopee Express để chỉnh mapping |
+| `debugTracking()` | Tra thử 1 mã VTP + 1 mã SPX, in payload thô ra Execution log |
+
+> Dropdown chọn hàm trong Apps Script editor **không truyền được tham số**, nên hàm nào
+> cần tham số (`debugTrackingVtp`, `debugTrackingSpx`) phải gọi từ trong code.
+> Muốn bấm Run là chạy được thì chọn `debugTracking()` — đã gói sẵn mã mẫu bên trong.
 
 Lần chạy đầu sẽ hỏi quyền `UrlFetchApp` (gọi ra ngoài) và quyền tạo trigger — bấm cho phép.
 

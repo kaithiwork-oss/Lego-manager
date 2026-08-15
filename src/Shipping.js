@@ -559,6 +559,24 @@ function _shipDebug(code, endpoints, nguon) {
 }
 
 
+/**
+ * CHẠY HÀM NÀY từ dropdown của Apps Script editor.
+ * Dropdown không truyền được tham số nên gói sẵn 2 mã mẫu ở đây.
+ * Kết quả xem ở Execution log (Ctrl+Enter).
+ */
+function debugTracking() {
+  var msg = [
+    '===== VIETTEL POST =====',
+    debugTrackingVtp('149554355818'),
+    '',
+    '===== SHOPEE EXPRESS =====',
+    debugTrackingSpx('SPXVN063728919538')
+  ].join('\n');
+  Logger.log(msg);
+  return msg;
+}
+
+
 function debugTrackingVtp(code) {
   var c = String(code || '149554355818').trim();
   return _shipDebug(c, _shipEndpointsVtp(c));
