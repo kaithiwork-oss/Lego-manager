@@ -599,6 +599,70 @@ function debugTrackingSpx(code) {
 
 
 /**
+ * DÒ VÒNG 2 CHO VIETTEL POST.
+ *
+ * Vòng 1 thử 7 tổ hợp method/tham số đều ra 405 — cả GET lẫn POST đều bị từ
+ * chối trên cả hai path, nên không phải chuyện sai method đơn thuần.
+ *
+ * Lần này đọc HEADER thay vì body: response 405 bắt buộc kèm header `Allow`
+ * liệt kê đúng method được phép. Kèm thử luôn trang tra cứu công khai xem
+ * HTML có sẵn trạng thái không (nếu có thì khỏi cần API).
+ */
+function debugProbeVtp2() {
+  var c = '149554355818';
+  var targets = [
+    { m: 'get',  u: 'https://partner.viettelpost.vn/v2/order/tracking?orderNumber=' + c },
+    { m: 'get',  u: 'https://partner.viettelpost.vn/v2/order/getOrderByOrderNumber?orderNumber=' + c },
+    { m: 'head', u: 'https://partner.viettelpost.vn/v2/order/tracking' },
+    { m: 'get',  u: 'https://viettelpost.com.vn/tra-cuu-hanh-trinh-don-hang/?billcode=' + c, html: true }
+  ];
+
+  var out = ['DÒ VÒNG 2 — mã ' + c, ''];
+
+  targets.forEach(function (t, i) {
+    out.push((i + 1) + '. ' + t.m.toUpperCase() + ' ' + t.u);
+    try {
+      var res = UrlFetchApp.fetch(t.u, {
+        method: t.m, muteHttpExceptions: true, followRedirects: true,
+        headers: { 'Accept': '*/*', 'User-Agent': SHIP_UA }
+      });
+
+      out.push('   HTTP ' + res.getResponseCode());
+
+      // Header quan trọng nhất: Allow (405 phải có), rồi Content-Type
+      var h = res.getAllHeaders();
+      var keep = [];
+      for (var k in h) {
+        if (!h.hasOwnProperty(k)) continue;
+        if (/^(allow|content-type|location|www-authenticate|server)$/i.test(k)) {
+          keep.push(k + ': ' + h[k]);
+        }
+      }
+      out.push('   ' + (keep.length ? keep.join(' | ') : '(không có header đáng chú ý)'));
+
+      var body = res.getContentText();
+      if (t.html) {
+        // Trang SPA thì HTML không chứa trạng thái; kiểm bằng từ khoá
+        var hits = ['giao thành công', 'đang giao', 'lấy hàng', 'luân chuyển', 'bưu cục', 'hoàn']
+          .filter(function (w) { return body.toLowerCase().indexOf(w) >= 0; });
+        out.push('   HTML dài ' + body.length +
+          ' — từ khoá trạng thái tìm thấy: ' + (hits.length ? hits.join(', ') : 'KHÔNG CÓ (trang render bằng JS)'));
+      } else {
+        out.push('   body: ' + body.replace(/\s+/g, ' ').slice(0, 150));
+      }
+    } catch (e) {
+      out.push('   Lỗi: ' + e.toString().slice(0, 150));
+    }
+    out.push('');
+  });
+
+  var msg = out.join('\n');
+  Logger.log(msg);
+  return msg;
+}
+
+
+/**
  * DÒ ENDPOINT VIETTEL POST.
  * Hai endpoint ban đầu đều trả 405 Method Not Allowed — đúng path nhưng sai
  * method: getOrderByOrderNumber từ chối GET, /order/tracking từ chối POST.
