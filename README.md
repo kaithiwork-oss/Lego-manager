@@ -46,6 +46,7 @@ Code trên Apps Script sẽ được tải về thư mục `src/`. Sau đó comm
 
 | Lệnh | Việc |
 |---|---|
+| `npm test` | Chạy test logic vận chuyển (không cần mạng, không đụng sheet) |
 | `npm run pull` | Kéo code từ Apps Script về `src/` |
 | `npm run push` | Đẩy code từ `src/` lên Apps Script |
 | `npm run watch` | Tự động push mỗi khi lưu file |
@@ -63,5 +64,56 @@ Code trên Apps Script sẽ được tải về thư mục `src/`. Sau đó comm
 .claspignore       # file không đẩy lên Apps Script
 src/
   appsscript.json  # manifest của Apps Script project
-  *.js             # source code (.gs trên editor = .js ở local)
+  Code.js          # logic chính + web app
+  Rebrickable.js   # tra cứu Rebrickable
+  Shipping.js      # tra trạng thái vận chuyển tự động
+  Index.html       # giao diện web app
 ```
+
+## Tự động cập nhật trạng thái vận chuyển
+
+`src/Shipping.js` tra trạng thái theo mã vận đơn rồi ghi vào cột **Trạng thái đơn hàng**
+của `DataGiaoDich`. Chạy hằng ngày lúc **00:00 (giờ VN)**.
+
+Đơn được **bỏ qua** khi: chưa có mã vận đơn, hoặc trạng thái đã là *Đã nhận hàng* / *Hoàn trả*.
+
+### Bật lịch chạy
+
+Sau khi `npm run push`, mở Apps Script editor và chạy tay 1 lần:
+
+| Hàm | Việc |
+|---|---|
+| `installShippingSyncTrigger()` | Cài lịch chạy hằng ngày lúc 0h (chạy 1 lần là xong) |
+| `shippingSyncStatus()` | Xem đã cài lịch chưa + kết quả lần chạy gần nhất |
+| `autoSyncShippingStatus()` | Chạy đồng bộ ngay, không đợi tới 0h |
+| `removeShippingSyncTrigger()` | Gỡ lịch |
+| `debugTrackingVtp('149554355818')` | Xem response thật của hãng để chỉnh lại mapping |
+
+Lần chạy đầu sẽ hỏi quyền `UrlFetchApp` (gọi ra ngoài) và quyền tạo trigger — bấm cho phép.
+
+### Nhận dạng hãng
+
+| Dạng mã | Hãng |
+|---|---|
+| 12 chữ số bắt đầu bằng `1` (vd `149554355818`) | Viettel Post |
+| `VTP…`, `VV…`, `VN<số>…` | Viettel Post |
+| `SPX…`, hoặc ≥20 chữ số, hoặc nguồn là Shopee | Shopee Express |
+| `GHN…`, `GHTK…`, `J&T…` | hiện chỉ hiện tên, **chưa tra tự động** |
+
+Hãng chưa hỗ trợ thì đơn được bỏ qua, không ghi gì vào sheet.
+
+### Mapping trạng thái
+
+Đọc theo **tên trạng thái** (chữ) chứ không theo mã số, vì mã số của hãng hay đổi.
+Quy về 4 trạng thái của app: `Chờ hàng`, `Đang vận chuyển`, `Đã nhận hàng`, `Hoàn trả`.
+
+Vài chỗ dễ nhầm đã xử lý riêng:
+
+- *"Lấy hàng thành công"* → **Đang vận chuyển** (không phải đã giao)
+- *"Giao hàng không thành công"* → **Đang vận chuyển** (không phải hoàn)
+- *"Đã hoàn thành"* → **Đã nhận hàng** (không phải hoàn trả)
+
+Trạng thái lạ chưa map được thì **không ghi gì**, chỉ log lại để bổ sung sau —
+xem bằng `shippingSyncStatus()` hoặc `npm run logs`.
+
+Mỗi lần đổi trạng thái đều ghi 1 dòng vào `DataLog` kèm nguyên văn trạng thái hãng trả về.

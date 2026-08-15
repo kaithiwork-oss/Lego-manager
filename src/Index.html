@@ -2692,8 +2692,11 @@ function contactBtnHtml(link){
 function detectCarrier(code, nguon){
   var c=String(code||'').trim().toUpperCase();
   var n=String(nguon||'').toLowerCase();
-  if(n.includes('shopee')||c.startsWith('SPXVN')||c.startsWith('SPX')||/^[0-9]{20,}$/.test(c)) return 'shopee';
+  /* Mã VTP dạng số: 12 chữ số bắt đầu bằng 1 (vd 149554355818).
+     Xét trước Shopee vì định dạng mã cụ thể đáng tin hơn suy đoán theo nguồn. */
+  if(/^1[0-9]{11}$/.test(c)) return 'vtp';
   if(c.startsWith('VTP')||c.startsWith('VV')||/^VN[0-9]/.test(c)) return 'vtp';
+  if(n.includes('shopee')||c.startsWith('SPXVN')||c.startsWith('SPX')||/^[0-9]{20,}$/.test(c)) return 'shopee';
   if(c.startsWith('GHN')||c.startsWith('GHTK')||c.startsWith('J&T')||c.startsWith('JT')) return 'other';
   return 'unknown';
 }

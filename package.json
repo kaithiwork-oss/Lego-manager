@@ -4,6 +4,7 @@
   "private": true,
   "description": "Google Apps Script project for managing Lego collection",
   "scripts": {
+    "test": "node test/shipping-mapping.test.js && node test/shipping-sync.test.js",
     "login": "clasp login",
     "whoami": "clasp show-authorized-user",
     "pull": "clasp pull",
