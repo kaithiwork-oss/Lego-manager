@@ -288,8 +288,13 @@ function _shipTryEndpoints(endpoints) {
 //   VTP_PASSWORD  : mật khẩu
 // Không set thì đơn VTP tự động bị bỏ qua, không ảnh hưởng đơn SPX.
 //
-// CHƯA XÁC NHẬN tài khoản người mua có qua được cổng partner hay không —
-// chạy debugVtpLogin() để biết.
+// ĐÃ KIỂM: tài khoản người mua (app VTP) KHÔNG dùng được. Endpoint Login chạy
+// nhưng trả "Username or password is not valid!" — hệ thống Partner tách riêng.
+// Cổng Partner giờ ở partner2.viettelpost.vn, và tài khoản API không đăng ký
+// online được: phải liên hệ kinh doanh VTP ký thoả thuận hợp tác mới được cấp.
+//
+// => Thực tế đơn VTP cập nhật TAY. Khối code dưới để nằm im, phòng khi sau này
+//    có tài khoản Partner thật; lúc đó nhớ đổi host sang endpoint của partner2.
 // ---------------------------------------------------------------
 
 var SHIP_VTP_USER_KEY  = 'VTP_USERNAME';

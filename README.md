@@ -153,28 +153,28 @@ Hãng chưa hỗ trợ thì đơn được bỏ qua, không ghi gì vào sheet.
 | **Viettel Post** | ⚠️ cần tài khoản | Xem mục dưới |
 | GHN / GHTK / J&T | ❌ chưa làm | Bỏ qua, cập nhật tay |
 
-#### Viettel Post cần đăng nhập
+#### Viettel Post: không tra tự động được
 
-Gọi trần vào `partner.viettelpost.vn` đều trả **405** kèm header `Allow: OPTIONS`
-(cổng API `Cloudrity` chặn request không xác thực). Trang tra cứu công khai thì
-render bằng JS, HTML rỗng, WAF chặn client không phải trình duyệt. Nên đường duy
-nhất là đăng nhập lấy token.
+**Kết luận: đơn VTP cập nhật tay.** Đã dò hết các đường, đây là ghi chép để sau
+này khỏi mất công thử lại.
 
-Vào **Project Settings → Script Properties**, thêm:
-
-| Property | Giá trị |
+| Đường đã thử | Kết quả |
 |---|---|
-| `VTP_USERNAME` | số điện thoại / email đăng nhập VTP |
-| `VTP_PASSWORD` | mật khẩu |
+| `partner.viettelpost.vn/v2/order/*` gọi trần (9 tổ hợp method + tên tham số) | **405**, header `Allow: OPTIONS`, server `Cloudrity` — cổng API chặn request không xác thực |
+| `viettelpost.com.vn/tra-cuu-hanh-trinh-don-hang/?billcode=…` | HTTP 200 nhưng HTML chỉ **177 ký tự**, không có trạng thái — trang render bằng JS, WAF chặn client không phải trình duyệt |
+| `partner.viettelpost.vn/v2/user/Login` bằng tài khoản người mua | Endpoint chạy, nhưng trả `"Username or password is not valid!"` — tài khoản app VTP khác hệ thống Partner |
 
-Rồi chạy `debugVtpLogin()` để xem đăng nhập có qua không.
+Cổng Partner hiện ở `partner2.viettelpost.vn`, và tài khoản API **không đăng ký
+online được**: phải liên hệ bộ phận kinh doanh VTP, ký thoả thuận hợp tác rồi
+nhân viên mới tạo tài khoản. Quy trình dành cho shop tích hợp hệ thống, không
+đáng cho nhu cầu tra vài đơn.
 
-**Chưa set thì đơn VTP tự động bị bỏ qua** — không gọi mạng, không ghi gì vào
-sheet, không ảnh hưởng đơn SPX. Token được cache 6 tiếng, hết hạn thì tự đăng
-nhập lại.
-
-> Chưa xác nhận tài khoản người mua có qua được cổng partner hay không —
-> `debugVtpLogin()` sẽ trả lời.
+Code đăng nhập vẫn còn trong `Shipping.js` (dùng Script Properties `VTP_USERNAME`
+/ `VTP_PASSWORD`), để nằm im phòng khi sau này có tài khoản Partner thật. **Chưa
+set thì đơn VTP bị bỏ qua và không gọi mạng** — không tốn request hỏng, không
+đụng vào sheet, không ảnh hưởng đơn SPX. Lưu ý host login trong code đang trỏ
+`partner.viettelpost.vn` (cổng cũ); có tài khoản thật thì phải đổi sang endpoint
+trong tài liệu của `partner2`.
 
 ### Mapping trạng thái
 
