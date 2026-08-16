@@ -292,16 +292,24 @@ select.filter-chip:focus,.filter-chip select:focus{border-color:var(--lego-yello
 .ng-metric-sub{font-size:11px;color:#9a5b00;font-weight:700;margin-top:1px;white-space:nowrap;}
 .ng-rate-pill{display:inline-flex;align-items:center;gap:3px;background:#fff8e6;color:#b3650a;font-size:13px;font-weight:800;padding:3px 9px;border-radius:100px;white-space:nowrap;}
 .ng-rate-pill .st{color:#fbbf24;}
+.ng-detail-link{flex-shrink:0;background:none;border:none;color:#8b8473;font-size:13px;font-weight:700;cursor:pointer;padding:6px 2px;display:inline-flex;align-items:center;gap:3px;transition:color .14s;-webkit-tap-highlight-color:transparent;}
+.ng-detail-link::after{content:'›';font-size:16px;line-height:1;}
+.ng-detail-link:hover{color:var(--lego-red-dark);}
 .ng-dots{display:none;}
+.ng-morebtn{display:none;}
 @media(max-width:820px){
-  /* Mỗi bảng thành 1 card, vuốt ngang qua lại, danh sách gạch mảnh bên trong */
-  .ng-track{flex-direction:row;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -12px;padding:0 12px 2px;}
+  /* Mỗi bảng thành 1 card, vuốt ngang qua lại, danh sách gạch mảnh bên trong.
+     Chỉ hiện 5 hạng đầu, bấm "Hiển thị thêm 5" để lộ tiếp. */
+  .ng-track{flex-direction:row;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -12px;padding:0 12px 2px;align-items:start;}
   .ng-track::-webkit-scrollbar{display:none;}
-  .ng-panel{flex:0 0 87%;scroll-snap-align:center;background:#fff;border:1px solid #ece8df;border-radius:18px;box-shadow:0 6px 18px rgba(12,31,63,.06);padding:4px 6px 8px;}
+  .ng-panel{flex:0 0 87%;scroll-snap-align:center;background:#fff;border:1px solid #ece8df;border-radius:18px;box-shadow:0 6px 18px rgba(12,31,63,.06);padding:4px 6px 6px;}
   .ng-phead{margin:0;padding:13px 9px 11px;font-size:14px;}
   .ng-plist{display:flex;flex-direction:column;gap:0;}
   .ng-item{background:none;border:none;border-radius:10px;box-shadow:none;border-top:1px solid #f3f1ea;padding:9px;}
   .ng-item:active{transform:none;box-shadow:none;background:#faf9f4;}
+  .ng-item.ng-hide-mobile{display:none;}
+  .ng-morebtn{display:block;width:100%;margin-top:2px;padding:11px;background:none;border:none;border-top:1px solid #f3f1ea;color:#8b8473;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .ng-morebtn:active{background:#faf9f4;}
   .ng-dots{display:flex;justify-content:center;gap:7px;margin-top:16px;}
   .ng-dot{width:7px;height:7px;border-radius:50%;background:#d8d3c4;border:none;padding:0;cursor:pointer;transition:width .22s var(--ease-out),background .22s;-webkit-tap-highlight-color:transparent;}
   .ng-dot.active{width:22px;border-radius:100px;background:var(--lego-red);}
@@ -964,6 +972,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="container">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
     <h2 style="font-size:18px;font-weight:700;">👤 Người giao dịch</h2>
+    <button class="ng-detail-link" onclick="openNguoiGDFull()">Xem chi tiết</button>
   </div>
   <div class="list-toolbar">
     <input type="text" class="search-input" id="ngSearch" placeholder="🔍 Tìm tên shop..." oninput="renderNguoiGD()">
@@ -1009,6 +1018,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button class="sidebar-close" aria-label="Đóng" onclick="closeNguoiGDDetail()">×</button>
   </div>
   <div class="sidebar-body" id="ngDetailBody"></div>
+</div>
+
+<!-- ====== BẢNG CHI TIẾT NGƯỜI GD (đầy đủ) ====== -->
+<div class="sidebar-overlay" id="ngFullOverlay" onclick="closeNguoiGDFull()"></div>
+<div class="sidebar" id="ngFullPanel">
+  <div class="sidebar-header">
+    <h2>📋 Chi tiết người giao dịch</h2>
+    <button class="sidebar-close" aria-label="Đóng" onclick="closeNguoiGDFull()">×</button>
+  </div>
+  <div class="sidebar-body" id="ngFullBody"></div>
 </div>
 
 <!-- ====== DUYỆT ẢNH ====== -->
@@ -4158,13 +4177,13 @@ function renderStarsReadonly(rating){
   for(var i=1;i<=5;i++) html+='<span style="font-size:15px;color:'+(i<=full?'#fbbf24':'#e0e0e0')+';">★</span>';
   return html;
 }
-function renderNguoiGD(){
+/* Lọc theo ô tìm kiếm + bộ lọc; dùng chung cho view xếp hạng và bảng chi tiết. */
+function ngGetFiltered(){
   var q=(document.getElementById('ngSearch').value||'').toLowerCase();
   var minLan=parseInt(document.getElementById('ngFilterSoLan').value)||0;
   var minTien=parseFloat(document.getElementById('ngFilterTien').value)||0;
   var minRating=parseFloat(document.getElementById('ngFilterRating').value)||0;
-
-  var filtered=nguoiGDData.filter(function(n){
+  return nguoiGDData.filter(function(n){
     if(q && !n.tenShop.toLowerCase().includes(q)) return false;
     if(minLan && n.soLan<minLan) return false;
     if(minTien && n.tongTien<minTien) return false;
@@ -4172,6 +4191,9 @@ function renderNguoiGD(){
     else if(minRating && n.rating<minRating) return false;
     return true;
   });
+}
+function renderNguoiGD(){
+  var filtered=ngGetFiltered();
 
   var rankings=document.getElementById('ngRankings');
   if(!filtered.length){
@@ -4205,27 +4227,46 @@ function renderNguoiGD(){
 
 /* Một bảng xếp hạng: tiêu đề + danh sách. Desktop lấp DỌC theo cột (--rows = số
    hàng mỗi cột) nên cột1 = hạng 1..rows, cột2 kế tiếp… metricFn trả HTML chỉ số. */
+var NG_MOBILE_SHOW=5;   // mobile: chỉ hiện 5 hạng đầu mỗi bảng, rồi "Hiển thị thêm 5"
 function ngRankPanel(ic, title, list, metricFn){
   var rows=Math.max(1, Math.ceil(list.length/3));
-  var body = list.length
-    ? '<div class="ng-plist" style="--rows:'+rows+';">'+list.map(function(n,i){ return ngItem(n, i+1, metricFn(n)); }).join('')+'</div>'
-    : '<div style="font-size:13px;color:#bbb;padding:18px 6px;text-align:center;">Chưa có dữ liệu</div>';
+  var body;
+  if(list.length){
+    var items=list.map(function(n,i){ return ngItem(n, i+1, metricFn(n), i>=NG_MOBILE_SHOW); }).join('');
+    body='<div class="ng-plist" style="--rows:'+rows+';">'+items+'</div>';
+    if(list.length>NG_MOBILE_SHOW){
+      body+='<button class="ng-morebtn" onclick="ngShowMore(this)">Hiển thị thêm '+Math.min(NG_MOBILE_SHOW,list.length-NG_MOBILE_SHOW)+' ▾</button>';
+    }
+  } else {
+    body='<div style="font-size:13px;color:#bbb;padding:18px 6px;text-align:center;">Chưa có dữ liệu</div>';
+  }
   return '<section class="ng-panel">'+
     '<div class="ng-phead"><span class="ic">'+ic+'</span>'+title+'<span class="cnt">'+list.length+'</span></div>'+
     body+
     '</section>';
 }
 
-/* Một thẻ hạng — tối giản: hạng + avatar + tên + đúng một chỉ số. */
-function ngItem(n, rank, metricHtml){
+/* Một thẻ hạng — tối giản: hạng + avatar + tên + đúng một chỉ số.
+   hideMobile: ẩn trên mobile (desktop lưới vẫn hiện đủ). */
+function ngItem(n, rank, metricHtml, hideMobile){
   var rankCls=rank<=3 ? ' ng-rank-'+rank : '';
   var nameSafe=n.tenShop.replace(/'/g,"\\'");
-  return '<div class="ng-item click-open" onclick="rowOpenNguoiGD(event,\''+nameSafe+'\')">'+
+  return '<div class="ng-item click-open'+(hideMobile?' ng-hide-mobile':'')+'" onclick="rowOpenNguoiGD(event,\''+nameSafe+'\')">'+
     '<div class="ng-rank'+rankCls+'">'+rank+'</div>'+
     '<div class="ng-avatar">'+initials(n.tenShop)+'</div>'+
     '<div class="ng-nm">'+n.tenShop+'</div>'+
     metricHtml+
     '</div>';
+}
+
+/* Mobile: lộ thêm 5 hạng của bảng chứa nút; hết thì bỏ nút. */
+function ngShowMore(btn){
+  var panel=btn.closest('.ng-panel'); if(!panel) return;
+  var hidden=panel.querySelectorAll('.ng-item.ng-hide-mobile');
+  for(var i=0;i<NG_MOBILE_SHOW && i<hidden.length;i++) hidden[i].classList.remove('ng-hide-mobile');
+  var remain=panel.querySelectorAll('.ng-item.ng-hide-mobile').length;
+  if(remain<=0) btn.remove();
+  else btn.textContent='Hiển thị thêm '+Math.min(NG_MOBILE_SHOW,remain)+' ▾';
 }
 
 /* Vuốt ngang giữa 3 bảng trên mobile; dot dưới cùng theo bảng đang xem. */
@@ -4330,6 +4371,38 @@ function closeNguoiGDDetail(){
   document.getElementById('ngDetailOverlay').classList.remove('open');
   document.getElementById('ngDetailPanel').classList.remove('open');
 }
+
+/* Bảng chi tiết đầy đủ (đủ cột) — mở từ nút "Xem chi tiết" ở đầu tab. */
+function openNguoiGDFull(){
+  var list=ngGetFiltered().slice().sort(function(a,b){ return b.tongTien-a.tongTien; });
+  var body=document.getElementById('ngFullBody');
+  if(!list.length){
+    body.innerHTML='<div class="empty-state"><span class="ei">📭</span>Không có dữ liệu phù hợp</div>';
+  } else {
+    var rows=list.map(function(n){
+      return '<tr class="click-open" onclick="ngFullRowClick(event,\''+n.tenShop.replace(/'/g,"\\'")+'\')">'+
+        '<td><b>'+n.tenShop+'</b></td>'+
+        '<td style="text-align:center;">'+contactBtnHtml(n.linkLH)+'</td>'+
+        '<td style="text-align:center;">'+n.soLan+'</td>'+
+        '<td style="text-align:center;color:#9a5b00;font-weight:600;">'+n.soMH+'</td>'+
+        '<td style="text-align:right;font-weight:600;">'+fmtFull(n.tongTien)+'</td>'+
+        '<td>'+(n.rating>0 ? renderStarsReadonly(n.rating)+' <span style="color:#aaa;font-size:12px;">('+n.rating.toFixed(1)+')</span>' : '<span style="color:#bbb;font-size:13px;">Chưa đánh giá</span>')+'</td>'+
+        '</tr>';
+    }).join('');
+    body.innerHTML='<div style="margin-bottom:12px;color:#888;font-size:13px;">'+list.length+' người · sắp theo tổng tiền</div>'+
+      '<div class="table-scroll"><table class="data-table">'+
+      '<thead><tr><th>Tên Shop</th><th>Liên hệ</th><th style="text-align:center;">Số lần</th><th style="text-align:center;">Số MH</th><th style="text-align:right;">Tổng tiền</th><th>Rating TB</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div>';
+  }
+  document.getElementById('ngFullOverlay').classList.add('open');
+  document.getElementById('ngFullPanel').classList.add('open');
+}
+function closeNguoiGDFull(){
+  document.getElementById('ngFullOverlay').classList.remove('open');
+  document.getElementById('ngFullPanel').classList.remove('open');
+}
+/* Bấm 1 dòng trong bảng chi tiết -> mở hồ sơ người đó. */
+function ngFullRowClick(ev, tenShop){ if(_hitInner(ev)) return; closeNguoiGDFull(); openNguoiGDDetail(tenShop); }
 </script>
 </body>
 </html>
