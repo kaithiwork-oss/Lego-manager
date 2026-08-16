@@ -970,6 +970,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ====== NGƯỜI GIAO DỊCH ====== -->
 <div class="page" id="page-nguoigd">
 <div class="container">
+  <div id="ngRankView">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
     <h2 style="font-size:18px;font-weight:700;">👤 Người giao dịch</h2>
     <button class="ng-detail-link" onclick="openNguoiGDFull()">Xem chi tiết</button>
@@ -1007,6 +1008,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <div id="ngRankings" class="ng-rankings"></div>
     <div id="ngEmpty" class="empty-state" style="display:none;"><span class="ei">📭</span>Không có dữ liệu phù hợp</div>
   </div>
+  </div><!-- /ngRankView -->
+
+  <div id="ngFullView" style="display:none;">
+    <div class="gd-page-head">
+      <div class="gd-head-left">
+        <button class="crumb-back" onclick="closeNguoiGDFull()">← Quay lại</button>
+        <h2 class="gd-page-title">📋 Chi tiết người giao dịch</h2>
+      </div>
+    </div>
+    <div id="ngFullBody"></div>
+  </div>
 </div>
 </div>
 
@@ -1018,16 +1030,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button class="sidebar-close" aria-label="Đóng" onclick="closeNguoiGDDetail()">×</button>
   </div>
   <div class="sidebar-body" id="ngDetailBody"></div>
-</div>
-
-<!-- ====== BẢNG CHI TIẾT NGƯỜI GD (đầy đủ) ====== -->
-<div class="sidebar-overlay" id="ngFullOverlay" onclick="closeNguoiGDFull()"></div>
-<div class="sidebar" id="ngFullPanel">
-  <div class="sidebar-header">
-    <h2>📋 Chi tiết người giao dịch</h2>
-    <button class="sidebar-close" aria-label="Đóng" onclick="closeNguoiGDFull()">×</button>
-  </div>
-  <div class="sidebar-body" id="ngFullBody"></div>
 </div>
 
 <!-- ====== DUYỆT ẢNH ====== -->
@@ -4145,6 +4147,7 @@ function gmhGoPage(p){ gmhPage=p; renderGiaMH(); window.scrollTo({top:0,behavior
    ===================================================== */
 var nguoiGDData=[];
 function loadNguoiGD(){
+  closeNguoiGDFull();   // vào tab luôn ở view xếp hạng, không kẹt ở trang chi tiết
   document.getElementById('ngLoading').style.display='block';
   document.getElementById('ngContent').style.display='none';
   function build(cache){
@@ -4394,12 +4397,14 @@ function openNguoiGDFull(){
       '<thead><tr><th>Tên Shop</th><th>Liên hệ</th><th style="text-align:center;">Số lần</th><th style="text-align:center;">Số MH</th><th style="text-align:right;">Tổng tiền</th><th>Rating TB</th></tr></thead>'+
       '<tbody>'+rows+'</tbody></table></div>';
   }
-  document.getElementById('ngFullOverlay').classList.add('open');
-  document.getElementById('ngFullPanel').classList.add('open');
+  document.getElementById('ngRankView').style.display='none';
+  document.getElementById('ngFullView').style.display='block';
+  window.scrollTo({top:0,behavior:PREFERS_REDUCED?'auto':'smooth'});
 }
 function closeNguoiGDFull(){
-  document.getElementById('ngFullOverlay').classList.remove('open');
-  document.getElementById('ngFullPanel').classList.remove('open');
+  document.getElementById('ngFullView').style.display='none';
+  document.getElementById('ngRankView').style.display='block';
+  window.scrollTo({top:0,behavior:'auto'});
 }
 /* Bấm 1 dòng trong bảng chi tiết -> mở hồ sơ người đó. */
 function ngFullRowClick(ev, tenShop){ if(_hitInner(ev)) return; closeNguoiGDFull(); openNguoiGDDetail(tenShop); }
