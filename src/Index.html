@@ -318,6 +318,10 @@ select.filter-chip:focus,.filter-chip select:focus{border-color:var(--lego-yello
 .row-btn:active{transform:scale(.92);}
 .row-btn.edit{background:#e6f0ff;color:#1d4fb8;}
 .row-btn.del{background:#fde9e7;color:var(--lego-red-dark);}
+/* Bấm cả dòng / thẻ để mở sidebar */
+.click-open{cursor:pointer;}
+tr.click-open:hover{background:#faf9f4;}
+.card-item.click-open:hover,.compact-item.click-open:hover,.gmh-card.click-open:hover,.ship-card.click-open:hover{background:#faf9f4;}
 
 /* SIDEBAR */
 .sidebar-overlay{position:fixed;inset:0;background:rgba(12,31,63,.55);z-index:300;display:none;opacity:0;transition:opacity .25s;}
@@ -1906,7 +1910,7 @@ function listRowHtml(g){
   var nb=r.nguon==='Bank'?'badge-bank':r.nguon==='Shopee'?'badge-shopee':'badge-cash';
   var lb=r.loaiGD==='MUA'?'badge-mua':(r.loaiGD==='HOÀN'?'badge-hoan':(r.loaiGD==='TRAO ĐỔI'?'badge-td':(r.loaiGD==='ĐƯỢC TẶNG'?'badge-gift':'badge-ban')));
   var soTienHtml=(r.loaiGD==='TRAO ĐỔI') ? '<span style="color:var(--lego-purple);">🔄 Trao đổi</span>' : (r.loaiGD==='ĐƯỢC TẶNG' ? '<span style="color:#0c6b62;" title="Giá trị ghi nhận — không tính vào tiền đã bỏ ra">🎁 '+fmtFull(totalTien)+'</span>' : fmtFull(totalTien));
-  return '<tr>'+
+  return '<tr class="click-open" onclick="rowOpenEdit(event,\''+(r.maGD||'').replace(/'/g,"\\'")+'\')">'+
     '<td><b>'+(r.maGD||'—')+'</b></td>'+
     '<td>'+(r.ngay?r.ngay.split('-').reverse().join('/'):'—')+'</td>'+
     '<td>'+(r.tenShop||'—')+'</td>'+
@@ -1918,7 +1922,7 @@ function listRowHtml(g){
     '<td style="font-size:12px;color:#888;">'+(r.trangThaiDon||'—')+'</td>'+
     '<td style="text-align:center;">'+contactBtnHtml(r.linkLH)+'</td>'+
     '<td style="text-align:center;">'+trackingBtnHtml(r.maVanDon, r.nguon)+'</td>'+
-    '<td><div class="row-action"><button class="row-btn edit" onclick="openEditFromList(\''+r.maGD+'\')">Sửa</button><button class="row-btn del" onclick="deleteFromList(\''+r.maGD+'\')">Xóa</button></div></td>'+
+    '<td><div class="row-action"><button class="row-btn del" onclick="deleteFromList(\''+r.maGD+'\')">Xóa</button></div></td>'+
     '</tr>';
 }
 
@@ -2042,7 +2046,7 @@ function renderListCard(rows){
     var maGDSafe=(r.maGD||'').replace(/'/g,"\\'");
     var spLine=spList.length ? spList[0]+(spList.length>1?' +'+(spList.length-1)+' SP':'') : '—';
     var amtHtml=(r.loaiGD==='TRAO ĐỔI') ? '🔄 Trao đổi' : ((r.loaiGD==='ĐƯỢC TẶNG'?'🎁 ':'')+fmt(totalTien)+'đ');
-    return '<div class="card-item">'+
+    return '<div class="card-item click-open" onclick="rowOpenEdit(event,\''+maGDSafe+'\')">'+
       '<div class="card-avatar" style="background:'+ac.bg+';color:'+ac.color+';">'+ini+'</div>'+
       anhStackHtml(spList,2)+
       '<div class="card-main">'+
@@ -2053,7 +2057,6 @@ function renderListCard(rows){
         '<div class="card-amt">'+amtHtml+'</div>'+
         '<div class="card-date">'+(r.ngay?r.ngay.split('-').reverse().join('/'):'—')+'</div>'+
       '</div>'+
-      '<button class="row-btn edit" onclick="openEditFromList(\''+maGDSafe+'\')">Sửa</button>'+
       '</div>';
   }).join('')+'</div>';
 }
@@ -2065,14 +2068,13 @@ function renderListCompact(rows){
     var maGDSafe=(r.maGD||'').replace(/'/g,"\\'");
     var spLine=spList.length ? spList[0]+(spList.length>1?' +'+(spList.length-1):'') : '—';
     var amtHtml=(r.loaiGD==='TRAO ĐỔI') ? '🔄' : ((r.loaiGD==='ĐƯỢC TẶNG'?'🎁 ':'')+fmt(totalTien)+'đ');
-    return '<div class="compact-item">'+
+    return '<div class="compact-item click-open" onclick="rowOpenEdit(event,\''+maGDSafe+'\')">'+
       '<div class="compact-dot" style="background:'+ac.color+';"></div>'+
       anhStackHtml(spList,2,'sm')+
       '<div class="compact-name">'+(r.tenShop||'—')+'</div>'+
       '<div class="compact-sp">'+spLine+'</div>'+
       '<div class="compact-amt">'+amtHtml+'</div>'+
       '<div class="compact-date">'+(r.ngay?r.ngay.split('-').reverse().join('/'):'—')+'</div>'+
-      '<div class="compact-actions"><button class="row-btn edit" onclick="openEditFromList(\''+maGDSafe+'\')">Sửa</button></div>'+
       '</div>';
   }).join('')+'</div>';
 }
@@ -2404,6 +2406,14 @@ function setSbPill(groupId, btn, cls, val){
   pop(btn, 1.08);
   if(groupId==='sbDonGroup') sbDonVal=val;
 }
+
+/* Bấm cả dòng/thẻ để mở sidebar. Bỏ qua khi bấm trúng nút/link con
+   (Xóa, 🖼 sửa ảnh, liên hệ, tracking...) để không mở nhầm. */
+function _hitInner(ev){ return !!(ev && ev.target && ev.target.closest('button,a,input,select,textarea,label')); }
+function rowOpenEdit(ev, maGD){ if(_hitInner(ev)) return; openEditFromList(maGD); }
+function rowOpenShip(ev, key){ if(_hitInner(ev)) return; openShippingEdit(key); }
+function rowOpenNguoiGD(ev, tenShop){ if(_hitInner(ev)) return; openNguoiGDDetail(tenShop); }
+function cardOpenEditFromDetail(ev, maGD){ if(_hitInner(ev)) return; closeNguoiGDDetail(); openEditFromList(maGD); }
 
 function openEditFromList(maGD){
   openSidebar('create');
@@ -3157,8 +3167,7 @@ function renderShipTable(items){
     var kb=key.replace(/'/g,"\\'");
     var vd=it.maVanDon?it.maVanDon:'<span style="color:#bbb;">(chưa có)</span>';
     var soDon=it.soDon>1?' <span style="font-size:11px;color:#1d4fb8;background:#e6f0ff;border-radius:100px;padding:1px 7px;">'+it.soDon+' đơn</span>':'';
-    var editBtn='<button class="row-btn" style="background:#fff4d6;color:#8a5a00;" onclick="openShippingEdit(\''+kb+'\')" title="Cập nhật vận chuyển">✏️ Sửa</button>';
-    return '<tr>'+
+    return '<tr class="click-open" onclick="rowOpenShip(event,\''+kb+'\')">'+
       '<td style="font-weight:600;">'+vd+soDon+'</td>'+
       '<td>'+carrierName(it.maVanDon,it.nguon)+'</td>'+
       '<td>'+(it.nguoiGD||'—')+'</td>'+
@@ -3166,7 +3175,7 @@ function renderShipTable(items){
         '<span class="sp-cell-txt">'+(it.matHang||'—')+'</span></div></td>'+
       '<td style="white-space:nowrap;">'+(it.ngayGDHienThi||'—')+'</td>'+
       '<td style="white-space:nowrap;color:#888;">'+(it.ngayCapNhat||'—')+'</td>'+
-      '<td style="white-space:nowrap;">'+trackingBtnHtml(it.maVanDon,it.nguon)+' '+editBtn+'</td>'+
+      '<td style="white-space:nowrap;">'+trackingBtnHtml(it.maVanDon,it.nguon)+'</td>'+
       '</tr>';
   }).join('');
   return '<div class="table-scroll"><table class="data-table"><thead><tr>'+
@@ -3202,11 +3211,11 @@ function renderShipCards(items){
       : '<span class="sc-code" style="color:#bbb;">chưa có mã VĐ</span>';
     var soDon=it.soDon>1?'<span class="sc-pill">'+it.soDon+' đơn</span>':'';
     var tong=_shipTotal(it.maGDs);
-    return '<div class="ship-card">'+
+    return '<div class="ship-card click-open" onclick="rowOpenShip(event,\''+kb+'\')">'+
       '<div class="sc-top">'+shipStatusBadge(it.trangThai||'')+codeHtml+soDon+'</div>'+
       '<div class="sc-items"><span class="sp-cell">'+anhStackHtml(it.matHangList,3)+
         '<span class="sp-cell-txt">'+escapeHtml(it.matHang||'—')+'</span></span></div>'+
-      '<div class="sc-person" onclick="openShippingEdit(\''+kb+'\')">'+
+      '<div class="sc-person">'+
         '<span class="sc-ava">'+escapeHtml(chu)+'</span>'+
         '<span class="sc-person-info"><b>'+escapeHtml(ten)+'</b>'+
         '<small>'+escapeHtml(carrierName(it.maVanDon,it.nguon))+' · '+escapeHtml(it.ngayGDHienThi||'—')+'</small></span>'+
@@ -3214,7 +3223,6 @@ function renderShipCards(items){
       '</div>'+
       '<div class="sc-money"><span>Giá trị đơn:</span><b>'+fmtFull(tong)+'</b></div>'+
       '<div class="sc-actions">'+trackingBtnHtml(it.maVanDon,it.nguon)+
-        '<button class="row-btn" style="background:#fff4d6;color:#8a5a00;" onclick="openShippingEdit(\''+kb+'\')">✏️ Sửa</button>'+
       '</div>'+
     '</div>';
   }).join('')+'</div>';
@@ -3967,13 +3975,12 @@ function renderGmhCard(rows){
       var anhHtml = img
         ? '<img src="'+escapeAttr(img)+'" loading="lazy" alt="" class="gmh-img" onerror="this.style.display=\'none\'">'
         : '<div class="gmh-img gmh-noimg">🧱</div>';
-      return '<div class="gmh-card">'+
+      return '<div class="gmh-card click-open" onclick="rowOpenEdit(event,\''+maGDSafe+'\')">'+
         anhHtml+
         '<div style="font-size:13px;font-weight:700;color:#15192b;margin-bottom:6px;line-height:1.3;">'+(r.tenSP||'—')+'</div>'+
         '<div style="font-size:17px;font-weight:800;color:'+ac.color+';">'+(r.donGia?fmtFull(r.donGia):'—')+'</div>'+
         '<div style="font-size:11px;color:#aaa;margin-top:4px;">'+(r.tenShop||'')+(r.ngay?' · '+r.ngay.split('-').reverse().join('/'):'')+'</div>'+
         '<div style="display:flex;gap:6px;margin-top:8px;">'+
-          '<button class="row-btn edit" onclick="openEditFromList(\''+maGDSafe+'\')">Sửa</button>'+
           '<button class="row-btn gmh-anh-btn" onclick="suaAnh(\''+tenSafe+'\')" title="Sửa ảnh sản phẩm">🖼</button>'+
         '</div>'+
         '</div>';
@@ -3984,7 +3991,7 @@ function renderGmhCompact(rows){
     var ac=avatarColor(r.loaiGD);
     var maGDSafe=(r.maGD||'').replace(/'/g,"\\'");
     var img=anhCua(r.tenSP);
-    return '<div class="compact-item">'+
+    return '<div class="compact-item click-open" onclick="rowOpenEdit(event,\''+maGDSafe+'\')">'+
       (img
         ? '<img src="'+escapeAttr(img)+'" loading="lazy" alt="" class="gmh-thumb" onerror="this.style.display=\'none\'">'
         : '<div class="compact-dot" style="background:'+ac.color+';"></div>')+
@@ -3992,7 +3999,6 @@ function renderGmhCompact(rows){
       '<div class="compact-sp">'+(r.tenShop||'')+'</div>'+
       '<div class="compact-amt">'+(r.donGia?fmtFull(r.donGia):'—')+'</div>'+
       '<div class="compact-date">'+(r.ngay?r.ngay.split('-').reverse().join('/'):'—')+'</div>'+
-      '<div class="compact-actions"><button class="row-btn edit" onclick="openEditFromList(\''+maGDSafe+'\')">Sửa</button></div>'+
       '</div>';
   }).join('')+'</div>';
 }
@@ -4060,7 +4066,7 @@ function renderGiaMH(){
     var thumb=img
       ? '<img src="'+escapeAttr(img)+'" loading="lazy" alt="" class="gmh-thumb" onerror="this.style.display=\'none\'">'
       : '<div class="gmh-thumb gmh-noimg" style="font-size:16px;">🧱</div>';
-    return '<tr>'+
+    return '<tr class="click-open" onclick="rowOpenEdit(event,\''+maGDSafe+'\')">'+
       '<td>'+thumb+'</td>'+
       '<td style="font-size:12px;color:#888;white-space:nowrap;">'+ngayHt+'</td>'+
       '<td style="font-size:12px;color:#888;">'+(r.maGD||'—')+'</td>'+
@@ -4069,7 +4075,6 @@ function renderGiaMH(){
       '<td><span class="badge '+lb+'">'+(r.loaiGD||'—')+'</span></td>'+
       '<td>'+(r.tenShop||'—')+'</td>'+
       '<td><div class="row-action">'+
-        '<button class="row-btn edit" onclick="openEditFromList(\''+maGDSafe+'\')">Sửa</button>'+
         '<button class="row-btn gmh-anh-btn" onclick="suaAnh(\''+tenSafe+'\')" title="Sửa ảnh sản phẩm">🖼</button>'+
       '</div></td>'+
       '</tr>';
@@ -4174,14 +4179,14 @@ function renderNguoiGD(){
   updateSortIndicators('#ngTable thead', ngSortKey, ngSortDir);
 
   tbody.innerHTML=filtered.map(function(n){
-    return '<tr>'+
+    return '<tr class="click-open" onclick="rowOpenNguoiGD(event,\''+n.tenShop.replace(/'/g,"\\'")+'\')">'+
       '<td><b>'+n.tenShop+'</b></td>'+
       '<td style="text-align:center;">'+contactBtnHtml(n.linkLH)+'</td>'+
       '<td style="text-align:center;">'+n.soLan+'</td>'+
       '<td style="text-align:center;color:#9a5b00;font-weight:600;">'+n.soMH+'</td>'+
       '<td style="text-align:right;font-weight:600;">'+fmtFull(n.tongTien)+'</td>'+
       '<td>'+(n.rating>0 ? renderStarsReadonly(n.rating)+' <span style="color:#aaa;font-size:12px;">('+n.rating.toFixed(1)+')</span>' : '<span style="color:#bbb;font-size:13px;">Chưa đánh giá</span>')+'</td>'+
-      '<td><button class="row-btn edit" onclick="openNguoiGDDetail(\''+n.tenShop.replace(/'/g,"\\'")+'\')">Xem chi tiết</button></td>'+
+      '<td style="text-align:center;color:#ccc;font-size:18px;font-weight:700;">›</td>'+
       '</tr>';
   }).join('');
 }
@@ -4228,7 +4233,7 @@ function openNguoiGDDetail(tenShop){
         }).join('')
       : '<div style="font-size:14px;font-weight:700;color:#bbb;">(không có sản phẩm)</div>';
     var tienHtml=(g.loaiGD==='TRAO ĐỔI') ? '<span style="color:var(--lego-purple);">🔄 Trao đổi</span>' : (g.loaiGD==='ĐƯỢC TẶNG' ? '<span style="color:#0c6b62;">🎁 '+fmtFull(g.soTien)+' <span style="font-size:11px;font-weight:600;">(được tặng)</span></span>' : fmtFull(g.soTien));
-    return '<div style="border:1px solid #eee;border-radius:12px;padding:14px;margin-bottom:10px;">'+
+    return '<div class="click-open" onclick="cardOpenEditFromDetail(event,\''+String(g.maGD||'').replace(/'/g,"\\'")+'\')" style="border:1px solid #eee;border-radius:12px;padding:14px;margin-bottom:10px;">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
         '<div style="flex:1;">'+spHtml+'</div>'+
         '<span style="font-size:12px;color:#aaa;white-space:nowrap;margin-left:10px;">'+ngayHt+'</span>'+
@@ -4238,8 +4243,7 @@ function openNguoiGDDetail(tenShop){
         '<span style="font-size:13px;font-weight:700;color:#15192b;">'+tienHtml+'</span>'+
       '</div>'+
       '<div style="margin-bottom:6px;">'+(g.rating?renderStarsReadonly(g.rating):'<span style="color:#bbb;font-size:12px;">Chưa đánh giá</span>')+'</div>'+
-      (g.ghiChuGD ? '<div style="font-size:13px;color:#666;background:#fafafa;border-radius:8px;padding:8px 10px;margin-bottom:6px;">'+g.ghiChuGD+'</div>' : '')+
-      '<button class="row-btn edit" onclick="closeNguoiGDDetail();openEditFromList(\''+g.maGD+'\')">Sửa giao dịch</button>'+
+      (g.ghiChuGD ? '<div style="font-size:13px;color:#666;background:#fafafa;border-radius:8px;padding:8px 10px;">'+g.ghiChuGD+'</div>' : '')+
       '</div>';
   }).join('');
   document.getElementById('ngDetailBody').innerHTML=html;
