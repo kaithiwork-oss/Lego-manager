@@ -269,6 +269,21 @@ select.filter-chip:focus,.filter-chip select:focus{border-color:var(--lego-yello
 .compact-amt{font-size:13px;font-weight:700;color:#15192b;white-space:nowrap;}
 .compact-date{font-size:11px;color:#bbb;white-space:nowrap;min-width:48px;text-align:right;}
 .compact-actions{display:flex;gap:4px;flex-shrink:0;}
+/* Người giao dịch — thẻ riêng từng người (mobile), đổ bóng cứng như nút */
+.ng-card-list{display:flex;flex-direction:column;gap:12px;}
+.ng-card{position:relative;background:#fff;border:1.5px solid #ece8df;border-radius:16px;padding:12px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;box-shadow:0 4px 0 #e7e0cf;transition:transform var(--t-fast) var(--ease-brick),box-shadow var(--t-fast);-webkit-tap-highlight-color:transparent;}
+.ng-card:active{transform:translateY(3px);box-shadow:0 1px 0 #e7e0cf;}
+.ng-rank{flex-shrink:0;width:24px;height:24px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:#f1efe8;color:#9b9482;}
+.ng-rank-1{background:linear-gradient(160deg,#ffe27a,#f5b400);color:#7a5200;box-shadow:0 2px 0 #d99e00;}
+.ng-rank-2{background:linear-gradient(160deg,#e7e9ee,#c3c7d0);color:#5b606c;box-shadow:0 2px 0 #a9adb8;}
+.ng-rank-3{background:linear-gradient(160deg,#f4c99a,#df9a5e);color:#6e3d17;box-shadow:0 2px 0 #c47f43;}
+.ng-avatar{background:#fff3da;color:#9a5b00;}
+.ng-card .card-main{flex:1;min-width:0;}
+.ng-card-meta{display:flex;align-items:center;gap:5px;margin:2px 0 1px;line-height:1;}
+.ng-rate-num{font-size:12px;color:#9a5b00;font-weight:700;}
+.ng-norate{font-size:12px;color:#bbb;}
+.ng-card-side{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0;}
+.ng-card-money{font-size:14px;font-weight:800;color:#15192b;font-variant-numeric:tabular-nums;white-space:nowrap;}
 /* Status bar */
 .status-bar{display:flex;gap:0;background:#fff;border:1.5px solid #ece8df;border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;}
 .status-bar-item{flex:1;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s;position:relative;}
@@ -958,7 +973,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
   <div id="ngLoading" class="loading-state">⏳ Đang tải...</div>
   <div id="ngContent" style="display:none;">
-    <div class="table-scroll">
+    <div class="table-scroll" id="ngTableWrap">
     <table class="data-table" id="ngTable">
       <thead>
         <tr>
@@ -974,6 +989,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <tbody id="ngBody"></tbody>
     </table>
     </div>
+    <div id="ngCardWrap" style="display:none;"></div>
     <div id="ngEmpty" class="empty-state" style="display:none;"><span class="ei">📭</span>Không có dữ liệu phù hợp</div>
   </div>
 </div>
@@ -4167,18 +4183,29 @@ function renderNguoiGD(){
     return ngSortDir*String(av||'').localeCompare(String(bv||''));
   });
 
-  var tbody=document.getElementById('ngBody');
+  var tableWrap=document.getElementById('ngTableWrap');
+  var cardWrap=document.getElementById('ngCardWrap');
   if(!filtered.length){
-    tbody.innerHTML='';
+    document.getElementById('ngBody').innerHTML='';
+    cardWrap.innerHTML='';
     document.getElementById('ngEmpty').style.display='block';
-    document.getElementById('ngTable').style.display='none';
+    tableWrap.style.display='none';
+    cardWrap.style.display='none';
     return;
   }
   document.getElementById('ngEmpty').style.display='none';
-  document.getElementById('ngTable').style.display='';
-  updateSortIndicators('#ngTable thead', ngSortKey, ngSortDir);
 
-  tbody.innerHTML=filtered.map(function(n){
+  if(window.innerWidth<=700){
+    tableWrap.style.display='none';
+    cardWrap.style.display='block';
+    cardWrap.innerHTML=renderNguoiGDCard(filtered);
+    return;
+  }
+
+  cardWrap.style.display='none';
+  tableWrap.style.display='block';
+  updateSortIndicators('#ngTable thead', ngSortKey, ngSortDir);
+  document.getElementById('ngBody').innerHTML=filtered.map(function(n){
     return '<tr class="click-open" onclick="rowOpenNguoiGD(event,\''+n.tenShop.replace(/'/g,"\\'")+'\')">'+
       '<td><b>'+n.tenShop+'</b></td>'+
       '<td style="text-align:center;">'+contactBtnHtml(n.linkLH)+'</td>'+
@@ -4189,6 +4216,31 @@ function renderNguoiGD(){
       '<td style="text-align:center;color:#ccc;font-size:18px;font-weight:700;">›</td>'+
       '</tr>';
   }).join('');
+}
+
+/* Thẻ từng người giao dịch — dùng trên mobile thay cho bảng gạch ngang */
+function renderNguoiGDCard(list){
+  return '<div class="ng-card-list">'+list.map(function(n,i){
+    var rank=i+1;
+    var rankCls=rank<=3 ? ' ng-rank-'+rank : '';
+    var nameSafe=n.tenShop.replace(/'/g,"\\'");
+    var ratingHtml=n.rating>0
+      ? renderStarsReadonly(n.rating)+'<span class="ng-rate-num">'+n.rating.toFixed(1)+'</span>'
+      : '<span class="ng-norate">Chưa đánh giá</span>';
+    return '<div class="ng-card click-open" onclick="rowOpenNguoiGD(event,\''+nameSafe+'\')">'+
+      '<div class="ng-rank'+rankCls+'">'+rank+'</div>'+
+      '<div class="card-avatar ng-avatar">'+initials(n.tenShop)+'</div>'+
+      '<div class="card-main">'+
+        '<div class="card-shop">'+n.tenShop+'</div>'+
+        '<div class="ng-card-meta">'+ratingHtml+'</div>'+
+        '<div class="card-sub">'+n.soLan+' lần GD · '+n.soMH+' mặt hàng</div>'+
+      '</div>'+
+      '<div class="ng-card-side">'+
+        '<div class="ng-card-money">'+fmtFull(n.tongTien)+'</div>'+
+        contactBtnHtml(n.linkLH)+
+      '</div>'+
+      '</div>';
+  }).join('')+'</div>';
 }
 
 var _ngDetailOriginalTenShop='';
