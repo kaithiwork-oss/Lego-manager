@@ -218,85 +218,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sc-money b{font-size:17px;font-weight:800;color:#15192b;}
 .sc-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
 
-/* ===== BOARD VẬN CHUYỂN (kiểu Trello) ===== */
-.ship-board{display:flex;gap:12px;align-items:flex-start;overflow-x:auto;overflow-y:hidden;
-  padding:2px 2px 10px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
-.ship-board::-webkit-scrollbar{height:8px;}
-.ship-board::-webkit-scrollbar-thumb{background:#e0dbcc;border-radius:100px;}
-body.ship-dragging .ship-board{scroll-snap-type:none;}
-body.ship-dragging{user-select:none;-webkit-user-select:none;}
-
-.sb-col{flex:0 0 300px;scroll-snap-align:start;background:#f4f2ea;border:1.5px solid #ece8df;
-  border-radius:16px;display:flex;flex-direction:column;max-height:calc(100vh - 250px);
-  transition:flex-basis .22s var(--ease-brick),background .15s;}
-.sb-col.drop-on{background:#fff8dd;border-color:var(--lego-yellow-dark);
-  box-shadow:0 0 0 3px rgba(255,213,0,.3);}
-.sb-col-head{display:flex;align-items:center;gap:7px;padding:11px 12px 9px;flex-shrink:0;}
-.sb-col-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-.sb-col-title{font-size:13.5px;font-weight:800;color:#15192b;flex:1;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;}
-.sb-col-count{font-size:11.5px;font-weight:800;color:#8b8473;background:#e8e5da;
-  border-radius:100px;padding:1px 8px;flex-shrink:0;font-variant-numeric:tabular-nums;}
-.sb-col-btn{background:none;border:none;cursor:pointer;color:#9b9685;font-size:12px;
-  padding:2px 3px;line-height:1;border-radius:6px;flex-shrink:0;
-  -webkit-tap-highlight-color:transparent;transition:background .12s,color .12s;}
-.sb-col-btn:hover{background:#e8e5da;color:#15192b;}
-.sb-col-body{flex:0 1 auto;overflow-y:auto;padding:0 10px 4px;display:flex;flex-direction:column;gap:9px;
-  min-height:44px;}
-.sb-col-foot{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
-  padding:9px 13px 11px;font-size:12px;color:#8b8473;font-weight:600;border-top:1px solid #e8e5da;
-  margin-top:6px;}
-.sb-col-foot b{font-size:13px;color:#15192b;font-variant-numeric:tabular-nums;}
-.sb-empty{font-size:12.5px;color:#b8b3a4;text-align:center;padding:14px 0;font-weight:600;
-  border:1.5px dashed #e0dbcc;border-radius:12px;}
-
-/* Cột thu gọn */
-.sb-col.closed{flex-basis:46px;}
-.sb-col.closed .sb-col-body,.sb-col.closed .sb-col-foot{display:none;}
-.sb-col.closed .sb-col-head{flex-direction:column;gap:9px;padding:11px 6px 14px;height:100%;}
-.sb-col.closed .sb-col-title{writing-mode:vertical-rl;flex:0 0 auto;max-height:160px;}
-.sb-col.closed .sb-col-menu-btn{display:none;}
-
-/* Thẻ trong board */
-.ship-board .ship-card{margin:0;cursor:grab;touch-action:pan-y;
-  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;}
-.ship-board .ship-card:active{cursor:grabbing;}
-.ship-card.sc-src{opacity:.32;filter:grayscale(.5);}
-.ship-card.sc-saving{opacity:.55;pointer-events:none;}
-.ship-card.sc-ghost{position:fixed;top:0;left:0;z-index:900;width:300px;pointer-events:none;
-  opacity:.96;box-shadow:0 14px 32px rgba(12,31,63,.28);will-change:transform;}
-
-/* Menu ••• của cột */
-.sb-menu{position:fixed;z-index:920;width:200px;background:#fff;border:1px solid #e8e8e8;
-  border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.16);overflow:hidden;padding:5px 0;
-  animation:ddIn .16s var(--ease-brick);}
-.sb-menu-lbl{font-size:10.5px;font-weight:800;color:#aaa;text-transform:uppercase;
-  letter-spacing:.04em;padding:7px 14px 4px;}
-.sb-menu-it{font-size:13.5px;padding:9px 14px;cursor:pointer;color:#15192b;font-weight:600;
-  transition:background .1s,padding-left .12s;}
-.sb-menu-it:hover{background:#fcfaf3;padding-left:18px;}
-.sb-menu-it.on{color:var(--lego-red-dark);}
-.sb-menu-it.on::after{content:' ✓';}
-.sb-menu-sep{height:1px;background:#f0eee4;margin:5px 0;}
-
-/* Thanh Hoàn tác */
-.ship-undo{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:930;
-  background:#15192b;color:#fff;border-radius:100px;padding:11px 12px 11px 20px;
-  display:flex;align-items:center;gap:14px;font-size:13.5px;font-weight:600;
-  box-shadow:0 10px 28px rgba(0,0,0,.3);max-width:92vw;opacity:0;pointer-events:none;
-  transition:transform .28s var(--ease-brick),opacity .2s;}
-.ship-undo.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;}
-.ship-undo span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.ship-undo button{background:var(--lego-yellow);color:#1a1200;border:none;border-radius:100px;
-  padding:6px 15px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;}
-
-@media(max-width:700px){
-  .sb-col{flex-basis:84vw;max-height:calc(100vh - 230px);}
-  .ship-board{scroll-snap-type:x mandatory;}
-  .ship-card.sc-ghost{width:84vw;}
-  .ship-undo{bottom:96px;}
-}
-
 /* ===== NÚT FILTER + TRAY BỘ LỌC (mobile) ===== */
 .filter-icon-btn{display:none;width:40px;height:40px;flex-shrink:0;align-items:center;justify-content:center;background:#fff;border:1px solid rgba(12,31,63,.07);border-radius:14px;cursor:pointer;color:#15192b;box-shadow:0 3px 12px rgba(12,31,63,.12);transition:transform var(--t-fast) var(--ease-brick),background .14s;-webkit-tap-highlight-color:transparent;position:relative;}
 .filter-icon-btn:active{transform:scale(.92);background:#faf9f4;}
@@ -3204,396 +3125,125 @@ function setShipFilterVal(val){
   shipStatusFilter=val; _syncShipChips(); applyShippingView();
 }
 
-/* =====================================================
-   BOARD VẬN CHUYỂN — kiểu Trello
-   Cột = trạng thái đơn. Kéo thẻ sang cột khác = updateShippingBulk.
-   ===================================================== */
-var SHIP_COLS=['Chờ hàng','Đang vận chuyển','Đã nhận hàng','Hoàn trả'];
-var SHIP_COL_META={
-  'Chờ hàng':        {dot:'#e5a300'},
-  'Đang vận chuyển': {dot:'#1d4fb8'},
-  'Đã nhận hàng':    {dot:'#0f7a3d'},
-  'Hoàn trả':        {dot:'#b4232a'},
-  '__other__':       {dot:'#9b9685'}
-};
-var _shipColClosed={};   /* cột nào đang thu gọn */
-var _shipColSort={};     /* kiểu sắp xếp riêng từng cột */
-
 function applyShippingView(){
   capNhatBadgeShip();
   updateShipStatusBar();
   var q=(document.getElementById('shipSearch').value||'').toLowerCase();
+  var f=shipStatusFilter;
   var filtered=allShipping.filter(function(i){
-    if(!q) return true;
-    var hay=((i.maVanDon||'')+' '+(i.nguoiGD||'')+' '+(i.matHang||'')).toLowerCase();
-    return hay.indexOf(q)>=0;
+    if(f && i.trangThai!==f) return false;
+    if(q){ var hay=((i.maVanDon||'')+' '+(i.nguoiGD||'')+' '+(i.matHang||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+    return true;
   });
   renderShipping(filtered);
 }
+var _shipByKey={};
+function renderShipping(items){
+  var el=document.getElementById('shipList');
+  _shipByKey={};
+  if(!items.length){ el.innerHTML='<div class="empty-state"><span class="ei">📭</span>Chưa có đơn vận chuyển</div>'; return; }
+  var order=['Đang vận chuyển','Chờ hàng','Đã nhận hàng','Hoàn trả'];
+  var buckets={}; order.forEach(function(s){ buckets[s]=[]; }); buckets['__other__']=[];
+  items.forEach(function(it){
+    var s=it.trangThai||'';
+    if(buckets[s]) buckets[s].push(it); else buckets['__other__'].push(it);
+  });
+  var byDate=function(a,b){ return (b.ngayGD||'').localeCompare(a.ngayGD||''); };
+  var html='';
+  order.concat(['__other__']).forEach(function(s){
+    var arr=buckets[s]; if(!arr.length) return;
+    arr.sort(byDate);
+    var head=(s==='__other__') ? '<span style="font-size:13px;font-weight:800;color:#888;">Khác / chưa có trạng thái</span>' : shipStatusBadge(s);
+    html+='<div style="margin:20px 0 8px;display:flex;align-items:center;gap:10px;">'+head+'<span style="font-size:12px;color:#aaa;font-weight:600;">'+arr.length+' vận đơn</span></div>';
+    html+=renderShipTable(arr);
+  });
+  el.innerHTML=html;
+}
+function renderShipTable(items){
+  if(shipViewIsCard()) return renderShipCards(items);
+  var body=items.map(function(it){
+    var key=it.maVanDon?('VD::'+it.maVanDon):('GD::'+it.maGDs[0]);
+    _shipByKey[key]=it;
+    var kb=key.replace(/'/g,"\\'");
+    var vd=it.maVanDon?it.maVanDon:'<span style="color:#bbb;">(chưa có)</span>';
+    var soDon=it.soDon>1?' <span style="font-size:11px;color:#1d4fb8;background:#e6f0ff;border-radius:100px;padding:1px 7px;">'+it.soDon+' đơn</span>':'';
+    return '<tr class="click-open" onclick="rowOpenShip(event,\''+kb+'\')">'+
+      '<td style="font-weight:600;">'+vd+soDon+'</td>'+
+      '<td>'+carrierName(it.maVanDon,it.nguon)+'</td>'+
+      '<td>'+(it.nguoiGD||'—')+'</td>'+
+      '<td style="max-width:280px;"><div class="sp-cell">'+anhStackHtml(it.matHangList,3)+
+        '<span class="sp-cell-txt">'+(it.matHang||'—')+'</span></div></td>'+
+      '<td style="white-space:nowrap;">'+(it.ngayGDHienThi||'—')+'</td>'+
+      '<td style="white-space:nowrap;color:#888;">'+(it.ngayCapNhat||'—')+'</td>'+
+      '<td style="white-space:nowrap;">'+trackingBtnHtml(it.maVanDon,it.nguon)+'</td>'+
+      '</tr>';
+  }).join('');
+  return '<div class="table-scroll"><table class="data-table"><thead><tr>'+
+    '<th>Mã vận đơn</th><th>Hãng</th><th>Người GD</th><th>Mặt hàng</th><th>Ngày GD</th><th>Cập nhật TT</th><th></th>'+
+    '</tr></thead><tbody>'+body+'</tbody></table></div>';
+}
+/* ===== CARD VIEW VẬN CHUYỂN (mặc định trên mobile) ===== */
+function shipViewIsCard(){ return window.innerWidth<=700; }
 
-/* Chip trạng thái giờ = chọn cột nào được hiện (rỗng = hiện tất cả) */
+function _shipTotal(maGDs){
+  var set={}; (maGDs||[]).forEach(function(m){ set[String(m)]=true; });
+  var t=0;
+  (_appCache.gdData||[]).forEach(function(r){ if(set[String(r.maGD)]) t+=(r.soTien||0); });
+  return t;
+}
+
+function copyShipCode(code, el){
+  if(navigator.clipboard) navigator.clipboard.writeText(code).catch(function(){});
+  showToast('📋 Đã copy: '+code);
+  if(el) pop(el, 1.25);
+}
+
+function renderShipCards(items){
+  return '<div class="ship-card-list">'+items.map(function(it){
+    var key=it.maVanDon?('VD::'+it.maVanDon):('GD::'+it.maGDs[0]);
+    _shipByKey[key]=it;
+    var kb=key.replace(/'/g,"\\'");
+    var ten=it.nguoiGD||'—';
+    var chu=(ten.trim()[0]||'?').toUpperCase();
+    var codeHtml = it.maVanDon
+      ? '<span class="sc-code">#'+escapeHtml(it.maVanDon)+'</span>'+
+        '<button class="sc-copy" aria-label="Copy mã vận đơn" onclick="copyShipCode(\''+String(it.maVanDon).replace(/'/g,"\\'")+'\',this)">⧉</button>'
+      : '<span class="sc-code" style="color:#bbb;">chưa có mã VĐ</span>';
+    var soDon=it.soDon>1?'<span class="sc-pill">'+it.soDon+' đơn</span>':'';
+    var tong=_shipTotal(it.maGDs);
+    return '<div class="ship-card click-open" onclick="rowOpenShip(event,\''+kb+'\')">'+
+      '<div class="sc-top">'+shipStatusBadge(it.trangThai||'')+codeHtml+soDon+'</div>'+
+      '<div class="sc-items"><span class="sp-cell">'+anhStackHtml(it.matHangList,3)+
+        '<span class="sp-cell-txt">'+escapeHtml(it.matHang||'—')+'</span></span></div>'+
+      '<div class="sc-person">'+
+        '<span class="sc-ava">'+escapeHtml(chu)+'</span>'+
+        '<span class="sc-person-info"><b>'+escapeHtml(ten)+'</b>'+
+        '<small>'+escapeHtml(carrierName(it.maVanDon,it.nguon))+' · '+escapeHtml(it.ngayGDHienThi||'—')+'</small></span>'+
+        '<span class="sc-chev">›</span>'+
+      '</div>'+
+      '<div class="sc-money"><span>Giá trị đơn:</span><b>'+fmtFull(tong)+'</b></div>'+
+      '<div class="sc-actions">'+trackingBtnHtml(it.maVanDon,it.nguon)+
+      '</div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
 function setShipFilter(btn,val){
   shipStatusFilter=val;
   var wrap=document.getElementById('shipStatusChips');
   if(wrap) wrap.querySelectorAll('.chip-btn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-  pop(btn,1.06);
+  pop(btn, 1.06);
   applyShippingView();
 }
 function _syncShipChips(){
   var wrap=document.getElementById('shipStatusChips'); if(!wrap) return;
-  wrap.querySelectorAll('.chip-btn').forEach(function(b){
-    b.classList.toggle('active',(b.getAttribute('data-val')||'')===shipStatusFilter);
-  });
+  wrap.querySelectorAll('.chip-btn').forEach(function(b){ b.classList.toggle('active', (b.getAttribute('data-val')||'')===shipStatusFilter); });
 }
 function goToShippingWithFilter(status){
   switchTab('shipping');
   shipStatusFilter=status||'';
   _syncShipChips();
   applyShippingView();
-}
-
-/* Tổng giá trị của 1 nhóm vận đơn */
-function _shipTotal(maGDs){
-  var set={}; (maGDs||[]).forEach(function(m){ set[String(m)]=true; });
-  var t=0;
-  ((_appCache&&_appCache.gdData)||[]).forEach(function(r){ if(set[String(r.maGD)]) t+=(r.soTien||0); });
-  return t;
-}
-function copyShipCode(code, el){
-  if(navigator.clipboard) navigator.clipboard.writeText(code).catch(function(){});
-  showToast('📋 Đã copy: '+code);
-  if(el) pop(el,1.25);
-}
-
-var _shipByKey={};
-/* ---------- RENDER ---------- */
-/* Cột "Đã nhận hàng" chỉ giữ đơn nhận trong SHIP_RECV_DAYS ngày gần đây */
-var SHIP_RECV_DAYS=7;
-/* Parse ngày dạng dd/mm/yyyy hoặc yyyy-mm-dd -> Date, hoặc null nếu không hợp lệ */
-function _shipParseDate(s){
-  if(!s) return null;
-  var p=String(s).trim().split(/[\/\-]/);
-  if(p.length!==3) return null;
-  var d=(String(s).indexOf('/')>=0)
-    ? new Date(+p[2], +p[1]-1, +p[0])   // dd/mm/yyyy
-    : new Date(+p[0], +p[1]-1, +p[2]);  // yyyy-mm-dd
-  return isNaN(d.getTime())?null:d;
-}
-function _shipRecentReceived(it){
-  var d=_shipParseDate(it.ngayCapNhat)||_shipParseDate(it.ngayGD);
-  if(!d) return false;   // không rõ ngày -> coi như nhận đã lâu, ẩn
-  return (Date.now()-d.getTime())/86400000 <= SHIP_RECV_DAYS;
-}
-
-function renderShipping(items){
-  var el=document.getElementById('shipList');
-  _shipByKey={};
-  if(!items.length){
-    el.innerHTML='<div class="empty-state"><span class="ei">📭</span>Không có vận đơn nào khớp</div>';
-    return;
-  }
-  var buckets={}; SHIP_COLS.forEach(function(s){ buckets[s]=[]; }); buckets['__other__']=[];
-  items.forEach(function(it){
-    var s=it.trangThai||'';
-    if(s==='Đã nhận hàng' && !_shipRecentReceived(it)) return;   // ẩn đơn đã nhận lâu
-    (buckets[s]?buckets[s]:buckets['__other__']).push(it);
-  });
-  var cols=SHIP_COLS.slice();
-  if(buckets['__other__'].length) cols.push('__other__');        // "chưa có trạng thái" xuống cuối
-  if(shipStatusFilter) cols=cols.filter(function(s){ return s===shipStatusFilter; });
-
-  el.innerHTML='<div class="ship-board" id="shipBoard">'+
-    cols.map(function(s){ return shipColHtml(s,buckets[s]); }).join('')+'</div>';
-  bindShipDrag();
-}
-
-function _shipSortArr(arr,mode){
-  var a=arr.slice();
-  if(mode==='date_asc')   a.sort(function(x,y){ return (x.ngayGD||'').localeCompare(y.ngayGD||''); });
-  else if(mode==='money') a.sort(function(x,y){ return _shipTotal(y.maGDs)-_shipTotal(x.maGDs); });
-  else if(mode==='name')  a.sort(function(x,y){ return (x.nguoiGD||'').localeCompare(y.nguoiGD||'','vi'); });
-  else                    a.sort(function(x,y){ return (y.ngayGD||'').localeCompare(x.ngayGD||''); });
-  return a;
-}
-
-function shipColHtml(s,arr){
-  arr=arr||[];
-  var meta=SHIP_COL_META[s]||SHIP_COL_META['__other__'];
-  var ten=(s==='__other__')?'Chưa có trạng thái':s;
-  var closed=!!_shipColClosed[s];
-  var tong=0; arr.forEach(function(it){ tong+=_shipTotal(it.maGDs); });
-  var sk=String(s).replace(/'/g,"\\'");
-  var body=arr.length
-    ? _shipSortArr(arr,_shipColSort[s]).map(shipCardHtml).join('')
-    : '<div class="sb-empty">Trống</div>';
-  var footNote=(s==='Đã nhận hàng')?(' · '+SHIP_RECV_DAYS+' ngày gần đây'):'';
-  return '<section class="sb-col'+(closed?' closed':'')+'" data-status="'+escapeAttr(s)+'">'+
-      '<header class="sb-col-head">'+
-        '<span class="sb-col-dot" style="background:'+meta.dot+'"></span>'+
-        '<span class="sb-col-title">'+escapeHtml(ten)+'</span>'+
-        '<span class="sb-col-count">'+arr.length+'</span>'+
-        '<button class="sb-col-btn" aria-label="'+(closed?'Mở rộng cột':'Thu gọn cột')+'" '+
-          'onclick="toggleShipCol(\''+sk+'\')">'+(closed?'↔':'→←')+'</button>'+
-        '<button class="sb-col-btn sb-col-menu-btn" aria-label="Menu cột" '+
-          'onclick="openShipColMenu(event,\''+sk+'\')">•••</button>'+
-      '</header>'+
-      '<div class="sb-col-body">'+body+'</div>'+
-      '<footer class="sb-col-foot"><span>'+arr.length+' vận đơn'+footNote+'</span><b>'+fmtFull(tong)+'</b></footer>'+
-    '</section>';
-}
-
-/* Thẻ: bỏ badge trạng thái vì cột đã nói lên điều đó */
-function shipCardHtml(it){
-  var key=it.maVanDon?('VD::'+it.maVanDon):('GD::'+it.maGDs[0]);
-  _shipByKey[key]=it;
-  var ten=it.nguoiGD||'—';
-  var chu=(ten.trim()[0]||'?').toUpperCase();
-  var codeHtml=it.maVanDon
-    ? '<span class="sc-code">#'+escapeHtml(it.maVanDon)+'</span>'+
-      '<button class="sc-copy" aria-label="Copy mã vận đơn" onclick="copyShipCode(\''+
-        String(it.maVanDon).replace(/'/g,"\\'")+'\',this)">⧉</button>'
-    : '<span class="sc-code" style="color:#bbb;">chưa có mã VĐ</span>';
-  var soDon=it.soDon>1?'<span class="sc-pill">'+it.soDon+' đơn</span>':'';
-  return '<div class="ship-card" data-key="'+escapeAttr(key)+'">'+
-      '<div class="sc-top">'+codeHtml+soDon+'</div>'+
-      '<div class="sc-items"><span class="sp-cell">'+anhStackHtml(it.matHangList,3)+
-        '<span class="sp-cell-txt">'+escapeHtml(it.matHang||'—')+'</span></span></div>'+
-      '<div class="sc-person">'+
-        '<span class="sc-ava">'+escapeHtml(chu)+'</span>'+
-        '<span class="sc-person-info"><b>'+escapeHtml(ten)+'</b>'+
-        '<small>'+escapeHtml(carrierName(it.maVanDon,it.nguon))+' · '+
-          escapeHtml(it.ngayGDHienThi||'—')+'</small></span>'+
-        '<span class="sc-chev">›</span>'+
-      '</div>'+
-      '<div class="sc-money"><span>Giá trị đơn:</span><b>'+fmtFull(_shipTotal(it.maGDs))+'</b></div>'+
-      '<div class="sc-actions">'+trackingBtnHtml(it.maVanDon,it.nguon)+'</div>'+
-    '</div>';
-}
-
-/* ---------- THU GỌN + MENU CỘT ---------- */
-function toggleShipCol(s){
-  closeShipColMenu();
-  _shipColClosed[s]=!_shipColClosed[s];
-  applyShippingView();
-}
-function setShipColSort(s,mode){
-  _shipColSort[s]=mode;
-  closeShipColMenu();
-  applyShippingView();
-}
-function copyShipColCodes(s){
-  closeShipColMenu();
-  var codes=allShipping.filter(function(i){
-    return (i.trangThai||'')===s || (s==='__other__' && SHIP_COLS.indexOf(i.trangThai||'')<0);
-  }).map(function(i){ return i.maVanDon; }).filter(Boolean);
-  if(!codes.length){ showToast('Cột này chưa có mã vận đơn nào',true); return; }
-  if(navigator.clipboard) navigator.clipboard.writeText(codes.join('\n')).catch(function(){});
-  showToast('📋 Đã copy '+codes.length+' mã vận đơn');
-}
-function closeShipColMenu(){
-  var m=document.getElementById('shipColMenu');
-  if(m && m.parentNode) m.parentNode.removeChild(m);
-}
-function openShipColMenu(ev,s){
-  ev.stopPropagation();
-  closeShipColMenu();
-  var sk=String(s).replace(/'/g,"\\'");
-  var cur=_shipColSort[s]||'date_desc';
-  var opts=[['Mới nhất trước','date_desc'],['Cũ nhất trước','date_asc'],
-            ['Giá trị cao nhất','money'],['Người GD (A→Z)','name']];
-  var html='<div class="sb-menu-lbl">Sắp xếp</div>'+
-    opts.map(function(o){
-      return '<div class="sb-menu-it'+(cur===o[1]?' on':'')+'" onclick="setShipColSort(\''+
-        sk+'\',\''+o[1]+'\')">'+o[0]+'</div>';
-    }).join('')+
-    '<div class="sb-menu-sep"></div>'+
-    '<div class="sb-menu-it" onclick="copyShipColCodes(\''+sk+'\')">⧉ Copy tất cả mã VĐ</div>'+
-    '<div class="sb-menu-it" onclick="toggleShipCol(\''+sk+'\')">→← Thu gọn cột</div>';
-  var m=document.createElement('div');
-  m.className='sb-menu'; m.id='shipColMenu'; m.innerHTML=html;
-  document.body.appendChild(m);
-  var r=ev.currentTarget.getBoundingClientRect();
-  m.style.top=Math.min(r.bottom+6, window.innerHeight-230)+'px';
-  m.style.left=Math.max(8, Math.min(r.right-200, window.innerWidth-208))+'px';
-  setTimeout(function(){ document.addEventListener('click', closeShipColMenu, {once:true}); }, 0);
-}
-
-/* ---------- KÉO THẢ (Pointer Events — chạy cả chuột lẫn cảm ứng) ----------
-   Chuột : kéo lệch >8px là nhấc thẻ.
-   Cảm ứng: giữ 250ms mới nhấc (vuốt sớm hơn = cuộn trang bình thường).      */
-var _shipDrag=null;
-
-function bindShipDrag(){
-  var board=document.getElementById('shipBoard'); if(!board) return;
-  board.querySelectorAll('.ship-card').forEach(function(c){
-    c.addEventListener('pointerdown', _shipDown);
-  });
-}
-
-function _shipDown(e){
-  if(e.button!==undefined && e.button!==0) return;
-  if(e.target.closest('button,a')) return;
-  var card=e.currentTarget;
-  _shipDrag={ card:card, key:card.getAttribute('data-key'),
-    x0:e.clientX, y0:e.clientY, x:e.clientX, y:e.clientY,
-    active:false, moved:false, touch:(e.pointerType==='touch'), pid:e.pointerId,
-    timer:null, raf:null, over:null, ghost:null };
-  try{ card.setPointerCapture(e.pointerId); }catch(err){}
-  card.addEventListener('pointermove', _shipMove);
-  card.addEventListener('pointerup', _shipUp);
-  card.addEventListener('pointercancel', _shipUp);
-  if(_shipDrag.touch){
-    _shipDrag.timer=setTimeout(function(){
-      if(_shipDrag && !_shipDrag.moved && !_shipDrag.active) _shipStart();
-    }, 250);
-  }
-}
-
-function _shipMove(e){
-  var d=_shipDrag; if(!d) return;
-  if(!d.active){
-    if(Math.abs(e.clientX-d.x0)+Math.abs(e.clientY-d.y0)>8){
-      d.moved=true;
-      if(d.touch){ clearTimeout(d.timer); _shipEnd(); return; }  /* vuốt sớm = để trang cuộn */
-      _shipStart();
-    } else return;
-  }
-  d.x=e.clientX; d.y=e.clientY;
-  _shipGhostMove();
-  _shipHover(e.clientX, e.clientY);
-}
-
-function _shipStart(){
-  var d=_shipDrag; if(!d || d.active) return;
-  d.active=true;
-  var r=d.card.getBoundingClientRect();
-  d.ox=d.x0-r.left; d.oy=d.y0-r.top;
-  var g=d.card.cloneNode(true);
-  g.className='ship-card sc-ghost';
-  g.style.width=r.width+'px';
-  g.removeAttribute('data-key');
-  document.body.appendChild(g);
-  d.ghost=g;
-  d.card.classList.add('sc-src');
-  document.body.classList.add('ship-dragging');
-  document.addEventListener('touchmove', _shipNoScroll, {passive:false});
-  if(navigator.vibrate) navigator.vibrate(12);
-  _shipGhostMove();
-  _shipAuto();
-}
-function _shipNoScroll(e){ e.preventDefault(); }
-function _shipGhostMove(){
-  var d=_shipDrag; if(!d || !d.ghost) return;
-  d.ghost.style.transform='translate('+(d.x-d.ox)+'px,'+(d.y-d.oy)+'px) rotate(3deg)';
-}
-function _shipHover(x,y){
-  var d=_shipDrag; if(!d) return;
-  var el=document.elementFromPoint(x,y);
-  var col=el?el.closest('.sb-col'):null;
-  if(d.over===col) return;
-  if(d.over) d.over.classList.remove('drop-on');
-  d.over=col;
-  if(col) col.classList.add('drop-on');
-}
-/* Chạm mép board thì tự cuộn ngang */
-function _shipAuto(){
-  var d=_shipDrag; if(!d || !d.active) return;
-  var board=document.getElementById('shipBoard');
-  if(board){
-    var r=board.getBoundingClientRect(), s=0;
-    if(d.x<r.left+56) s=-14; else if(d.x>r.right-56) s=14;
-    if(s) board.scrollLeft+=s;
-  }
-  d.raf=requestAnimationFrame(_shipAuto);
-}
-
-function _shipUp(){
-  var d=_shipDrag; if(!d) return;
-  var wasActive=d.active, wasMoved=d.moved, key=d.key;
-  var col=d.over;
-  _shipEnd();
-  if(!wasActive){ if(!wasMoved) openShippingEdit(key); return; }
-  if(!col) return;
-  var ns=col.getAttribute('data-status');
-  if(ns==='__other__'){ showToast('Không thả vào cột "Chưa có trạng thái"',true); return; }
-  moveShipCard(key, ns);
-}
-
-function _shipEnd(){
-  var d=_shipDrag; if(!d) return;
-  clearTimeout(d.timer);
-  if(d.raf) cancelAnimationFrame(d.raf);
-  if(d.ghost && d.ghost.parentNode) d.ghost.parentNode.removeChild(d.ghost);
-  if(d.over) d.over.classList.remove('drop-on');
-  d.card.classList.remove('sc-src');
-  d.card.removeEventListener('pointermove', _shipMove);
-  d.card.removeEventListener('pointerup', _shipUp);
-  d.card.removeEventListener('pointercancel', _shipUp);
-  try{ d.card.releasePointerCapture(d.pid); }catch(err){}
-  document.removeEventListener('touchmove', _shipNoScroll, {passive:false});
-  document.body.classList.remove('ship-dragging');
-  _shipDrag=null;
-}
-
-/* ---------- GHI TRẠNG THÁI MỚI (lạc quan + hoàn tác) ---------- */
-function _shipApplyLocal(g, status, ngay){
-  g.trangThai=status;
-  if(ngay) g.ngayCapNhat=ngay.split('-').reverse().join('/');
-  var set={}; (g.maGDs||[]).forEach(function(m){ set[String(m)]=true; });
-  ((_appCache&&_appCache.gdData)||[]).forEach(function(r){
-    if(set[String(r.maGD)]){ r.trangThaiDon=status; if(ngay) r.ngayTrangThai=ngay; }
-  });
-}
-
-function moveShipCard(key, newStatus, laHoanTac){
-  var g=_shipByKey[key]; if(!g) return;
-  var old=g.trangThai||'';
-  if(old===newStatus) return;
-
-  var d=new Date();
-  var today=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
-
-  _shipApplyLocal(g, newStatus, today);      /* chuyển ngay cho mượt */
-  applyShippingView();
-  var card=document.querySelector('.ship-card[data-key="'+String(key).replace(/"/g,'\\"')+'"]');
-  if(card) card.classList.add('sc-saving');
-
-  var nhan=g.maVanDon?('#'+g.maVanDon):(g.maGDs.length+' đơn');
-
-  google.script.run
-    .withSuccessHandler(function(r){
-      if(!r || !r.success){
-        _shipApplyLocal(g, old, ''); applyShippingView();
-        showToast((r&&r.message)||'Lỗi khi lưu trạng thái', true);
-        return;
-      }
-      capNhatBadgeShip();
-      if(card) card.classList.remove('sc-saving');
-      if(laHoanTac) showToast('↩️ Đã hoàn tác');
-      else showShipUndo(nhan+' → '+newStatus, function(){ moveShipCard(key, old, true); });
-    })
-    .withFailureHandler(function(e){
-      _shipApplyLocal(g, old, ''); applyShippingView();
-      showToast(''+e, true);
-    })
-    .updateShippingBulk(g.maGDs, g.maVanDon||'', newStatus, today);
-}
-
-var _shipUndoTimer=null;
-function showShipUndo(msg, fn){
-  var el=document.getElementById('shipUndoBar');
-  if(!el){
-    el=document.createElement('div');
-    el.id='shipUndoBar'; el.className='ship-undo';
-    document.body.appendChild(el);
-  }
-  el.innerHTML='<span>✅ '+escapeHtml(msg)+'</span><button type="button">Hoàn tác</button>';
-  el.classList.add('show');
-  el.querySelector('button').onclick=function(){
-    el.classList.remove('show'); clearTimeout(_shipUndoTimer); fn();
-  };
-  clearTimeout(_shipUndoTimer);
-  _shipUndoTimer=setTimeout(function(){ el.classList.remove('show'); }, 6000);
 }
 
 var _shipEditMaGDs=[], shipEditStatusVal='';
