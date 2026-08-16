@@ -777,7 +777,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="chart-card"><h3>Dòng tiền theo tháng</h3><canvas id="cThang"></canvas></div>
       <div class="chart-card"><h3>Theo hình thức GD</h3><canvas id="cNguon"></canvas></div>
     </div>
-    <div class="chart-card" style="margin-bottom:20px;"><h3>Top người giao dịch</h3><canvas id="cNguoi" height="100"></canvas></div>
 
     <!-- Preview danh sách: 5 dòng mới nhất theo filter Tổng quan -->
     <div class="db-list-preview">
@@ -1636,7 +1635,7 @@ var _payByRow={};
 var sbLoaiGD='', sbTTVal='', sbDonVal='', sbRatingVal=0;
 var bulkBills=[], bulkCounter=1;
 var xlsxRows=[];
-var chartThang, chartNguon, chartNguoi;
+var chartThang, chartNguon;
 var knownContacts=[];
 
 /* =====================================================
@@ -2039,16 +2038,6 @@ function updateCharts(gd,tt){
     if(chartNguon) chartNguon.destroy();
     var ngL=Object.keys(ng);
     chartNguon=new Chart(document.getElementById('cNguon').getContext('2d'),{type:'doughnut',data:{labels:ngL,datasets:[{data:ngL.map(function(x){return ng[x];}),backgroundColor:['#93c5fd','#fdba74','#86efac','#d8b4fe'],borderWidth:2}]},options:{responsive:true,animation:anim,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:function(c){return c.label+': '+fmtFull(c.raw);}}}}}});
-
-    var np={};
-    gd.forEach(function(r){
-      var n=r.tenShop||'?';
-      if(r.loaiGD==='MUA'||r.loaiGD==='BÁN') np[n]=(np[n]||0)+r.soTien;
-      else if(r.loaiGD==='HOÀN') np[n]=(np[n]||0)-r.soTien;
-    });
-    var sorted=Object.entries(np).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
-    if(chartNguoi) chartNguoi.destroy();
-    chartNguoi=new Chart(document.getElementById('cNguoi').getContext('2d'),{type:'bar',data:{labels:sorted.map(function(x){return x[0];}),datasets:[{label:'Tổng tiền',data:sorted.map(function(x){return x[1];}),backgroundColor:'#a5b4fc',borderRadius:5}]},options:{indexAxis:'y',responsive:true,animation:anim,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return fmt(v);}}}}}});
   });
 }
 
