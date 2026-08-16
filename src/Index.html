@@ -269,21 +269,29 @@ select.filter-chip:focus,.filter-chip select:focus{border-color:var(--lego-yello
 .compact-amt{font-size:13px;font-weight:700;color:#15192b;white-space:nowrap;}
 .compact-date{font-size:11px;color:#bbb;white-space:nowrap;min-width:48px;text-align:right;}
 .compact-actions{display:flex;gap:4px;flex-shrink:0;}
-/* Người giao dịch — thẻ riêng từng người (mobile), đổ bóng cứng như nút */
+/* Người giao dịch — 3 bảng xếp hạng, mỗi người một thẻ đổ bóng cứng như nút.
+   Desktop: 3 cột cạnh nhau (giống lưới App Store). Mobile: xếp dọc. */
+.ng-rankings{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:start;}
+.ng-rank-col{min-width:0;}
+.ng-rank-head{display:flex;align-items:center;gap:7px;margin:0 0 12px;font-size:14px;font-weight:800;color:#15192b;}
+.ng-rank-head .ic{font-size:16px;}
+.ng-rank-head .cnt{margin-left:auto;font-size:11.5px;font-weight:700;color:#b3ad9c;}
 .ng-card-list{display:flex;flex-direction:column;gap:12px;}
-.ng-card{position:relative;background:#fff;border:1.5px solid #ece8df;border-radius:16px;padding:12px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;box-shadow:0 4px 0 #e7e0cf;transition:transform var(--t-fast) var(--ease-brick),box-shadow var(--t-fast);-webkit-tap-highlight-color:transparent;}
+.ng-card{position:relative;background:#fff;border:1.5px solid #ece8df;border-radius:16px;padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 4px 0 #e7e0cf;transition:transform var(--t-fast) var(--ease-brick),box-shadow var(--t-fast);-webkit-tap-highlight-color:transparent;}
 .ng-card:active{transform:translateY(3px);box-shadow:0 1px 0 #e7e0cf;}
 .ng-rank{flex-shrink:0;width:24px;height:24px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:#f1efe8;color:#9b9482;}
 .ng-rank-1{background:linear-gradient(160deg,#ffe27a,#f5b400);color:#7a5200;box-shadow:0 2px 0 #d99e00;}
 .ng-rank-2{background:linear-gradient(160deg,#e7e9ee,#c3c7d0);color:#5b606c;box-shadow:0 2px 0 #a9adb8;}
 .ng-rank-3{background:linear-gradient(160deg,#f4c99a,#df9a5e);color:#6e3d17;box-shadow:0 2px 0 #c47f43;}
-.ng-avatar{background:#fff3da;color:#9a5b00;}
+.ng-avatar{width:34px;height:34px;background:#fff3da;color:#9a5b00;}
 .ng-card .card-main{flex:1;min-width:0;}
-.ng-card-meta{display:flex;align-items:center;gap:5px;margin:2px 0 1px;line-height:1;}
-.ng-rate-num{font-size:12px;color:#9a5b00;font-weight:700;}
-.ng-norate{font-size:12px;color:#bbb;}
-.ng-card-side{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0;}
-.ng-card-money{font-size:14px;font-weight:800;color:#15192b;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.ng-card .card-shop{font-size:13.5px;}
+.ng-metric{flex-shrink:0;text-align:right;line-height:1.15;}
+.ng-metric-main{font-size:13.5px;font-weight:800;color:#15192b;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.ng-metric-sub{font-size:11px;color:#9a5b00;font-weight:700;margin-top:1px;white-space:nowrap;}
+.ng-rate-pill{display:inline-flex;align-items:center;gap:3px;background:#fff8e6;color:#b3650a;font-size:13px;font-weight:800;padding:3px 9px;border-radius:100px;white-space:nowrap;}
+.ng-rate-pill .st{color:#fbbf24;}
+@media(max-width:900px){ .ng-rankings{grid-template-columns:1fr;gap:24px;} }
 /* Status bar */
 .status-bar{display:flex;gap:0;background:#fff;border:1.5px solid #ece8df;border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;}
 .status-bar-item{flex:1;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s;position:relative;}
@@ -973,23 +981,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
   <div id="ngLoading" class="loading-state">⏳ Đang tải...</div>
   <div id="ngContent" style="display:none;">
-    <div class="table-scroll" id="ngTableWrap">
-    <table class="data-table" id="ngTable">
-      <thead>
-        <tr>
-          <th class="sortable-th" data-key="tenShop" tabindex="0" onclick="sortNguoiGD('tenShop')" onkeydown="ngSortKeydown(event,'tenShop')">Tên Shop<span class="sort-arrow">↕</span></th>
-          <th>Liên hệ</th>
-          <th class="sortable-th" data-key="soLan" tabindex="0" onclick="sortNguoiGD('soLan')" onkeydown="ngSortKeydown(event,'soLan')" style="text-align:center;">Số lần GD<span class="sort-arrow">↕</span></th>
-          <th class="sortable-th" data-key="soMH" tabindex="0" onclick="sortNguoiGD('soMH')" onkeydown="ngSortKeydown(event,'soMH')" style="text-align:center;">Số MH<span class="sort-arrow">↕</span></th>
-          <th class="sortable-th" data-key="tongTien" tabindex="0" onclick="sortNguoiGD('tongTien')" onkeydown="ngSortKeydown(event,'tongTien')" style="text-align:right;">Tổng tiền<span class="sort-arrow">↕</span></th>
-          <th class="sortable-th" data-key="rating" tabindex="0" onclick="sortNguoiGD('rating')" onkeydown="ngSortKeydown(event,'rating')">Rating TB<span class="sort-arrow">↕</span></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="ngBody"></tbody>
-    </table>
-    </div>
-    <div id="ngCardWrap" style="display:none;"></div>
+    <div id="ngRankings" class="ng-rankings"></div>
     <div id="ngEmpty" class="empty-state" style="display:none;"><span class="ei">📭</span>Không có dữ liệu phù hợp</div>
   </div>
 </div>
@@ -4118,17 +4110,7 @@ function gmhGoPage(p){ gmhPage=p; renderGiaMH(); window.scrollTo({top:0,behavior
 /* =====================================================
    17. NGƯỜI GIAO DỊCH
    ===================================================== */
-var nguoiGDData=[], ngSortKey='tongTien', ngSortDir=-1;
-function sortNguoiGD(key){
-  if(ngSortKey===key) ngSortDir*=-1;
-  else { ngSortKey=key; ngSortDir=(key==='tenShop')?1:-1; }
-  renderNguoiGD();
-}
-function ngSortKeydown(e,key){
-  if(e.key==='ArrowUp'){ e.preventDefault(); ngSortKey=key; ngSortDir=1; renderNguoiGD(); }
-  else if(e.key==='ArrowDown'){ e.preventDefault(); ngSortKey=key; ngSortDir=-1; renderNguoiGD(); }
-  else if(e.key==='Enter'||e.key===' '){ e.preventDefault(); sortNguoiGD(key); }
-}
+var nguoiGDData=[];
 function loadNguoiGD(){
   document.getElementById('ngLoading').style.display='block';
   document.getElementById('ngContent').style.display='none';
@@ -4177,70 +4159,52 @@ function renderNguoiGD(){
     return true;
   });
 
-  filtered.sort(function(a,b){
-    var av=a[ngSortKey], bv=b[ngSortKey];
-    if(typeof av==='number') return ngSortDir*(av-bv);
-    return ngSortDir*String(av||'').localeCompare(String(bv||''));
-  });
-
-  var tableWrap=document.getElementById('ngTableWrap');
-  var cardWrap=document.getElementById('ngCardWrap');
+  var rankings=document.getElementById('ngRankings');
   if(!filtered.length){
-    document.getElementById('ngBody').innerHTML='';
-    cardWrap.innerHTML='';
+    rankings.innerHTML='';
     document.getElementById('ngEmpty').style.display='block';
-    tableWrap.style.display='none';
-    cardWrap.style.display='none';
     return;
   }
   document.getElementById('ngEmpty').style.display='none';
 
-  if(window.innerWidth<=700){
-    tableWrap.style.display='none';
-    cardWrap.style.display='block';
-    cardWrap.innerHTML=renderNguoiGDCard(filtered);
-    return;
-  }
+  var byTien=filtered.slice().sort(function(a,b){ return b.tongTien-a.tongTien; });
+  var byLan=filtered.slice().sort(function(a,b){ return (b.soLan-a.soLan)||(b.soMH-a.soMH); });
+  var byRating=filtered.filter(function(n){ return n.rating>0; })
+    .sort(function(a,b){ return (b.rating-a.rating)||(b.soLan-a.soLan); });
 
-  cardWrap.style.display='none';
-  tableWrap.style.display='block';
-  updateSortIndicators('#ngTable thead', ngSortKey, ngSortDir);
-  document.getElementById('ngBody').innerHTML=filtered.map(function(n){
-    return '<tr class="click-open" onclick="rowOpenNguoiGD(event,\''+n.tenShop.replace(/'/g,"\\'")+'\')">'+
-      '<td><b>'+n.tenShop+'</b></td>'+
-      '<td style="text-align:center;">'+contactBtnHtml(n.linkLH)+'</td>'+
-      '<td style="text-align:center;">'+n.soLan+'</td>'+
-      '<td style="text-align:center;color:#9a5b00;font-weight:600;">'+n.soMH+'</td>'+
-      '<td style="text-align:right;font-weight:600;">'+fmtFull(n.tongTien)+'</td>'+
-      '<td>'+(n.rating>0 ? renderStarsReadonly(n.rating)+' <span style="color:#aaa;font-size:12px;">('+n.rating.toFixed(1)+')</span>' : '<span style="color:#bbb;font-size:13px;">Chưa đánh giá</span>')+'</td>'+
-      '<td style="text-align:center;color:#ccc;font-size:18px;font-weight:700;">›</td>'+
-      '</tr>';
-  }).join('');
+  rankings.innerHTML=
+    ngRankSection('💰','Theo tổng tiền', byTien, function(n){
+      return '<div class="ng-metric"><div class="ng-metric-main">'+fmtFull(n.tongTien)+'</div></div>';
+    })+
+    ngRankSection('🔄','Theo số lần giao dịch', byLan, function(n){
+      return '<div class="ng-metric"><div class="ng-metric-main">'+n.soLan+' lần</div><div class="ng-metric-sub">'+n.soMH+' mặt hàng</div></div>';
+    })+
+    ngRankSection('⭐','Theo đánh giá', byRating, function(n){
+      return '<div class="ng-metric"><span class="ng-rate-pill"><span class="st">★</span>'+n.rating.toFixed(1)+'</span></div>';
+    });
 }
 
-/* Thẻ từng người giao dịch — dùng trên mobile thay cho bảng gạch ngang */
-function renderNguoiGDCard(list){
-  return '<div class="ng-card-list">'+list.map(function(n,i){
-    var rank=i+1;
-    var rankCls=rank<=3 ? ' ng-rank-'+rank : '';
-    var nameSafe=n.tenShop.replace(/'/g,"\\'");
-    var ratingHtml=n.rating>0
-      ? renderStarsReadonly(n.rating)+'<span class="ng-rate-num">'+n.rating.toFixed(1)+'</span>'
-      : '<span class="ng-norate">Chưa đánh giá</span>';
-    return '<div class="ng-card click-open" onclick="rowOpenNguoiGD(event,\''+nameSafe+'\')">'+
-      '<div class="ng-rank'+rankCls+'">'+rank+'</div>'+
-      '<div class="card-avatar ng-avatar">'+initials(n.tenShop)+'</div>'+
-      '<div class="card-main">'+
-        '<div class="card-shop">'+n.tenShop+'</div>'+
-        '<div class="ng-card-meta">'+ratingHtml+'</div>'+
-        '<div class="card-sub">'+n.soLan+' lần GD · '+n.soMH+' mặt hàng</div>'+
-      '</div>'+
-      '<div class="ng-card-side">'+
-        '<div class="ng-card-money">'+fmtFull(n.tongTien)+'</div>'+
-        contactBtnHtml(n.linkLH)+
-      '</div>'+
-      '</div>';
-  }).join('')+'</div>';
+/* Một cột xếp hạng: tiêu đề + danh sách thẻ. metricFn trả HTML chỉ số bên phải. */
+function ngRankSection(ic, title, list, metricFn){
+  var body = list.length
+    ? '<div class="ng-card-list">'+list.map(function(n,i){ return ngRankCard(n, i+1, metricFn(n)); }).join('')+'</div>'
+    : '<div style="font-size:13px;color:#bbb;padding:16px;text-align:center;">Chưa có dữ liệu</div>';
+  return '<section class="ng-rank-col">'+
+    '<h3 class="ng-rank-head"><span class="ic">'+ic+'</span>'+title+'<span class="cnt">'+list.length+'</span></h3>'+
+    body+
+    '</section>';
+}
+
+/* Một thẻ xếp hạng — tối giản: hạng + avatar + tên + đúng một chỉ số. */
+function ngRankCard(n, rank, metricHtml){
+  var rankCls=rank<=3 ? ' ng-rank-'+rank : '';
+  var nameSafe=n.tenShop.replace(/'/g,"\\'");
+  return '<div class="ng-card click-open" onclick="rowOpenNguoiGD(event,\''+nameSafe+'\')">'+
+    '<div class="ng-rank'+rankCls+'">'+rank+'</div>'+
+    '<div class="card-avatar ng-avatar">'+initials(n.tenShop)+'</div>'+
+    '<div class="card-main"><div class="card-shop">'+n.tenShop+'</div></div>'+
+    metricHtml+
+    '</div>';
 }
 
 var _ngDetailOriginalTenShop='';
