@@ -297,10 +297,7 @@ select.filter-chip:focus,.filter-chip select:focus{border-color:var(--lego-yello
 .ng-detail-link:hover{color:var(--lego-red-dark);}
 .ng-item.ng-hide-desktop{display:none;}   /* desktop chỉ hiện 9 hạng đầu */
 .ng-dots{display:none;}
-.ng-morebtn{display:none;-webkit-tap-highlight-color:transparent;}
-.ng-morebtn.d-only{display:block;width:fit-content;margin:16px auto 0;padding:9px 22px;background:#f1ede2;border:1.5px solid #e3ddc9;border-radius:100px;color:var(--lego-navy);font-size:13px;font-weight:700;cursor:pointer;transition:background .15s,transform var(--t-fast) var(--ease-brick);}
-.ng-morebtn.d-only:hover{background:#e7e1d0;}
-.ng-morebtn.d-only:active{transform:scale(.96);}
+.ng-morebtn{display:none;-webkit-tap-highlight-color:transparent;}   /* desktop: không có nút, chỉ hiện 9 */
 @media(max-width:820px){
   /* Mỗi bảng thành 1 card, vuốt ngang qua lại, danh sách gạch mảnh bên trong.
      Chỉ hiện 5 hạng đầu, bấm "Hiển thị thêm 5" để lộ tiếp. */
@@ -313,7 +310,6 @@ select.filter-chip:focus,.filter-chip select:focus{border-color:var(--lego-yello
   .ng-item:active{transform:none;box-shadow:none;background:#faf9f4;}
   .ng-item.ng-hide-desktop{display:flex;}   /* mobile không dùng giới hạn desktop */
   .ng-item.ng-hide-mobile{display:none;}     /* … mà theo giới hạn mobile (đặt sau để thắng) */
-  .ng-morebtn.d-only{display:none;}
   .ng-morebtn.m-only{display:block;width:100%;margin:2px 0 0;padding:11px;background:none;border:none;border-top:1px solid #f3f1ea;border-radius:0;color:#8b8473;font-size:13px;font-weight:700;cursor:pointer;}
   .ng-morebtn.m-only:active{background:#faf9f4;}
   .ng-dots{display:flex;justify-content:center;gap:7px;margin-top:16px;}
@@ -4233,9 +4229,6 @@ function ngRankPanel(ic, title, list, metricFn){
     var dRows=Math.max(1, Math.ceil(Math.min(NG_DESKTOP_SHOW,list.length)/3));
     var items=list.map(function(n,i){ return ngItem(n, i+1, metricFn(n), i>=NG_MOBILE_SHOW, i>=NG_DESKTOP_SHOW); }).join('');
     body='<div class="ng-plist" style="--rows:'+dRows+';">'+items+'</div>';
-    if(list.length>NG_DESKTOP_SHOW){
-      body+='<button class="ng-morebtn d-only" onclick="ngShowMoreDesktop(this)">Hiển thị thêm '+Math.min(NG_DESKTOP_SHOW,list.length-NG_DESKTOP_SHOW)+' ▾</button>';
-    }
     if(list.length>NG_MOBILE_SHOW){
       body+='<button class="ng-morebtn m-only" onclick="ngShowMore(this)">Hiển thị thêm '+Math.min(NG_MOBILE_SHOW,list.length-NG_MOBILE_SHOW)+' ▾</button>';
     }
@@ -4270,19 +4263,6 @@ function ngShowMore(btn){
   var remain=panel.querySelectorAll('.ng-item.ng-hide-mobile').length;
   if(remain<=0) btn.remove();
   else btn.textContent='Hiển thị thêm '+Math.min(NG_MOBILE_SHOW,remain)+' ▾';
-}
-
-/* Desktop: lộ thêm 9 hạng và tính lại số hàng lưới (--rows) theo số đang hiện. */
-function ngShowMoreDesktop(btn){
-  var panel=btn.closest('.ng-panel'); if(!panel) return;
-  var plist=panel.querySelector('.ng-plist');
-  var hidden=panel.querySelectorAll('.ng-item.ng-hide-desktop');
-  for(var i=0;i<NG_DESKTOP_SHOW && i<hidden.length;i++) hidden[i].classList.remove('ng-hide-desktop');
-  var shown=panel.querySelectorAll('.ng-item:not(.ng-hide-desktop)').length;
-  if(plist) plist.style.setProperty('--rows', Math.max(1, Math.ceil(shown/3)));
-  var remain=panel.querySelectorAll('.ng-item.ng-hide-desktop').length;
-  if(remain<=0) btn.remove();
-  else btn.textContent='Hiển thị thêm '+Math.min(NG_DESKTOP_SHOW,remain)+' ▾';
 }
 
 /* Vuốt ngang giữa 3 bảng trên mobile; dot dưới cùng theo bảng đang xem. */
