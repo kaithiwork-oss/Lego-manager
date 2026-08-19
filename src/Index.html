@@ -661,6 +661,74 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .stat-card{padding:12px;}
   .stat-card .s-value{font-size:19px;}
 }
+
+/* ====== WISHLIST ====== */
+.wl-add-btn{font-size:13px;font-weight:700;color:#fff;background:var(--lego-red);border:none;border-radius:999px;padding:8px 16px;cursor:pointer;box-shadow:0 2px 6px rgba(216,41,28,.25);transition:transform .1s,background .15s;}
+.wl-add-btn:hover{background:var(--lego-red-dark);}
+.wl-add-btn:active{transform:scale(.96);}
+.wl-toolbar{margin-bottom:16px;}
+.wl-folder-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.wl-folder-chips:empty{display:none;}
+.wl-fchip{font-size:12.5px;font-weight:600;color:#6b6455;background:#fff;border:1px solid #e8e5da;border-radius:999px;padding:6px 13px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.wl-fchip:hover{border-color:var(--lego-red);color:var(--lego-red-dark);}
+.wl-fchip.active{background:var(--lego-red);border-color:var(--lego-red);color:#fff;}
+.wl-fchip .cnt{opacity:.7;font-weight:700;margin-left:3px;}
+
+.wl-folder-sec{margin-bottom:26px;}
+.wl-folder-head{display:flex;align-items:center;gap:8px;margin:0 2px 12px;}
+.wl-folder-name{font-size:15px;font-weight:700;color:#2b2620;}
+.wl-folder-count{font-size:12px;font-weight:700;color:#8b8473;background:#f3f0e6;border-radius:999px;padding:2px 9px;}
+.wl-folder-total{font-size:12.5px;color:#8b8473;margin-left:auto;font-weight:600;}
+
+.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+.wl-card{background:#fff;border:1px solid #ebe8de;border-radius:var(--radius-md);overflow:hidden;display:flex;flex-direction:column;transition:transform .12s,box-shadow .12s;position:relative;}
+.wl-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08);}
+.wl-card-img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#faf9f4;padding:10px;}
+.wl-card-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1;}
+.wl-card-name{font-size:13px;font-weight:600;color:#2b2620;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.wl-card-ma{font-size:11.5px;color:#a29b88;font-weight:600;}
+.wl-card-note{font-size:12px;color:#7a7365;line-height:1.35;margin-top:2px;}
+.wl-card-price{font-size:13px;font-weight:700;color:var(--lego-red-dark);margin-top:auto;padding-top:4px;}
+.wl-card-acts{display:flex;gap:6px;padding:0 12px 12px;}
+.wl-card-acts button{flex:1;font-size:12px;font-weight:600;border:1px solid #ebe8de;background:#fbf9f2;color:#6b6455;border-radius:8px;padding:6px 0;cursor:pointer;transition:all .12s;}
+.wl-card-acts button:hover{border-color:var(--lego-red);color:var(--lego-red-dark);}
+.wl-card-acts button.del:hover{border-color:#d8291c;color:#d8291c;background:#fff2f1;}
+
+.wl-empty-state{text-align:center;padding:50px 20px;color:#a29b88;}
+.wl-empty-state .ic{font-size:44px;margin-bottom:10px;}
+.wl-empty-state .t{font-size:15px;font-weight:700;color:#6b6455;margin-bottom:4px;}
+.wl-empty-state .s{font-size:13px;}
+
+/* modal tìm & thêm */
+.wl-modal-overlay{position:fixed;inset:0;background:rgba(20,16,12,.45);z-index:120;opacity:0;pointer-events:none;transition:opacity .2s;}
+.wl-modal-overlay.open{opacity:1;pointer-events:auto;}
+.wl-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%);width:min(560px,94vw);max-height:88vh;background:#fff;border-radius:var(--radius-lg);z-index:121;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 24px 60px rgba(0,0,0,.28);}
+.wl-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%);}
+.wl-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #f0eee4;}
+.wl-modal-title{font-size:16px;font-weight:700;}
+.wl-modal-close{background:none;border:none;font-size:18px;color:#a29b88;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.wl-modal-close:hover{background:#f5f3ec;color:#2b2620;}
+.wl-modal-body{padding:16px 18px;overflow-y:auto;}
+.wl-seg{display:inline-flex;background:#f3f0e6;border-radius:999px;padding:3px;margin-bottom:12px;}
+.wl-seg-btn{font-size:13px;font-weight:600;color:#8b8473;background:none;border:none;border-radius:999px;padding:6px 18px;cursor:pointer;transition:all .12s;}
+.wl-seg-btn.active{background:#fff;color:var(--lego-red-dark);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.wl-search-row{display:flex;gap:8px;margin-bottom:12px;}
+.wl-search-row .search-input{flex:1;}
+.wl-field{margin-bottom:14px;}
+.wl-lbl{display:block;font-size:12px;font-weight:700;color:#8b8473;margin-bottom:5px;}
+.wl-modal-title2{font-size:12px;font-weight:700;color:#8b8473;margin-bottom:10px;}
+.wl-result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;min-height:60px;}
+.wl-empty{grid-column:1/-1;color:#a29b88;font-size:13px;text-align:center;padding:16px;}
+.wl-ro{border:1px solid #ebe8de;border-radius:10px;overflow:hidden;cursor:pointer;background:#fff;transition:all .12s;position:relative;}
+.wl-ro:hover{border-color:var(--lego-red);box-shadow:0 4px 12px rgba(216,41,28,.15);}
+.wl-ro img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#faf9f4;padding:6px;display:block;}
+.wl-ro .rn{font-size:11.5px;font-weight:600;color:#2b2620;padding:6px 8px 3px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.wl-ro .rm{font-size:10.5px;color:#a29b88;padding:0 8px 8px;font-weight:600;}
+.wl-ro .radd{position:absolute;top:6px;right:6px;background:var(--lego-red);color:#fff;font-size:15px;font-weight:700;width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);opacity:0;transition:opacity .12s;}
+.wl-ro:hover .radd{opacity:1;}
+@media(max-width:600px){
+  .wl-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+}
 </style>
 
 <script>
@@ -707,6 +775,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button class="nav-tab" data-tab="shipping" onclick="switchTab('shipping',this)"><span class="nav-ic">🚚</span>Vận chuyển<span class="nav-badge" id="navBadgeShip"></span></button>
     <button class="nav-tab" data-tab="giamh" onclick="switchTab('giamh',this)"><span class="nav-ic">🏷️</span>Mặt hàng</button>
     <button class="nav-tab" data-tab="nguoigd" onclick="switchTab('nguoigd',this)"><span class="nav-ic">👤</span>Người GD</button>
+    <button class="nav-tab" data-tab="wishlist" onclick="switchTab('wishlist',this)"><span class="nav-ic">💖</span>Wishlist</button>
   </div>
 
   <div class="side-nav-footer">
@@ -1119,6 +1188,24 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 </div>
 </div>
 
+<!-- ====== WISHLIST ====== -->
+<div class="page" id="page-wishlist">
+<div class="container" style="max-width:1100px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
+    <h2 style="font-size:18px;font-weight:700;">💖 Wishlist</h2>
+    <div style="display:flex;gap:8px;">
+      <button onclick="loadWishlist()" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
+      <button class="wl-add-btn" onclick="openWishlistSearch()">＋ Thêm mục</button>
+    </div>
+  </div>
+  <div class="wl-toolbar">
+    <input type="text" id="wlSearch" class="search-input" aria-label="Lọc wishlist" placeholder="🔍 Lọc theo tên, mã, ghi chú..." oninput="renderWishlist()">
+    <div class="wl-folder-chips" id="wlFolderChips"></div>
+  </div>
+  <div id="wlContent"><div class="loading-state">⏳ Đang tải...</div></div>
+</div>
+</div>
+
 <!-- ====== LỊCH SỬ THAY ĐỔI ====== -->
 <div class="page" id="page-changelog">
 <div class="container" style="max-width:900px;">
@@ -1457,6 +1544,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button class="bn-item nav-tab" data-tab="nguoigd" aria-label="Người GD" onclick="switchTab('nguoigd',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>
     </button>
+    <button class="bn-item nav-tab" data-tab="wishlist" aria-label="Wishlist" onclick="switchTab('wishlist',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5 4.2 12.9a4.6 4.6 0 0 1 6.5-6.5l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.5 6.5Z"/></svg>
+    </button>
   </div>
   <button class="fab-btn" aria-label="Thêm giao dịch" id="fabBtn" onclick="toggleFabSheet()"><span>＋</span></button>
 </nav>
@@ -1473,6 +1563,32 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
   <div class="fab-sheet-option xlsx" onclick="closeFabSheet();openSidebar('importExcel')">
     <span class="fso-ic">📊</span>Import Excel
+  </div>
+</div>
+
+<!-- ====== WISHLIST: MODAL TÌM & THÊM ====== -->
+<div class="wl-modal-overlay" id="wlModalOverlay" onclick="closeWishlistSearch()"></div>
+<div class="wl-modal" id="wlModal" role="dialog" aria-label="Thêm vào wishlist">
+  <div class="wl-modal-head">
+    <div class="wl-modal-title">💖 Thêm vào wishlist</div>
+    <button class="wl-modal-close" aria-label="Đóng" onclick="closeWishlistSearch()">✕</button>
+  </div>
+  <div class="wl-modal-body">
+    <div class="wl-seg" id="wlSeg">
+      <button class="wl-seg-btn active" data-loai="set" onclick="setWlLoai('set',this)">Set</button>
+      <button class="wl-seg-btn" data-loai="mini" onclick="setWlLoai('mini',this)">Minifig</button>
+    </div>
+    <div class="wl-search-row">
+      <input type="text" id="wlKeyword" class="search-input" placeholder="🔍 Tên hoặc mã set (vd: 76821, technic bugatti)..." onkeydown="if(event.key==='Enter')doWishlistSearch()">
+      <button class="wl-add-btn" onclick="doWishlistSearch()">Tìm</button>
+    </div>
+    <div class="wl-field">
+      <label class="wl-lbl">Nhóm / Bộ sưu tập</label>
+      <input type="text" id="wlFolderInput" class="search-input" list="wlFolderList" placeholder="vd: Star Wars, Technic, Ưu tiên mua..." autocomplete="off">
+      <datalist id="wlFolderList"></datalist>
+    </div>
+    <div class="wl-modal-title2" id="wlResultTitle">Kết quả</div>
+    <div class="wl-result-grid" id="wlResults"><div class="wl-empty">Nhập từ khoá rồi bấm <b>Tìm</b> để tra trên Rebrickable.</div></div>
   </div>
 </div>
 
@@ -1822,6 +1938,7 @@ function switchTab(tab, el){
   if(tab==='nguoigd') loadNguoiGD();
   if(tab==='giamh') loadGiaMH();
   if(tab==='duyet') loadDuyet(true);
+  if(tab==='wishlist') loadWishlist();
 }
 
 function showToast(msg, isErr){
@@ -1851,7 +1968,7 @@ document.addEventListener('click', function(e){
   if (!e.target.closest('.btn-import-wrap')){ closeImportDD(); closeCreateDD(); }
 });
 document.addEventListener('keydown', function(e){
-  if (e.key === 'Escape'){ closeSidebar(); closeFabSheet(); closeMoreSheet(); closeFilterTray(); closeNguoiGDDetail(); }
+  if (e.key === 'Escape'){ closeSidebar(); closeFabSheet(); closeMoreSheet(); closeFilterTray(); closeNguoiGDDetail(); closeWishlistSearch(); }
 });
 
 /* =====================================================
@@ -4401,6 +4518,203 @@ function closeNguoiGDFull(){
 }
 /* Bấm 1 dòng trong bảng chi tiết -> mở hồ sơ người đó. */
 function ngFullRowClick(ev, tenShop){ if(_hitInner(ev)) return; closeNguoiGDFull(); openNguoiGDDetail(tenShop); }
+
+/* =====================================================
+   WISHLIST
+   ===================================================== */
+var wlData=[];               // toàn bộ mục
+var wlFolderFilter='';       // '' = tất cả
+var wlLoai='set';            // set | mini
+var wlLoaded=false;
+
+function loadWishlist(){
+  var c=document.getElementById('wlContent');
+  if(!wlLoaded) c.innerHTML='<div class="loading-state">⏳ Đang tải...</div>';
+  google.script.run
+    .withSuccessHandler(function(r){
+      wlLoaded=true;
+      if(!r||!r.success){ c.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Không tải được</div><div class="s">'+escapeHtml((r&&r.message)||'')+'</div></div>'; return; }
+      wlData=r.data||[];
+      renderWishlist();
+    })
+    .withFailureHandler(function(e){ c.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Lỗi</div><div class="s">'+escapeHtml(''+e)+'</div></div>'; })
+    .getWishlist();
+}
+
+function wlFolders(){
+  var seen={}, order=[];
+  wlData.forEach(function(x){ var f=x.folder||'Chưa phân loại'; if(!seen[f]){ seen[f]=0; order.push(f); } seen[f]++; });
+  return { order:order, count:seen };
+}
+
+function renderWishlist(){
+  var c=document.getElementById('wlContent');
+  if(!wlData.length){
+    document.getElementById('wlFolderChips').innerHTML='';
+    c.innerHTML='<div class="wl-empty-state"><div class="ic">💖</div><div class="t">Wishlist trống</div><div class="s">Bấm “＋ Thêm mục” để tra Rebrickable và lưu bộ Lego bạn muốn mua.</div></div>';
+    return;
+  }
+
+  // chips folder
+  var f=wlFolders();
+  var chips='<button class="wl-fchip'+(wlFolderFilter===''?' active':'')+'" onclick="setWlFolderFilter(\'\')">Tất cả<span class="cnt">'+wlData.length+'</span></button>';
+  f.order.forEach(function(name){
+    chips+='<button class="wl-fchip'+(wlFolderFilter===name?' active':'')+'" onclick="setWlFolderFilter('+JSON.stringify(name).replace(/"/g,'&quot;')+')">'+escapeHtml(name)+'<span class="cnt">'+f.count[name]+'</span></button>';
+  });
+  document.getElementById('wlFolderChips').innerHTML=chips;
+
+  // lọc theo từ khoá + folder
+  var kw=(document.getElementById('wlSearch').value||'').trim().toLowerCase();
+  var list=wlData.filter(function(x){
+    if(wlFolderFilter && (x.folder||'Chưa phân loại')!==wlFolderFilter) return false;
+    if(kw){
+      var hay=((x.ten||'')+' '+(x.setNo||'')+' '+(x.ghiChu||'')).toLowerCase();
+      if(hay.indexOf(kw)<0) return false;
+    }
+    return true;
+  });
+
+  if(!list.length){ c.innerHTML='<div class="wl-empty-state"><div class="ic">🔍</div><div class="t">Không có mục nào khớp</div></div>'; return; }
+
+  // gom nhóm theo folder giữ thứ tự xuất hiện
+  var groups={}, gOrder=[];
+  list.forEach(function(x){ var fn=x.folder||'Chưa phân loại'; if(!groups[fn]){ groups[fn]=[]; gOrder.push(fn); } groups[fn].push(x); });
+
+  var html='';
+  gOrder.forEach(function(fn){
+    var items=groups[fn];
+    var tong=items.reduce(function(s,x){ return s+(Number(x.gia)||0); },0);
+    html+='<div class="wl-folder-sec"><div class="wl-folder-head">'+
+      '<span class="wl-folder-name">📁 '+escapeHtml(fn)+'</span>'+
+      '<span class="wl-folder-count">'+items.length+'</span>'+
+      (tong>0?'<span class="wl-folder-total">'+fmtFull(tong)+'</span>':'')+
+      '</div><div class="wl-grid">';
+    items.forEach(function(x){ html+=wlCardHtml(x); });
+    html+='</div></div>';
+  });
+  c.innerHTML=html;
+}
+
+function wlCardHtml(x){
+  var img=x.anh?'<img class="wl-card-img" src="'+escapeAttr(x.anh)+'" loading="lazy" alt="" onerror="this.style.opacity=.2">'
+               :'<div class="wl-card-img" style="display:flex;align-items:center;justify-content:center;font-size:34px;">🧱</div>';
+  var id=escapeAttr(x.id);
+  return '<div class="wl-card">'+img+
+    '<div class="wl-card-body">'+
+      '<div class="wl-card-name">'+escapeHtml(x.ten)+'</div>'+
+      (x.setNo?'<div class="wl-card-ma">'+escapeHtml(x.setNo)+'</div>':'')+
+      (x.ghiChu?'<div class="wl-card-note">'+escapeHtml(x.ghiChu)+'</div>':'')+
+      (x.gia>0?'<div class="wl-card-price">'+fmtFull(x.gia)+'</div>':'')+
+    '</div>'+
+    '<div class="wl-card-acts">'+
+      '<button onclick="editWishlistItem(\''+id+'\')">✏️ Sửa</button>'+
+      '<button class="del" onclick="removeWishlistItem(\''+id+'\')">🗑️</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function setWlFolderFilter(name){ wlFolderFilter=name; renderWishlist(); }
+
+function editWishlistItem(id){
+  var x=wlData.filter(function(i){ return i.id===id; })[0];
+  if(!x) return;
+  var folder=prompt('Nhóm / bộ sưu tập:', x.folder||'Chưa phân loại');
+  if(folder===null) return;
+  var ghiChu=prompt('Ghi chú:', x.ghiChu||'');
+  if(ghiChu===null) return;
+  var giaStr=prompt('Giá dự kiến (VNĐ, để trống nếu không rõ):', x.gia||'');
+  if(giaStr===null) return;
+  var gia=parseInt(String(giaStr).replace(/[^0-9]/g,''))||0;
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; }
+      showToast('✅ Đã cập nhật');
+      wlData=wlData.map(function(i){ return i.id===id?r.item:i; });
+      renderWishlist();
+    })
+    .withFailureHandler(function(e){ showToast(''+e,true); })
+    .updateWishlistItem(id,{folder:folder,ghiChu:ghiChu,gia:gia});
+}
+
+function removeWishlistItem(id){
+  var x=wlData.filter(function(i){ return i.id===id; })[0];
+  if(!x) return;
+  if(!confirm('Xoá "'+(x.ten||'')+'" khỏi wishlist?')) return;
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; }
+      showToast('✅ '+r.message);
+      wlData=wlData.filter(function(i){ return i.id!==id; });
+      renderWishlist();
+    })
+    .withFailureHandler(function(e){ showToast(''+e,true); })
+    .deleteWishlistItem(id);
+}
+
+/* ---- modal tìm & thêm ---- */
+function openWishlistSearch(){
+  document.getElementById('wlModalOverlay').classList.add('open');
+  document.getElementById('wlModal').classList.add('open');
+  // gợi ý folder từ dữ liệu hiện có + folder đang lọc
+  var dl=document.getElementById('wlFolderList');
+  var f=wlFolders();
+  dl.innerHTML=f.order.map(function(n){ return '<option value="'+escapeAttr(n)+'">'; }).join('');
+  var fi=document.getElementById('wlFolderInput');
+  if(!fi.value && wlFolderFilter) fi.value=wlFolderFilter;
+  setTimeout(function(){ document.getElementById('wlKeyword').focus(); },80);
+}
+function closeWishlistSearch(){
+  document.getElementById('wlModalOverlay').classList.remove('open');
+  document.getElementById('wlModal').classList.remove('open');
+}
+function setWlLoai(loai, el){
+  wlLoai=loai;
+  document.querySelectorAll('#wlSeg .wl-seg-btn').forEach(function(b){ b.classList.toggle('active', b===el); });
+}
+
+function doWishlistSearch(){
+  var kw=(document.getElementById('wlKeyword').value||'').trim();
+  var box=document.getElementById('wlResults');
+  var title=document.getElementById('wlResultTitle');
+  if(!kw){ box.innerHTML='<div class="wl-empty">Nhập từ khoá để tìm.</div>'; return; }
+  title.textContent='Đang tìm...';
+  box.innerHTML='<div class="wl-empty">⏳ Đang tra Rebrickable...</div>';
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r||!r.success){ title.textContent='Kết quả'; box.innerHTML='<div class="wl-empty" style="color:#b4232a;">'+escapeHtml((r&&r.message)||'Lỗi')+'</div>'; return; }
+      var ds=r.data||[];
+      title.textContent='Kết quả — '+ds.length+' mục (bấm để thêm)';
+      if(!ds.length){ box.innerHTML='<div class="wl-empty">Không tìm thấy. Thử đổi từ khoá hoặc Set/Minifig.</div>'; return; }
+      window._wlResults=ds;
+      box.innerHTML=ds.map(function(x,i){
+        return '<div class="wl-ro" onclick="addFromSearch('+i+',this)">'+
+          '<span class="radd">＋</span>'+
+          '<img src="'+escapeAttr(x.url)+'" loading="lazy" alt="" onerror="this.style.opacity=.2">'+
+          '<div class="rn">'+escapeHtml(x.ten)+'</div>'+
+          '<div class="rm">'+escapeHtml(x.ma||'')+'</div>'+
+          '</div>';
+      }).join('');
+    })
+    .withFailureHandler(function(e){ title.textContent='Kết quả'; box.innerHTML='<div class="wl-empty" style="color:#b4232a;">'+escapeHtml(''+e)+'</div>'; })
+    .timUngVien(wlLoai, kw);
+}
+
+function addFromSearch(i, el){
+  var ds=window._wlResults||[];
+  var x=ds[i]; if(!x) return;
+  var folder=(document.getElementById('wlFolderInput').value||'').trim();
+  if(el){ el.style.pointerEvents='none'; el.style.opacity=.55; }
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); if(el){ el.style.pointerEvents=''; el.style.opacity=''; } return; }
+      showToast('✅ Đã thêm vào wishlist');
+      wlData.unshift(r.item);
+      if(el){ var b=el.querySelector('.radd'); if(b){ b.textContent='✓'; b.style.opacity=1; b.style.background='#0f7a3d'; } }
+      renderWishlist();
+    })
+    .withFailureHandler(function(e){ showToast(''+e,true); if(el){ el.style.pointerEvents=''; el.style.opacity=''; } })
+    .addWishlistItem({ setNo:x.ma, ten:x.ten, anh:x.url, folder:folder });
+}
 </script>
 </body>
 </html>
