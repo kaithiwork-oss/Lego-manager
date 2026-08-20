@@ -9,7 +9,8 @@ eval(stub + src);
 
 let fail = 0;
 function eq(actual, expected, label) {
-  const ok = actual === expected;
+  // so sâu để mảng/object cũng đối chiếu được theo nội dung
+  const ok = (actual === expected) || JSON.stringify(actual) === JSON.stringify(expected);
   if (!ok) fail++;
   console.log((ok ? '  ok   ' : '  FAIL ') + label + ' => ' + JSON.stringify(actual) +
     (ok ? '' : ' (mong đợi ' + JSON.stringify(expected) + ')'));
@@ -164,6 +165,20 @@ SPX_GIAO.data.sls_tracking_info.records.push(
     description: 'Parcel has been delivered' });
 eq(shipMapStatusText(_shipExtractStatusText(SPX_GIAO)), 'Đã nhận hàng',
   'mốc Delivered mới nhất nằm cuối mảng vẫn thắng');
+
+console.log('\n== chu kỳ quét (_shipTriggerHours) ==');
+eq(_shipTriggerHours(6), [0, 6, 12, 18], '6 tiếng -> 0h, 6h, 12h, 18h');
+eq(_shipTriggerHours(12), [0, 12], '12 tiếng');
+eq(_shipTriggerHours(24), [0], '24 tiếng -> chỉ 0h');
+eq(_shipTriggerHours(8), [0, 8, 16], '8 tiếng');
+eq(_shipTriggerHours(2).length, 12, '2 tiếng -> 12 trigger, dưới trần 20 của Apps Script');
+eq(SHIP_SYNC_DEFAULT_HOURS, 6, 'mặc định là 6 tiếng');
+
+[5, 7, 0, -6, 25, 1.5, 'abc', null].forEach(function (bad) {
+  let nemLoi = false;
+  try { _shipTriggerHours(bad); } catch (e) { nemLoi = true; }
+  eq(nemLoi, true, 'chu kỳ không hợp lệ bị chặn: ' + JSON.stringify(bad));
+});
 
 console.log('\n== VTP khi chưa điền tài khoản ==');
 global.CacheService = { getScriptCache: () => ({ get: () => null, put() {} }) };

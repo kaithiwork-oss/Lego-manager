@@ -29,6 +29,11 @@ var SHIP_SYNC_TIME_BUDGET_MS = 4.5 * 60 * 1000;
 var SHIP_SYNC_TRIGGER_FN = 'autoSyncShippingStatus';
 var SHIP_SYNC_LAST_RUN_KEY = 'SHIP_SYNC_LAST_RUN';
 
+// Chu kỳ quét mặc định (tiếng). 6 tiếng = 4 lần/ngày: 0h, 6h, 12h, 18h.
+// Trạng thái vận chuyển thực tế chỉ đổi vài lần mỗi ngày nên quét dày hơn
+// gần như chỉ tốn request. Xem trần quota ở README trước khi giảm.
+var SHIP_SYNC_DEFAULT_HOURS = 6;
+
 
 // =============================================
 // NHẬN DẠNG HÃNG VẬN CHUYỂN (bản server, khớp với detectCarrier ở Index.html)
@@ -572,20 +577,62 @@ function _shipSaveRun(summary, note) {
 
 
 // =============================================
-// QUẢN LÝ TRIGGER — chạy hằng ngày lúc 0h giờ VN
+// QUẢN LÝ TRIGGER — mặc định 6 tiếng/lần (0h, 6h, 12h, 18h giờ VN)
 // =============================================
 
-/** Chạy tay 1 lần từ editor để cài lịch */
-function installShippingSyncTrigger() {
+/**
+ * Các mốc giờ trong ngày cho chu kỳ `hoursEvery` tiếng.
+ * Tách riêng cho dễ kiểm: _shipTriggerHours(6) -> [0, 6, 12, 18]
+ */
+function _shipTriggerHours(hoursEvery) {
+  var h = Number(hoursEvery);
+  if (!h || h < 1 || h > 24 || h !== Math.floor(h) || 24 % h !== 0) {
+    throw new Error('Chu kỳ phải là ước của 24: 1, 2, 3, 4, 6, 8, 12 hoặc 24 (nhận được: ' + hoursEvery + ')');
+  }
+  var out = [];
+  for (var t = 0; t < 24; t += h) out.push(t);
+  return out;
+}
+
+
+/**
+ * Cài lịch quét. Chạy tay 1 lần từ editor.
+ *
+ *   installShippingSyncTrigger()    -> 6 tiếng/lần (mặc định)
+ *   installShippingSyncTrigger(12)  -> 12 tiếng/lần
+ *   installShippingSyncTrigger(24)  -> 1 lần/ngày lúc 0h
+ *
+ * Dùng nhiều trigger theo giờ cố định thay vì everyHours() để mốc quét bám
+ * đúng 0h/6h/12h/18h — everyHours() tính từ lúc cài nên giờ chạy trôi lung tung.
+ * Riêng chu kỳ 1 tiếng thì phải dùng everyHours vì 24 trigger vượt trần của
+ * Apps Script (20 trigger / script / user).
+ */
+function installShippingSyncTrigger(hoursEvery) {
+  var h = (hoursEvery === undefined || hoursEvery === null) ? SHIP_SYNC_DEFAULT_HOURS : Number(hoursEvery);
+  var hours = _shipTriggerHours(h);   // ném lỗi sớm nếu chu kỳ không hợp lệ
+
   removeShippingSyncTrigger();
-  ScriptApp.newTrigger(SHIP_SYNC_TRIGGER_FN)
-    .timeBased()
-    .everyDays(1)
-    .atHour(0)
-    .nearMinute(0)
-    .inTimezone('Asia/Ho_Chi_Minh')
-    .create();
-  var msg = '✓ Đã cài lịch chạy "' + SHIP_SYNC_TRIGGER_FN + '" hằng ngày lúc 00:00 (giờ VN).';
+
+  if (h === 1) {
+    ScriptApp.newTrigger(SHIP_SYNC_TRIGGER_FN).timeBased().everyHours(1).nearMinute(0).create();
+    var m1 = '✓ Đã cài lịch chạy "' + SHIP_SYNC_TRIGGER_FN + '" mỗi 1 tiếng.';
+    Logger.log(m1);
+    return m1;
+  }
+
+  hours.forEach(function (hour) {
+    ScriptApp.newTrigger(SHIP_SYNC_TRIGGER_FN)
+      .timeBased()
+      .everyDays(1)
+      .atHour(hour)
+      .nearMinute(0)
+      .inTimezone('Asia/Ho_Chi_Minh')
+      .create();
+  });
+
+  var msg = '✓ Đã cài lịch chạy "' + SHIP_SYNC_TRIGGER_FN + '" mỗi ' + h + ' tiếng — ' +
+    hours.map(function (x) { return (x < 10 ? '0' : '') + x + 'h'; }).join(', ') + ' (giờ VN).' +
+    '\n  (' + hours.length + ' trigger. Apps Script chạy trong khoảng ±15 phút quanh mốc.)';
   Logger.log(msg);
   return msg;
 }
@@ -607,13 +654,21 @@ function removeShippingSyncTrigger() {
 
 /** Xem lịch đã cài chưa + kết quả lần chạy gần nhất */
 function shippingSyncStatus() {
-  var installed = ScriptApp.getProjectTriggers().filter(function (t) {
+  var mine = ScriptApp.getProjectTriggers().filter(function (t) {
     return t.getHandlerFunction() === SHIP_SYNC_TRIGGER_FN;
-  }).length;
+  });
+
+  var out;
+  if (!mine.length) {
+    out = '✗ Chưa cài lịch — chạy installShippingSyncTrigger()';
+  } else {
+    var n = mine.length;
+    out = '✓ Đã cài lịch: ' + n + ' trigger' +
+      (n > 1 ? ' → quét mỗi ' + (24 / n) + ' tiếng' : '');
+  }
 
   var last = _prop(SHIP_SYNC_LAST_RUN_KEY);
-  var out = (installed ? '✓ Đã cài lịch (' + installed + ' trigger)' : '✗ Chưa cài lịch — chạy installShippingSyncTrigger()') +
-    '\nLần chạy gần nhất: ' + (last || '(chưa có)');
+  out += '\nLần chạy gần nhất: ' + (last || '(chưa có)');
   Logger.log(out);
   return out;
 }
