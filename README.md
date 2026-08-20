@@ -111,7 +111,7 @@ src/
 ## Tự động cập nhật trạng thái vận chuyển
 
 `src/Shipping.js` tra trạng thái theo mã vận đơn rồi ghi vào cột **Trạng thái đơn hàng**
-của `DataGiaoDich`. Chạy hằng ngày lúc **00:00 (giờ VN)**.
+của `DataGiaoDich`. Mặc định quét **6 tiếng/lần** — 0h, 6h, 12h, 18h (giờ VN).
 
 Đơn được **bỏ qua** khi: chưa có mã vận đơn, hoặc trạng thái đã là *Đã nhận hàng* / *Hoàn trả*.
 
@@ -121,7 +121,7 @@ Sau khi `npm run push`, mở Apps Script editor và chạy tay 1 lần:
 
 | Hàm | Việc |
 |---|---|
-| `installShippingSyncTrigger()` | Cài lịch chạy hằng ngày lúc 0h (chạy 1 lần là xong) |
+| `installShippingSyncTrigger()` | Cài lịch 6 tiếng/lần (chạy 1 lần là xong) |
 | `shippingSyncStatus()` | Xem đã cài lịch chưa + kết quả lần chạy gần nhất |
 | `autoSyncShippingStatus()` | Chạy đồng bộ ngay, không đợi tới 0h |
 | `removeShippingSyncTrigger()` | Gỡ lịch |
@@ -133,6 +133,43 @@ Sau khi `npm run push`, mở Apps Script editor và chạy tay 1 lần:
 > Muốn bấm Run là chạy được thì chọn `debugTracking()` — đã gói sẵn mã mẫu bên trong.
 
 Lần chạy đầu sẽ hỏi quyền `UrlFetchApp` (gọi ra ngoài) và quyền tạo trigger — bấm cho phép.
+
+### Đổi tần suất quét
+
+```javascript
+installShippingSyncTrigger()     // 6 tiếng/lần — mặc định
+installShippingSyncTrigger(12)   // 12 tiếng/lần
+installShippingSyncTrigger(24)   // 1 lần/ngày lúc 0h
+installShippingSyncTrigger(3)    // 3 tiếng/lần
+```
+
+Chu kỳ phải là **ước của 24** (1, 2, 3, 4, 6, 8, 12, 24), số khác bị chặn ngay.
+Mỗi mốc giờ là một trigger riêng để giờ quét bám đúng 0h/6h/12h/18h — dùng
+`everyHours()` thì giờ chạy tính từ lúc cài nên trôi lung tung. Apps Script chạy
+trong khoảng **±15 phút** quanh mốc.
+
+Cài lại đè lịch cũ, không cần gỡ trước.
+
+#### Trước khi quét dày hơn
+
+Mỗi lần quét gọi mạng **một lần cho mỗi vận đơn chưa hoàn thành** — gọi số đó là **N**.
+Ba trần của tài khoản Gmail thường:
+
+| Giới hạn | Mức |
+|---|---|
+| Tổng thời gian trigger chạy / ngày | ~90 phút |
+| Số lần `UrlFetchApp` / ngày | ~20.000 |
+| Thời gian mỗi lần chạy | 6 phút (code tự dừng ở 4,5 phút, phần dư để lần sau) |
+
+| N | Mỗi lần quét | Nếu quét theo giờ |
+|---|---|---|
+| 20 | ~20–40 giây | ~12 phút/ngày — thoải mái |
+| 60 | ~1–2 phút | ~40 phút/ngày — ổn |
+| 150 | ~2,5–5 phút | **~90+ phút/ngày — chạm trần** |
+
+Rủi ro lớn hơn quota: mọi request đều bắn vào `spx.vn` từ dải IP của Google, quét
+dày dễ bị rate-limit hoặc chặn IP. Trạng thái vận chuyển thực tế chỉ đổi vài lần
+mỗi ngày, nên 6 tiếng/lần đã bắt kịp gần hết mà tốn 1/6 so với quét theo giờ.
 
 ### Nhận dạng hãng
 
