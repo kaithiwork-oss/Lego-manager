@@ -129,6 +129,12 @@ Danh sách bộ Lego muốn mua, tổ chức **2 tầng kiểu Google Drive**.
    chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá).
 5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã.
 
+### Thêm từ tab Mặt hàng
+
+Mỗi mặt hàng trong tab **🏷️ Mặt hàng** (bảng + thẻ) có nút **💖** — bấm mở popup nhỏ
+chọn bộ sưu tập (hoặc *Chưa vào bộ* / *➕ Bộ mới*) rồi thêm thẳng mặt hàng đó vào
+wishlist (lấy luôn tên + ảnh đã duyệt của mặt hàng). Không cần tra lại Rebrickable.
+
 ### Dữ liệu
 
 Lưu ở tab Sheet **`DataWishlist`** (tự tạo lần đầu mở tab). Cột:
