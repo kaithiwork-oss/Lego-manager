@@ -126,7 +126,10 @@ Danh sách bộ Lego muốn mua, tổ chức **2 tầng kiểu Google Drive**.
    bấm kết quả để thêm. Thêm được nhiều bộ liên tục (đếm "Đã thêm N bộ"), xong bấm
    **← Wishlist**.
 4. Mỗi thẻ đánh dấu **đã có / chưa có** (bấm là đổi ngay), và có nút ✏️ (sửa ghi
-   chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá).
+   chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá). Thẻ nguồn **Mặt hàng** có thêm
+   🔗 để nhảy sang tab Mặt hàng (lọc theo tên mặt hàng đó).
+   Trong trang một bộ sưu tập có nút **✅ Cả bộ đã có / 🕒 Cả bộ chưa có** để đánh
+   dấu hàng loạt (`setCollectionOwned`).
 5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã.
 
 ### Thêm từ tab Mặt hàng

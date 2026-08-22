@@ -184,6 +184,30 @@ function setWishlistOwned(id, daCo) {
   }
 }
 
+/* Đánh dấu đã có / chưa có cho CẢ bộ sưu tập (theo Folder) */
+function setCollectionOwned(folder, daCo) {
+  try {
+    var sh = _wishlistSheet();
+    if (sh.getLastRow() < 2) return { success: true, doi: 0 };
+    var target = String(folder || '');
+    var n = sh.getLastRow() - 1;
+    var folders = sh.getRange(2, WL_COL.FOLDER + 1, n, 1).getValues();
+    var daCoRng = sh.getRange(2, WL_COL.DACO + 1, n, 1);
+    var vals = daCoRng.getValues();
+    var doi = 0, want = daCo === true;
+    for (var i = 0; i < n; i++) {
+      if (String(folders[i][0] || '') === target) {
+        if (vals[i][0] !== want) { vals[i][0] = want; doi++; }
+        else { vals[i][0] = want; }
+      }
+    }
+    daCoRng.setValues(vals);
+    return { success: true, message: 'Đã cập nhật ' + doi + ' mục', doi: doi, daCo: want };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}
+
 /* Xoá mục theo ID */
 function deleteWishlistItem(id) {
   try {

@@ -1267,7 +1267,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <h2 id="wlDName"></h2>
       <span class="wl-pill count" id="wlDCount"></span>
       <span class="wl-pill own" id="wlDOwn"></span>
-      <button class="wl-crumb" style="margin:0 0 0 auto;" onclick="wlRenameCollection()">✏️ Đổi tên</button>
+      <button class="wl-crumb" style="margin:0 0 0 auto;" onclick="wlMarkCollectionOwned(true)">✅ Cả bộ đã có</button>
+      <button class="wl-crumb" onclick="wlMarkCollectionOwned(false)">🕒 Cả bộ chưa có</button>
+      <button class="wl-crumb" onclick="wlRenameCollection()">✏️ Đổi tên</button>
     </div>
     <div class="wl-grid" id="wlDGrid"></div>
   </div>
@@ -4724,6 +4726,7 @@ function wlCardHtml(x){
       '<div class="wl-toggle"><button class="wl-tbtn '+tcls+'" onclick="wlToggleOwned(\''+id+'\')">'+tlabel+'</button></div>'+
     '</div>'+
     '<div class="wl-card-acts">'+
+      (x.nguon==='mat_hang'?'<button onclick="wlGoToMatHang(\''+id+'\')" title="Mở trong Mặt hàng">🔗</button>':'')+
       '<button onclick="wlEditItem(\''+id+'\')" title="Sửa ghi chú/giá">✏️</button>'+
       '<button onclick="wlMoveItem(\''+id+'\')" title="Chuyển bộ sưu tập">📁</button>'+
       '<button class="del" onclick="wlRemoveItem(\''+id+'\')" title="Xoá">🗑️</button>'+
@@ -4773,6 +4776,26 @@ function wlRenameCollection(){
     })
     .withFailureHandler(function(e){ showToast(''+e,true); })
     .renameWishlistFolder(wlOpenCol, moi);
+}
+function wlMarkCollectionOwned(daCo){
+  if(!wlOpenCol && wlOpenCol!=='') return;
+  var folder=wlOpenCol;
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; }
+      wlData.forEach(function(x){ if((x.folder||'')===folder) x.daCo=(daCo===true); });
+      showToast('✅ '+(daCo?'Đã đánh dấu cả bộ đã có':'Đã bỏ đánh dấu cả bộ'));
+      wlRenderDetail();
+    })
+    .withFailureHandler(function(e){ showToast(''+e,true); })
+    .setCollectionOwned(folder, daCo===true);
+}
+/* Mở mặt hàng tương ứng trong tab Mặt hàng (lọc theo tên) */
+function wlGoToMatHang(id){
+  var x=wlFind(id); if(!x) return;
+  var s=document.getElementById('gmhSearch'); if(s) s.value=x.ten||'';
+  if(typeof gmhPage!=='undefined') gmhPage=1;
+  switchTab('giamh');
 }
 
 /* ---- thao tác trên 1 mục ---- */
