@@ -105,8 +105,75 @@ src/
   Code.js          # logic chính + web app
   Rebrickable.js   # tra cứu Rebrickable
   Shipping.js      # tra trạng thái vận chuyển tự động
+  Wishlist.js      # backend tab Wishlist (bộ sưu tập + mục muốn mua)
   Index.html       # giao diện web app
 ```
+
+## Wishlist (tab 💖)
+
+Danh sách bộ Lego muốn mua, tổ chức **2 tầng kiểu Google Drive**.
+
+### Luồng sử dụng
+
+1. **Trang chính** hiện trước các **bộ sưu tập** (folder, hiển thị trơn: vệt màu +
+   icon + thanh tiến độ *x/y đã có*), bên dưới là các mục **"Chưa vào bộ sưu tập"**
+   (thẻ có ảnh set).
+2. Bấm một bộ sưu tập → **mở trang con** xem các bộ bên trong (nút **← Bộ sưu tập**
+   để quay lại, **✏️ Đổi tên** để đổi tên bộ).
+3. Nút **＋ Thêm mục** → **mở trang riêng "Thêm vào wishlist"**: chọn Set/Minifig,
+   gõ từ khoá → tra Rebrickable (dùng lại `timUngVien` trong `Rebrickable.js`),
+   chọn **"Thêm vào bộ sưu tập"** nào (hoặc *Chưa vào bộ sưu tập* / *➕ Bộ mới…*),
+   bấm kết quả để thêm. Thêm được nhiều bộ liên tục (đếm "Đã thêm N bộ"), xong bấm
+   **← Wishlist**.
+4. Mỗi thẻ đánh dấu **đã có / chưa có** (bấm là đổi ngay), và có nút ✏️ (sửa ghi
+   chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá). Thẻ nguồn **Mặt hàng** có thêm
+   🔗 để nhảy sang tab Mặt hàng (lọc theo tên mặt hàng đó).
+   Trong trang một bộ sưu tập có nút **✅ Cả bộ đã có / 🕒 Cả bộ chưa có** để đánh
+   dấu hàng loạt (`setCollectionOwned`).
+5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã.
+
+### Thêm từ tab Mặt hàng
+
+Mỗi mặt hàng trong tab **🏷️ Mặt hàng** (bảng + thẻ) có nút **💖** — bấm mở popup nhỏ
+chọn bộ sưu tập (hoặc *Chưa vào bộ* / *➕ Bộ mới*) rồi thêm thẳng mặt hàng đó vào
+wishlist (lấy luôn tên + ảnh đã duyệt của mặt hàng). Không cần tra lại Rebrickable.
+
+### Dữ liệu
+
+Lưu ở tab Sheet **`DataWishlist`** (tự tạo lần đầu mở tab). Cột:
+
+```
+ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo | Nguon
+```
+
+- **Folder rỗng** = mục lẻ (chưa vào bộ sưu tập); **Folder có tên** = thuộc bộ sưu
+  tập cùng tên. "Bộ sưu tập" chỉ là gom nhóm theo giá trị Folder, không có bảng riêng.
+- **DaCo** (TRUE/FALSE) = đã sở hữu hay chưa.
+- **Nguon**: `mat_hang` = thêm từ tab Mặt hàng (mặc định **đã có**); rỗng = thêm thủ
+  công (tìm Rebrickable). Thêm từ Mặt hàng luôn `DaCo=TRUE` — nhưng vẫn bấm đổi lại *chưa có* được.
+- Tab cũ thiếu cột `DaCo`/`Nguon` sẽ **tự bổ sung** khi mở lại (xem `_wishlistSheet`).
+
+### Gộp trùng (dedup)
+
+Trong **cùng một bộ sưu tập**, nếu 2 mục có **cùng link ảnh Rebrickable** (cùng bộ) thì
+chỉ hiện **1** — ưu tiên bản thêm từ **Mặt hàng**, ẩn bản thêm thủ công. Gộp ở **phía
+giao diện** (`wlCollapse` trong `Index.html`) nên **không xoá** dòng nào khỏi sheet; bỏ
+bản Mặt hàng đi thì bản thủ công hiện lại. Ảnh phải **trùng URL** mới gộp (mặt hàng lấy
+ảnh đã duyệt, bản thủ công lấy `set_img_url` — cùng bộ thì cùng URL Rebrickable).
+
+### Hàm backend (`Wishlist.js`)
+
+| Hàm | Việc |
+|---|---|
+| `getWishlist()` | Trả toàn bộ mục (mới thêm lên đầu) |
+| `addWishlistItem(item)` | Thêm mục `{setNo,ten,anh,folder,ghiChu,gia,daCo}` |
+| `updateWishlistItem(id, patch)` | Sửa `folder` (rỗng = đưa ra ngoài) / `ghiChu` / `gia` / `ten` / `daCo` |
+| `setWishlistOwned(id, daCo)` | Đánh dấu đã có / chưa có |
+| `deleteWishlistItem(id)` | Xoá mục |
+| `renameWishlistFolder(cũ, mới)` | Đổi tên cả bộ sưu tập |
+
+> Giá là **nhập tay** (Rebrickable không trả giá). Muốn giá thị trường tự động thì
+> cần cắm BrickLink Price Guide API (OAuth) — chưa làm.
 
 ## Tự động cập nhật trạng thái vận chuyển
 
