@@ -4618,10 +4618,33 @@ var WL_SPINE=['#D8291C','#E0A100','#0f7a3d','#2a6f97','#8338ec','#c46210','#0089
 function wlSpine(name){ var h=0,s=String(name||''); for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return WL_SPINE[h%WL_SPINE.length]; }
 
 function wlIsLoose(x){ var f=x.folder||''; return !f || f==='Chưa phân loại'; }
-function wlLooseItems(){ return wlData.filter(wlIsLoose); }
+
+/* Gộp trùng: trong cùng folder, nếu nhiều mục cùng link ảnh Rebrickable thì chỉ
+   giữ 1 — ưu tiên bản thêm từ Mặt hàng (nguon='mat_hang'), bỏ bản thêm thủ công. */
+function wlCollapse(items){
+  var winner={};
+  items.forEach(function(it){
+    if(!it.anh) return;
+    var k=(it.folder||'')+'||'+it.anh;
+    var cur=winner[k];
+    if(!cur){ winner[k]=it; return; }
+    if(it.nguon==='mat_hang' && cur.nguon!=='mat_hang') winner[k]=it;
+  });
+  var used={};
+  return items.filter(function(it){
+    if(!it.anh) return true;
+    var k=(it.folder||'')+'||'+it.anh;
+    if(winner[k]!==it) return false;
+    if(used[k]) return false;
+    used[k]=true; return true;
+  });
+}
+function wlVisibleData(){ return wlCollapse(wlData); }
+
+function wlLooseItems(){ return wlVisibleData().filter(wlIsLoose); }
 function wlCollections(){   // [{name, items}] giữ thứ tự xuất hiện
   var map={}, order=[];
-  wlData.forEach(function(x){ if(wlIsLoose(x)) return; var f=x.folder; if(!map[f]){ map[f]=[]; order.push(f); } map[f].push(x); });
+  wlVisibleData().forEach(function(x){ if(wlIsLoose(x)) return; var f=x.folder; if(!map[f]){ map[f]=[]; order.push(f); } map[f].push(x); });
   return order.map(function(n){ return {name:n, items:map[n]}; });
 }
 function wlOwnStat(items){ var have=items.filter(function(x){return x.daCo;}).length; return {have:have,total:items.length,wait:items.length-have}; }
@@ -4716,7 +4739,7 @@ function wlApplyFilter(){
 function wlRenderFilter(){
   document.getElementById('wlNormal').style.display='none';
   var sv=document.getElementById('wlSearchView'); sv.style.display='';
-  var hits=wlData.filter(function(x){ return ((x.ten||'')+' '+(x.setNo||'')+' '+(x.ghiChu||'')).toLowerCase().indexOf(wlFilterQ)>=0; });
+  var hits=wlVisibleData().filter(function(x){ return ((x.ten||'')+' '+(x.setNo||'')+' '+(x.ghiChu||'')).toLowerCase().indexOf(wlFilterQ)>=0; });
   document.getElementById('wlFCount').textContent=hits.length;
   document.getElementById('wlFGrid').innerHTML = hits.length
     ? hits.map(wlCardHtml).join('')
@@ -4730,7 +4753,7 @@ function wlOpenCollection(name){
 }
 function wlCloseCollection(){ wlOpenCol=null; wlShowView('landing'); wlRenderLanding(); window.scrollTo({top:0,behavior:'auto'}); }
 function wlRenderDetail(){
-  var items=wlData.filter(function(x){ return (x.folder||'')===wlOpenCol; });
+  var items=wlVisibleData().filter(function(x){ return (x.folder||'')===wlOpenCol; });
   if(!items.length){ wlCloseCollection(); return; }
   var s=wlOwnStat(items);
   document.getElementById('wlDName').textContent='📁 '+wlOpenCol;
@@ -4916,7 +4939,7 @@ function gmhConfirmAddToWl(){
       gmhCloseAddModal();
     })
     .withFailureHandler(function(e){ btn.disabled=false; showToast(''+e,true); })
-    .addWishlistItem({ ten:_gmhWlTen, anh:_gmhWlImg, setNo:'', folder:folder });
+    .addWishlistItem({ ten:_gmhWlTen, anh:_gmhWlImg, setNo:'', folder:folder, daCo:true, nguon:'mat_hang' });
 }
 </script>
 </body>

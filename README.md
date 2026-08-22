@@ -140,13 +140,23 @@ wishlist (lấy luôn tên + ảnh đã duyệt của mặt hàng). Không cần
 Lưu ở tab Sheet **`DataWishlist`** (tự tạo lần đầu mở tab). Cột:
 
 ```
-ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo
+ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo | Nguon
 ```
 
 - **Folder rỗng** = mục lẻ (chưa vào bộ sưu tập); **Folder có tên** = thuộc bộ sưu
   tập cùng tên. "Bộ sưu tập" chỉ là gom nhóm theo giá trị Folder, không có bảng riêng.
 - **DaCo** (TRUE/FALSE) = đã sở hữu hay chưa.
-- Tab cũ thiếu cột `DaCo` sẽ **tự bổ sung** khi mở lại (xem `_wishlistSheet`).
+- **Nguon**: `mat_hang` = thêm từ tab Mặt hàng (mặc định **đã có**); rỗng = thêm thủ
+  công (tìm Rebrickable). Thêm từ Mặt hàng luôn `DaCo=TRUE` — nhưng vẫn bấm đổi lại *chưa có* được.
+- Tab cũ thiếu cột `DaCo`/`Nguon` sẽ **tự bổ sung** khi mở lại (xem `_wishlistSheet`).
+
+### Gộp trùng (dedup)
+
+Trong **cùng một bộ sưu tập**, nếu 2 mục có **cùng link ảnh Rebrickable** (cùng bộ) thì
+chỉ hiện **1** — ưu tiên bản thêm từ **Mặt hàng**, ẩn bản thêm thủ công. Gộp ở **phía
+giao diện** (`wlCollapse` trong `Index.html`) nên **không xoá** dòng nào khỏi sheet; bỏ
+bản Mặt hàng đi thì bản thủ công hiện lại. Ảnh phải **trùng URL** mới gộp (mặt hàng lấy
+ảnh đã duyệt, bản thủ công lấy `set_img_url` — cùng bộ thì cùng URL Rebrickable).
 
 ### Hàm backend (`Wishlist.js`)
 

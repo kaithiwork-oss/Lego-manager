@@ -4,19 +4,23 @@
 // thêm mục bằng cách tìm trên Rebrickable (dùng lại timUngVien).
 //
 // Lưu ở tab Sheet: DataWishlist
-// Cột: ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo
+// Cột: ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo | Nguon
 //
 // Mô hình 2 tầng:
 //   - Folder RỖNG  => mục "Chưa vào bộ sưu tập" (mục lẻ)
 //   - Folder có tên => thuộc một "bộ sưu tập" cùng tên
 //   - DaCo (TRUE/FALSE) => đã sở hữu bộ đó hay chưa
+//   - Nguon: 'mat_hang' = thêm từ tab Mặt hàng (đã sở hữu); '' = thêm thủ công
+//     (tìm Rebrickable). Khi 2 mục cùng Folder + cùng link ảnh Rebrickable thì bản
+//     'mat_hang' được ưu tiên, bản thủ công bị ẩn (xem gộp trùng ở phía giao diện).
 // =============================================
 
 var TAB_WISHLIST = 'DataWishlist';
-var HEADERS_WISHLIST = ['ID', 'SetNo', 'Ten', 'Anh', 'Folder', 'GhiChu', 'Gia', 'NgayThem', 'DaCo'];
+var HEADERS_WISHLIST = ['ID', 'SetNo', 'Ten', 'Anh', 'Folder', 'GhiChu', 'Gia', 'NgayThem', 'DaCo', 'Nguon'];
 
-var WL_COL = { ID: 0, SETNO: 1, TEN: 2, ANH: 3, FOLDER: 4, GHICHU: 5, GIA: 6, NGAYTHEM: 7, DACO: 8 };
+var WL_COL = { ID: 0, SETNO: 1, TEN: 2, ANH: 3, FOLDER: 4, GHICHU: 5, GIA: 6, NGAYTHEM: 7, DACO: 8, NGUON: 9 };
 var WL_FOLDER_MAC_DINH = ''; // rỗng = mục lẻ (chưa vào bộ sưu tập)
+var WL_NGUON_MAT_HANG = 'mat_hang';
 
 /* Lấy (tạo nếu chưa có) tab DataWishlist, đảm bảo đủ cột */
 function _wishlistSheet() {
@@ -28,7 +32,7 @@ function _wishlistSheet() {
     if (typeof formatHeaderRow === 'function') formatHeaderRow(sh);
     return sh;
   }
-  // Nâng cấp schema: bổ sung cột DaCo nếu tab cũ chưa có
+  // Nâng cấp schema: bổ sung cột thiếu (DaCo, Nguon) cho tab cũ
   if (sh.getLastColumn() < HEADERS_WISHLIST.length) {
     sh.getRange(1, 1, 1, HEADERS_WISHLIST.length).setValues([HEADERS_WISHLIST]);
     if (typeof formatHeaderRow === 'function') formatHeaderRow(sh);
@@ -52,7 +56,8 @@ function _wlRowToItem(row) {
     ngayThem: row[WL_COL.NGAYTHEM]
       ? Utilities.formatDate(new Date(row[WL_COL.NGAYTHEM]), 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy')
       : '',
-    daCo:     row[WL_COL.DACO] === true || row[WL_COL.DACO] === 'TRUE' || row[WL_COL.DACO] === 'x'
+    daCo:     row[WL_COL.DACO] === true || row[WL_COL.DACO] === 'TRUE' || row[WL_COL.DACO] === 'x',
+    nguon:    String(row[WL_COL.NGUON] || '')
   };
 }
 
@@ -74,7 +79,7 @@ function getWishlist() {
   }
 }
 
-/* Thêm mục mới. item = { setNo, ten, anh, folder, ghiChu, gia } */
+/* Thêm mục mới. item = { setNo, ten, anh, folder, ghiChu, gia, daCo, nguon } */
 function addWishlistItem(item) {
   try {
     item = item || {};
@@ -85,6 +90,7 @@ function addWishlistItem(item) {
     var id = _wlId();
     var folder = String(item.folder || '').trim();
     var daCo = item.daCo === true;
+    var nguon = String(item.nguon || '').trim();
 
     sh.appendRow([
       id,
@@ -95,7 +101,8 @@ function addWishlistItem(item) {
       String(item.ghiChu || '').trim(),
       Number(item.gia) || 0,
       new Date(),
-      daCo
+      daCo,
+      nguon
     ]);
 
     return {
@@ -110,7 +117,8 @@ function addWishlistItem(item) {
         ghiChu: String(item.ghiChu || '').trim(),
         gia: Number(item.gia) || 0,
         ngayThem: Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy'),
-        daCo: daCo
+        daCo: daCo,
+        nguon: nguon
       }
     };
   } catch (e) {
