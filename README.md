@@ -105,8 +105,56 @@ src/
   Code.js          # logic chính + web app
   Rebrickable.js   # tra cứu Rebrickable
   Shipping.js      # tra trạng thái vận chuyển tự động
+  Wishlist.js      # backend tab Wishlist (bộ sưu tập + mục muốn mua)
   Index.html       # giao diện web app
 ```
+
+## Wishlist (tab 💖)
+
+Danh sách bộ Lego muốn mua, tổ chức **2 tầng kiểu Google Drive**.
+
+### Luồng sử dụng
+
+1. **Trang chính** hiện trước các **bộ sưu tập** (folder, hiển thị trơn: vệt màu +
+   icon + thanh tiến độ *x/y đã có*), bên dưới là các mục **"Chưa vào bộ sưu tập"**
+   (thẻ có ảnh set).
+2. Bấm một bộ sưu tập → **mở trang con** xem các bộ bên trong (nút **← Bộ sưu tập**
+   để quay lại, **✏️ Đổi tên** để đổi tên bộ).
+3. Nút **＋ Thêm mục** → **mở trang riêng "Thêm vào wishlist"**: chọn Set/Minifig,
+   gõ từ khoá → tra Rebrickable (dùng lại `timUngVien` trong `Rebrickable.js`),
+   chọn **"Thêm vào bộ sưu tập"** nào (hoặc *Chưa vào bộ sưu tập* / *➕ Bộ mới…*),
+   bấm kết quả để thêm. Thêm được nhiều bộ liên tục (đếm "Đã thêm N bộ"), xong bấm
+   **← Wishlist**.
+4. Mỗi thẻ đánh dấu **đã có / chưa có** (bấm là đổi ngay), và có nút ✏️ (sửa ghi
+   chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá).
+5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã.
+
+### Dữ liệu
+
+Lưu ở tab Sheet **`DataWishlist`** (tự tạo lần đầu mở tab). Cột:
+
+```
+ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo
+```
+
+- **Folder rỗng** = mục lẻ (chưa vào bộ sưu tập); **Folder có tên** = thuộc bộ sưu
+  tập cùng tên. "Bộ sưu tập" chỉ là gom nhóm theo giá trị Folder, không có bảng riêng.
+- **DaCo** (TRUE/FALSE) = đã sở hữu hay chưa.
+- Tab cũ thiếu cột `DaCo` sẽ **tự bổ sung** khi mở lại (xem `_wishlistSheet`).
+
+### Hàm backend (`Wishlist.js`)
+
+| Hàm | Việc |
+|---|---|
+| `getWishlist()` | Trả toàn bộ mục (mới thêm lên đầu) |
+| `addWishlistItem(item)` | Thêm mục `{setNo,ten,anh,folder,ghiChu,gia,daCo}` |
+| `updateWishlistItem(id, patch)` | Sửa `folder` (rỗng = đưa ra ngoài) / `ghiChu` / `gia` / `ten` / `daCo` |
+| `setWishlistOwned(id, daCo)` | Đánh dấu đã có / chưa có |
+| `deleteWishlistItem(id)` | Xoá mục |
+| `renameWishlistFolder(cũ, mới)` | Đổi tên cả bộ sưu tập |
+
+> Giá là **nhập tay** (Rebrickable không trả giá). Muốn giá thị trường tự động thì
+> cần cắm BrickLink Price Guide API (OAuth) — chưa làm.
 
 ## Tự động cập nhật trạng thái vận chuyển
 

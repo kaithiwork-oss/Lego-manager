@@ -662,33 +662,54 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .stat-card .s-value{font-size:19px;}
 }
 
-/* ====== WISHLIST ====== */
-.wl-add-btn{font-size:13px;font-weight:700;color:#fff;background:var(--lego-red);border:none;border-radius:999px;padding:8px 16px;cursor:pointer;box-shadow:0 2px 6px rgba(216,41,28,.25);transition:transform .1s,background .15s;}
+/* ====== WISHLIST (2 tầng: bộ sưu tập + mục lẻ) ====== */
+:root{--wl-have:#0f7a3d;--wl-have-bg:#e9f6ee;--wl-wait:#b46b00;--wl-wait-bg:#fbf1df;}
+.wl-add-btn{font-size:13px;font-weight:700;color:#fff;background:var(--lego-red);border:none;border-radius:999px;padding:9px 17px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;box-shadow:0 2px 6px rgba(216,41,28,.25);transition:transform .1s,background .15s;}
 .wl-add-btn:hover{background:var(--lego-red-dark);}
 .wl-add-btn:active{transform:scale(.96);}
-.wl-toolbar{margin-bottom:16px;}
-.wl-folder-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-.wl-folder-chips:empty{display:none;}
-.wl-fchip{font-size:12.5px;font-weight:600;color:#6b6455;background:#fff;border:1px solid #e8e5da;border-radius:999px;padding:6px 13px;cursor:pointer;transition:all .12s;white-space:nowrap;}
-.wl-fchip:hover{border-color:var(--lego-red);color:var(--lego-red-dark);}
-.wl-fchip.active{background:var(--lego-red);border-color:var(--lego-red);color:#fff;}
-.wl-fchip .cnt{opacity:.7;font-weight:700;margin-left:3px;}
+.wl-add-btn span{font-size:16px;line-height:1;}
+.wl-bar{margin-bottom:20px;}
 
-.wl-folder-sec{margin-bottom:26px;}
-.wl-folder-head{display:flex;align-items:center;gap:8px;margin:0 2px 12px;}
-.wl-folder-name{font-size:15px;font-weight:700;color:#2b2620;}
-.wl-folder-count{font-size:12px;font-weight:700;color:#8b8473;background:#f3f0e6;border-radius:999px;padding:2px 9px;}
-.wl-folder-total{font-size:12.5px;color:#8b8473;margin-left:auto;font-weight:600;}
+.wl-sec-h{display:flex;align-items:baseline;gap:9px;margin:0 2px 13px;}
+.wl-sec-t{font-size:15px;font-weight:800;color:#2b2620;}
+.wl-sec-c{font-size:11.5px;font-weight:700;color:#8b8473;background:#f3f0e6;border-radius:999px;padding:2px 9px;}
+.wl-sec-hint{margin-left:auto;font-size:12px;color:#a29b88;}
 
-.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
-.wl-card{background:#fff;border:1px solid #ebe8de;border-radius:var(--radius-md);overflow:hidden;display:flex;flex-direction:column;transition:transform .12s,box-shadow .12s;position:relative;}
+/* tile bộ sưu tập — folder trơn, không ảnh */
+.wl-col-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:30px;}
+.wl-col-grid:empty{display:none;}
+.wl-col-tile{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #ebe8de;border-radius:14px;padding:13px 15px 13px 13px;cursor:pointer;text-align:left;font:inherit;color:inherit;position:relative;overflow:hidden;transition:transform .12s,box-shadow .12s,border-color .12s;}
+.wl-col-tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--spine,#8b8473);}
+.wl-col-tile:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08);}
+.wl-col-ic{width:44px;height:44px;flex-shrink:0;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;background:#faf7ef;}
+.wl-col-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
+.wl-col-name{font-weight:700;font-size:15px;color:#2b2620;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wl-col-meta{display:flex;align-items:center;gap:9px;}
+.wl-col-meta .cnt{font-size:12px;color:#8b8473;font-weight:600;white-space:nowrap;}
+.wl-ownbar{flex:1;height:6px;border-radius:99px;background:#f0eee4;overflow:hidden;min-width:40px;}
+.wl-ownbar>i{display:block;height:100%;background:var(--wl-have);}
+.wl-own-frac{font-size:11.5px;font-weight:700;color:var(--wl-have);white-space:nowrap;}
+.wl-col-go{font-size:22px;color:#c9c1ad;line-height:1;}
+
+/* thẻ sản phẩm */
+.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+.wl-card{background:#fff;border:1px solid #ebe8de;border-radius:var(--radius-md);overflow:hidden;display:flex;flex-direction:column;transition:transform .12s,box-shadow .12s;}
 .wl-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08);}
-.wl-card-img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#faf9f4;padding:10px;}
-.wl-card-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1;}
+.wl-thumb-wrap{position:relative;}
+.wl-card-img{width:100%;aspect-ratio:4/3;object-fit:contain;background:#faf9f4;padding:8px;display:block;}
+.wl-have-flag{position:absolute;top:8px;left:8px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;}
+.wl-have-flag.on{color:#fff;background:#0e6e37;}
+.wl-have-flag.off{color:var(--wl-wait);background:var(--wl-wait-bg);}
+.wl-card-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px;flex:1;}
 .wl-card-name{font-size:13px;font-weight:600;color:#2b2620;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .wl-card-ma{font-size:11.5px;color:#a29b88;font-weight:600;}
-.wl-card-note{font-size:12px;color:#7a7365;line-height:1.35;margin-top:2px;}
-.wl-card-price{font-size:13px;font-weight:700;color:var(--lego-red-dark);margin-top:auto;padding-top:4px;}
+.wl-card-note{font-size:12px;color:#7a7365;line-height:1.35;margin-top:1px;}
+.wl-toggle{margin-top:auto;padding-top:9px;}
+.wl-tbtn{width:100%;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border-radius:9px;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .14s;}
+.wl-tbtn.off{color:var(--wl-wait);background:transparent;border:1px solid #ecd9b5;}
+.wl-tbtn.off:hover{background:var(--wl-wait-bg);}
+.wl-tbtn.on{color:#fff;background:var(--wl-have);border:1px solid var(--wl-have);}
+.wl-tbtn.on:hover{filter:brightness(1.05);}
 .wl-card-acts{display:flex;gap:6px;padding:0 12px 12px;}
 .wl-card-acts button{flex:1;font-size:12px;font-weight:600;border:1px solid #ebe8de;background:#fbf9f2;color:#6b6455;border-radius:8px;padding:6px 0;cursor:pointer;transition:all .12s;}
 .wl-card-acts button:hover{border-color:var(--lego-red);color:var(--lego-red-dark);}
@@ -699,35 +720,37 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .wl-empty-state .t{font-size:15px;font-weight:700;color:#6b6455;margin-bottom:4px;}
 .wl-empty-state .s{font-size:13px;}
 
-/* modal tìm & thêm */
-.wl-modal-overlay{position:fixed;inset:0;background:rgba(20,16,12,.45);z-index:120;opacity:0;pointer-events:none;transition:opacity .2s;}
-.wl-modal-overlay.open{opacity:1;pointer-events:auto;}
-.wl-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%);width:min(560px,94vw);max-height:88vh;background:#fff;border-radius:var(--radius-lg);z-index:121;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 24px 60px rgba(0,0,0,.28);}
-.wl-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%);}
-.wl-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #f0eee4;}
-.wl-modal-title{font-size:16px;font-weight:700;}
-.wl-modal-close{background:none;border:none;font-size:18px;color:#a29b88;cursor:pointer;padding:4px 8px;border-radius:8px;}
-.wl-modal-close:hover{background:#f5f3ec;color:#2b2620;}
-.wl-modal-body{padding:16px 18px;overflow-y:auto;}
-.wl-seg{display:inline-flex;background:#f3f0e6;border-radius:999px;padding:3px;margin-bottom:12px;}
-.wl-seg-btn{font-size:13px;font-weight:600;color:#8b8473;background:none;border:none;border-radius:999px;padding:6px 18px;cursor:pointer;transition:all .12s;}
+/* trang con: chi tiết bộ sưu tập + thêm mục */
+.wl-crumb{display:inline-flex;align-items:center;gap:7px;font:inherit;font-weight:700;font-size:13.5px;color:var(--lego-red-dark);background:transparent;border:none;cursor:pointer;padding:4px 0;margin-bottom:14px;}
+.wl-crumb:hover{text-decoration:underline;}
+.wl-detail-head{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:18px;}
+.wl-detail-head h2{font-size:20px;font-weight:800;margin:0;color:#2b2620;}
+.wl-pill{font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;}
+.wl-pill.count{color:#8b8473;background:#f3f0e6;}
+.wl-pill.own{color:var(--wl-have);background:var(--wl-have-bg);}
+
+.wl-add-controls{background:#fff;border:1px solid #ebe8de;border-radius:var(--radius-md);padding:16px;margin-bottom:22px;}
+.wl-seg{display:inline-flex;background:#f3f0e6;border-radius:999px;padding:3px;margin-bottom:13px;}
+.wl-seg-btn{font:inherit;font-size:13.5px;font-weight:600;color:#8b8473;background:none;border:none;border-radius:999px;padding:7px 20px;cursor:pointer;}
 .wl-seg-btn.active{background:#fff;color:var(--lego-red-dark);box-shadow:0 1px 3px rgba(0,0,0,.1);}
-.wl-search-row{display:flex;gap:8px;margin-bottom:12px;}
+.wl-search-row{display:flex;gap:9px;margin-bottom:14px;}
 .wl-search-row .search-input{flex:1;}
-.wl-field{margin-bottom:14px;}
-.wl-lbl{display:block;font-size:12px;font-weight:700;color:#8b8473;margin-bottom:5px;}
-.wl-modal-title2{font-size:12px;font-weight:700;color:#8b8473;margin-bottom:10px;}
-.wl-result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;min-height:60px;}
-.wl-empty{grid-column:1/-1;color:#a29b88;font-size:13px;text-align:center;padding:16px;}
-.wl-ro{border:1px solid #ebe8de;border-radius:10px;overflow:hidden;cursor:pointer;background:#fff;transition:all .12s;position:relative;}
+.wl-dest-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.wl-lbl{font-size:12.5px;font-weight:700;color:#8b8473;white-space:nowrap;}
+.wl-sel{flex:1;min-width:200px;font:inherit;font-size:14px;padding:10px 12px;border:1.5px solid #e3ddc9;border-radius:12px;background:#fcfaf3;color:#2b2620;}
+.wl-res-t{font-size:12.5px;font-weight:700;color:#8b8473;margin:0 2px 13px;}
+.wl-result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;min-height:50px;}
+.wl-empty{grid-column:1/-1;color:#a29b88;font-size:13px;text-align:center;padding:20px;}
+.wl-ro{border:1px solid #ebe8de;border-radius:11px;overflow:hidden;cursor:pointer;background:#fff;transition:all .12s;position:relative;}
 .wl-ro:hover{border-color:var(--lego-red);box-shadow:0 4px 12px rgba(216,41,28,.15);}
-.wl-ro img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#faf9f4;padding:6px;display:block;}
+.wl-ro img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#faf9f4;padding:8px;display:block;}
 .wl-ro .rn{font-size:11.5px;font-weight:600;color:#2b2620;padding:6px 8px 3px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .wl-ro .rm{font-size:10.5px;color:#a29b88;padding:0 8px 8px;font-weight:600;}
 .wl-ro .radd{position:absolute;top:6px;right:6px;background:var(--lego-red);color:#fff;font-size:15px;font-weight:700;width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);opacity:0;transition:opacity .12s;}
 .wl-ro:hover .radd{opacity:1;}
 @media(max-width:600px){
-  .wl-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .wl-grid,.wl-col-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .wl-result-grid{grid-template-columns:1fr 1fr;gap:10px;}
 }
 </style>
 
@@ -1194,15 +1217,66 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
     <h2 style="font-size:18px;font-weight:700;">💖 Wishlist</h2>
     <div style="display:flex;gap:8px;">
-      <button onclick="loadWishlist()" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
-      <button class="wl-add-btn" onclick="openWishlistSearch()">＋ Thêm mục</button>
+      <button onclick="loadWishlist(true)" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
+      <button class="wl-add-btn" onclick="wlOpenAdd()"><span>＋</span> Thêm mục</button>
     </div>
   </div>
-  <div class="wl-toolbar">
-    <input type="text" id="wlSearch" class="search-input" aria-label="Lọc wishlist" placeholder="🔍 Lọc theo tên, mã, ghi chú..." oninput="renderWishlist()">
-    <div class="wl-folder-chips" id="wlFolderChips"></div>
+
+  <div class="wl-bar" id="wlFilterBar">
+    <input type="text" id="wlSearch" class="search-input" aria-label="Lọc wishlist" placeholder="🔍 Lọc theo tên hoặc mã trong wishlist..." oninput="wlApplyFilter()">
   </div>
-  <div id="wlContent"><div class="loading-state">⏳ Đang tải...</div></div>
+
+  <!-- LANDING: bộ sưu tập + mục chưa vào bộ -->
+  <div id="wlLanding">
+    <div id="wlNormal">
+      <div class="wl-sec-h"><span class="wl-sec-t">📚 Bộ sưu tập</span><span class="wl-sec-c" id="wlColCount">0</span><span class="wl-sec-hint">Bấm để mở</span></div>
+      <div class="wl-col-grid" id="wlColGrid"></div>
+      <div class="wl-sec-h"><span class="wl-sec-t">🗂️ Chưa vào bộ sưu tập</span><span class="wl-sec-c" id="wlLooseCount">0</span></div>
+      <div class="wl-grid" id="wlLooseGrid"></div>
+    </div>
+    <div id="wlSearchView" style="display:none;">
+      <div class="wl-sec-h"><span class="wl-sec-t">🔍 Kết quả lọc</span><span class="wl-sec-c" id="wlFCount">0</span></div>
+      <div class="wl-grid" id="wlFGrid"></div>
+    </div>
+    <div id="wlLoading"><div class="loading-state">⏳ Đang tải...</div></div>
+  </div>
+
+  <!-- DETAIL: một bộ sưu tập -->
+  <div id="wlDetail" style="display:none;">
+    <button class="wl-crumb" onclick="wlCloseCollection()">← Bộ sưu tập</button>
+    <div class="wl-detail-head">
+      <h2 id="wlDName"></h2>
+      <span class="wl-pill count" id="wlDCount"></span>
+      <span class="wl-pill own" id="wlDOwn"></span>
+      <button class="wl-crumb" style="margin:0 0 0 auto;" onclick="wlRenameCollection()">✏️ Đổi tên</button>
+    </div>
+    <div class="wl-grid" id="wlDGrid"></div>
+  </div>
+
+  <!-- ADD: trang tìm & thêm -->
+  <div id="wlAdd" style="display:none;">
+    <button class="wl-crumb" onclick="wlCloseAdd()">← Wishlist</button>
+    <div class="wl-detail-head">
+      <h2>💖 Thêm vào wishlist</h2>
+      <span class="wl-pill own" id="wlAddedPill" style="display:none;"></span>
+    </div>
+    <div class="wl-add-controls">
+      <div class="wl-seg" id="wlSeg">
+        <button class="wl-seg-btn active" onclick="wlSetLoai('set',this)">Set</button>
+        <button class="wl-seg-btn" onclick="wlSetLoai('mini',this)">Minifig</button>
+      </div>
+      <div class="wl-search-row">
+        <input type="text" id="wlKw" class="search-input" placeholder="🔍 Tên hoặc mã set (vd: 75192, technic ferrari)..." onkeydown="if(event.key==='Enter')wlDoSearch()">
+        <button class="wl-add-btn" onclick="wlDoSearch()">Tìm</button>
+      </div>
+      <div class="wl-dest-row">
+        <label class="wl-lbl" for="wlDest">Thêm vào bộ sưu tập</label>
+        <select id="wlDest" class="wl-sel"></select>
+      </div>
+    </div>
+    <div class="wl-res-t" id="wlResT">Kết quả</div>
+    <div class="wl-result-grid" id="wlResults"><div class="wl-empty">Nhập từ khoá rồi bấm <b>Tìm</b> để tra trên Rebrickable. Thêm được nhiều bộ liên tục, xong bấm <b>← Wishlist</b>.</div></div>
+  </div>
 </div>
 </div>
 
@@ -1563,32 +1637,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
   <div class="fab-sheet-option xlsx" onclick="closeFabSheet();openSidebar('importExcel')">
     <span class="fso-ic">📊</span>Import Excel
-  </div>
-</div>
-
-<!-- ====== WISHLIST: MODAL TÌM & THÊM ====== -->
-<div class="wl-modal-overlay" id="wlModalOverlay" onclick="closeWishlistSearch()"></div>
-<div class="wl-modal" id="wlModal" role="dialog" aria-label="Thêm vào wishlist">
-  <div class="wl-modal-head">
-    <div class="wl-modal-title">💖 Thêm vào wishlist</div>
-    <button class="wl-modal-close" aria-label="Đóng" onclick="closeWishlistSearch()">✕</button>
-  </div>
-  <div class="wl-modal-body">
-    <div class="wl-seg" id="wlSeg">
-      <button class="wl-seg-btn active" data-loai="set" onclick="setWlLoai('set',this)">Set</button>
-      <button class="wl-seg-btn" data-loai="mini" onclick="setWlLoai('mini',this)">Minifig</button>
-    </div>
-    <div class="wl-search-row">
-      <input type="text" id="wlKeyword" class="search-input" placeholder="🔍 Tên hoặc mã set (vd: 76821, technic bugatti)..." onkeydown="if(event.key==='Enter')doWishlistSearch()">
-      <button class="wl-add-btn" onclick="doWishlistSearch()">Tìm</button>
-    </div>
-    <div class="wl-field">
-      <label class="wl-lbl">Nhóm / Bộ sưu tập</label>
-      <input type="text" id="wlFolderInput" class="search-input" list="wlFolderList" placeholder="vd: Star Wars, Technic, Ưu tiên mua..." autocomplete="off">
-      <datalist id="wlFolderList"></datalist>
-    </div>
-    <div class="wl-modal-title2" id="wlResultTitle">Kết quả</div>
-    <div class="wl-result-grid" id="wlResults"><div class="wl-empty">Nhập từ khoá rồi bấm <b>Tìm</b> để tra trên Rebrickable.</div></div>
   </div>
 </div>
 
@@ -1968,7 +2016,7 @@ document.addEventListener('click', function(e){
   if (!e.target.closest('.btn-import-wrap')){ closeImportDD(); closeCreateDD(); }
 });
 document.addEventListener('keydown', function(e){
-  if (e.key === 'Escape'){ closeSidebar(); closeFabSheet(); closeMoreSheet(); closeFilterTray(); closeNguoiGDDetail(); closeWishlistSearch(); }
+  if (e.key === 'Escape'){ closeSidebar(); closeFabSheet(); closeMoreSheet(); closeFilterTray(); closeNguoiGDDetail(); if(document.getElementById('wlAdd') && document.getElementById('wlAdd').style.display!=='none') wlCloseAdd(); }
 });
 
 /* =====================================================
@@ -4520,174 +4568,245 @@ function closeNguoiGDFull(){
 function ngFullRowClick(ev, tenShop){ if(_hitInner(ev)) return; closeNguoiGDFull(); openNguoiGDDetail(tenShop); }
 
 /* =====================================================
-   WISHLIST
+   WISHLIST — 2 tầng: bộ sưu tập (folder) + mục lẻ
+   Mục "lẻ" = folder rỗng; "bộ sưu tập" = folder có tên.
    ===================================================== */
 var wlData=[];               // toàn bộ mục
-var wlFolderFilter='';       // '' = tất cả
-var wlLoai='set';            // set | mini
+var wlLoai='set';            // set | mini (tab tìm)
+var wlOpenCol=null;          // tên bộ sưu tập đang mở, null = landing
+var wlFilterQ='';            // từ khoá lọc
+var wlAddedCount=0;          // đếm số đã thêm ở trang Thêm mục
 var wlLoaded=false;
+var WL_LOOSE='';             // giá trị folder cho mục chưa vào bộ
+var WL_SPINE=['#D8291C','#E0A100','#0f7a3d','#2a6f97','#8338ec','#c46210','#00897b','#c9184a'];
+function wlSpine(name){ var h=0,s=String(name||''); for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return WL_SPINE[h%WL_SPINE.length]; }
 
-function loadWishlist(){
-  var c=document.getElementById('wlContent');
-  if(!wlLoaded) c.innerHTML='<div class="loading-state">⏳ Đang tải...</div>';
+function wlIsLoose(x){ var f=x.folder||''; return !f || f==='Chưa phân loại'; }
+function wlLooseItems(){ return wlData.filter(wlIsLoose); }
+function wlCollections(){   // [{name, items}] giữ thứ tự xuất hiện
+  var map={}, order=[];
+  wlData.forEach(function(x){ if(wlIsLoose(x)) return; var f=x.folder; if(!map[f]){ map[f]=[]; order.push(f); } map[f].push(x); });
+  return order.map(function(n){ return {name:n, items:map[n]}; });
+}
+function wlOwnStat(items){ var have=items.filter(function(x){return x.daCo;}).length; return {have:have,total:items.length,wait:items.length-have}; }
+
+function loadWishlist(force){
+  wlOpenCol=null; wlFilterQ='';
+  var q=document.getElementById('wlSearch'); if(q) q.value='';
+  wlShowView('landing');
+  var ld=document.getElementById('wlLoading');
+  if(!wlLoaded || force){ ld.style.display='block'; ld.innerHTML='<div class="loading-state">⏳ Đang tải...</div>'; }
   google.script.run
     .withSuccessHandler(function(r){
-      wlLoaded=true;
-      if(!r||!r.success){ c.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Không tải được</div><div class="s">'+escapeHtml((r&&r.message)||'')+'</div></div>'; return; }
+      wlLoaded=true; ld.style.display='none';
+      if(!r||!r.success){ ld.style.display='block'; ld.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Không tải được</div><div class="s">'+escapeHtml((r&&r.message)||'')+'</div></div>'; return; }
       wlData=r.data||[];
-      renderWishlist();
+      wlRenderLanding();
     })
-    .withFailureHandler(function(e){ c.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Lỗi</div><div class="s">'+escapeHtml(''+e)+'</div></div>'; })
+    .withFailureHandler(function(e){ ld.style.display='block'; ld.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Lỗi</div><div class="s">'+escapeHtml(''+e)+'</div></div>'; })
     .getWishlist();
 }
 
-function wlFolders(){
-  var seen={}, order=[];
-  wlData.forEach(function(x){ var f=x.folder||'Chưa phân loại'; if(!seen[f]){ seen[f]=0; order.push(f); } seen[f]++; });
-  return { order:order, count:seen };
+/* ---- chuyển view ---- */
+function wlShowView(v){
+  document.getElementById('wlLanding').style.display = v==='landing'?'':'none';
+  document.getElementById('wlDetail').style.display  = v==='detail'?'':'none';
+  document.getElementById('wlAdd').style.display     = v==='add'?'':'none';
+  document.getElementById('wlFilterBar').style.display = v==='landing'?'':'none';
 }
 
-function renderWishlist(){
-  var c=document.getElementById('wlContent');
+/* ---- landing ---- */
+function wlRenderLanding(){
+  var ld=document.getElementById('wlLoading'); if(ld) ld.style.display='none';
   if(!wlData.length){
-    document.getElementById('wlFolderChips').innerHTML='';
-    c.innerHTML='<div class="wl-empty-state"><div class="ic">💖</div><div class="t">Wishlist trống</div><div class="s">Bấm “＋ Thêm mục” để tra Rebrickable và lưu bộ Lego bạn muốn mua.</div></div>';
+    document.getElementById('wlNormal').style.display='none';
+    document.getElementById('wlSearchView').style.display='none';
+    ld.style.display='block';
+    ld.innerHTML='<div class="wl-empty-state"><div class="ic">💖</div><div class="t">Wishlist trống</div><div class="s">Bấm “＋ Thêm mục” để tra Rebrickable và lưu bộ Lego bạn muốn mua.</div></div>';
     return;
   }
+  if(wlFilterQ){ wlRenderFilter(); return; }
+  document.getElementById('wlNormal').style.display='';
+  document.getElementById('wlSearchView').style.display='none';
 
-  // chips folder
-  var f=wlFolders();
-  var chips='<button class="wl-fchip'+(wlFolderFilter===''?' active':'')+'" onclick="setWlFolderFilter(\'\')">Tất cả<span class="cnt">'+wlData.length+'</span></button>';
-  f.order.forEach(function(name){
-    chips+='<button class="wl-fchip'+(wlFolderFilter===name?' active':'')+'" onclick="setWlFolderFilter('+JSON.stringify(name).replace(/"/g,'&quot;')+')">'+escapeHtml(name)+'<span class="cnt">'+f.count[name]+'</span></button>';
-  });
-  document.getElementById('wlFolderChips').innerHTML=chips;
+  var cols=wlCollections(), loose=wlLooseItems();
+  document.getElementById('wlColCount').textContent=cols.length;
+  document.getElementById('wlLooseCount').textContent=loose.length;
+  document.getElementById('wlColGrid').innerHTML = cols.map(wlColTile).join('');
+  document.getElementById('wlLooseGrid').innerHTML = loose.length
+    ? loose.map(wlCardHtml).join('')
+    : '<div style="color:#a29b88;font-size:13px;padding:6px 2px;grid-column:1/-1;">Chưa có mục nào ngoài bộ sưu tập.</div>';
+}
 
-  // lọc theo từ khoá + folder
-  var kw=(document.getElementById('wlSearch').value||'').trim().toLowerCase();
-  var list=wlData.filter(function(x){
-    if(wlFolderFilter && (x.folder||'Chưa phân loại')!==wlFolderFilter) return false;
-    if(kw){
-      var hay=((x.ten||'')+' '+(x.setNo||'')+' '+(x.ghiChu||'')).toLowerCase();
-      if(hay.indexOf(kw)<0) return false;
-    }
-    return true;
-  });
-
-  if(!list.length){ c.innerHTML='<div class="wl-empty-state"><div class="ic">🔍</div><div class="t">Không có mục nào khớp</div></div>'; return; }
-
-  // gom nhóm theo folder giữ thứ tự xuất hiện
-  var groups={}, gOrder=[];
-  list.forEach(function(x){ var fn=x.folder||'Chưa phân loại'; if(!groups[fn]){ groups[fn]=[]; gOrder.push(fn); } groups[fn].push(x); });
-
-  var html='';
-  gOrder.forEach(function(fn){
-    var items=groups[fn];
-    var tong=items.reduce(function(s,x){ return s+(Number(x.gia)||0); },0);
-    html+='<div class="wl-folder-sec"><div class="wl-folder-head">'+
-      '<span class="wl-folder-name">📁 '+escapeHtml(fn)+'</span>'+
-      '<span class="wl-folder-count">'+items.length+'</span>'+
-      (tong>0?'<span class="wl-folder-total">'+fmtFull(tong)+'</span>':'')+
-      '</div><div class="wl-grid">';
-    items.forEach(function(x){ html+=wlCardHtml(x); });
-    html+='</div></div>';
-  });
-  c.innerHTML=html;
+function wlColTile(c){
+  var s=wlOwnStat(c.items), pct=s.total?Math.round(s.have/s.total*100):0;
+  return '<button class="wl-col-tile" style="--spine:'+wlSpine(c.name)+';" onclick="wlOpenCollection('+JSON.stringify(c.name).replace(/"/g,'&quot;')+')">'+
+    '<span class="wl-col-ic">📁</span>'+
+    '<span class="wl-col-main">'+
+      '<span class="wl-col-name">'+escapeHtml(c.name)+'</span>'+
+      '<span class="wl-col-meta"><span class="cnt">'+c.items.length+' bộ</span>'+
+        '<span class="wl-ownbar"><i style="width:'+pct+'%"></i></span>'+
+        '<span class="wl-own-frac">'+s.have+'/'+s.total+' đã có</span></span>'+
+    '</span><span class="wl-col-go">›</span></button>';
 }
 
 function wlCardHtml(x){
   var img=x.anh?'<img class="wl-card-img" src="'+escapeAttr(x.anh)+'" loading="lazy" alt="" onerror="this.style.opacity=.2">'
                :'<div class="wl-card-img" style="display:flex;align-items:center;justify-content:center;font-size:34px;">🧱</div>';
   var id=escapeAttr(x.id);
-  return '<div class="wl-card">'+img+
+  var flag = x.daCo?'<span class="wl-have-flag on">✓ Đã có</span>':'<span class="wl-have-flag off">🕒 Chưa có</span>';
+  var tcls = x.daCo?'on':'off', tlabel = x.daCo?'✓ Đã có — bấm để bỏ':'Đánh dấu đã có';
+  return '<div class="wl-card">'+
+    '<div class="wl-thumb-wrap">'+img+flag+'</div>'+
     '<div class="wl-card-body">'+
       '<div class="wl-card-name">'+escapeHtml(x.ten)+'</div>'+
       (x.setNo?'<div class="wl-card-ma">'+escapeHtml(x.setNo)+'</div>':'')+
       (x.ghiChu?'<div class="wl-card-note">'+escapeHtml(x.ghiChu)+'</div>':'')+
-      (x.gia>0?'<div class="wl-card-price">'+fmtFull(x.gia)+'</div>':'')+
+      '<div class="wl-toggle"><button class="wl-tbtn '+tcls+'" onclick="wlToggleOwned(\''+id+'\')">'+tlabel+'</button></div>'+
     '</div>'+
     '<div class="wl-card-acts">'+
-      '<button onclick="editWishlistItem(\''+id+'\')">✏️ Sửa</button>'+
-      '<button class="del" onclick="removeWishlistItem(\''+id+'\')">🗑️</button>'+
+      '<button onclick="wlEditItem(\''+id+'\')" title="Sửa ghi chú/giá">✏️</button>'+
+      '<button onclick="wlMoveItem(\''+id+'\')" title="Chuyển bộ sưu tập">📁</button>'+
+      '<button class="del" onclick="wlRemoveItem(\''+id+'\')" title="Xoá">🗑️</button>'+
     '</div>'+
   '</div>';
 }
 
-function setWlFolderFilter(name){ wlFolderFilter=name; renderWishlist(); }
-
-function editWishlistItem(id){
-  var x=wlData.filter(function(i){ return i.id===id; })[0];
-  if(!x) return;
-  var folder=prompt('Nhóm / bộ sưu tập:', x.folder||'Chưa phân loại');
-  if(folder===null) return;
-  var ghiChu=prompt('Ghi chú:', x.ghiChu||'');
-  if(ghiChu===null) return;
-  var giaStr=prompt('Giá dự kiến (VNĐ, để trống nếu không rõ):', x.gia||'');
-  if(giaStr===null) return;
-  var gia=parseInt(String(giaStr).replace(/[^0-9]/g,''))||0;
-  google.script.run
-    .withSuccessHandler(function(r){
-      if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; }
-      showToast('✅ Đã cập nhật');
-      wlData=wlData.map(function(i){ return i.id===id?r.item:i; });
-      renderWishlist();
-    })
-    .withFailureHandler(function(e){ showToast(''+e,true); })
-    .updateWishlistItem(id,{folder:folder,ghiChu:ghiChu,gia:gia});
+/* ---- lọc nhanh ---- */
+function wlApplyFilter(){
+  wlFilterQ=(document.getElementById('wlSearch').value||'').trim().toLowerCase();
+  wlRenderLanding();
+}
+function wlRenderFilter(){
+  document.getElementById('wlNormal').style.display='none';
+  var sv=document.getElementById('wlSearchView'); sv.style.display='';
+  var hits=wlData.filter(function(x){ return ((x.ten||'')+' '+(x.setNo||'')+' '+(x.ghiChu||'')).toLowerCase().indexOf(wlFilterQ)>=0; });
+  document.getElementById('wlFCount').textContent=hits.length;
+  document.getElementById('wlFGrid').innerHTML = hits.length
+    ? hits.map(wlCardHtml).join('')
+    : '<div style="grid-column:1/-1;color:#a29b88;font-size:13px;padding:8px 2px;">Không có mục nào khớp “'+escapeHtml(wlFilterQ)+'”.</div>';
 }
 
-function removeWishlistItem(id){
-  var x=wlData.filter(function(i){ return i.id===id; })[0];
-  if(!x) return;
-  if(!confirm('Xoá "'+(x.ten||'')+'" khỏi wishlist?')) return;
+/* ---- chi tiết bộ sưu tập ---- */
+function wlOpenCollection(name){
+  wlOpenCol=name; wlShowView('detail'); wlRenderDetail();
+  window.scrollTo({top:0,behavior:'auto'});
+}
+function wlCloseCollection(){ wlOpenCol=null; wlShowView('landing'); wlRenderLanding(); window.scrollTo({top:0,behavior:'auto'}); }
+function wlRenderDetail(){
+  var items=wlData.filter(function(x){ return (x.folder||'')===wlOpenCol; });
+  if(!items.length){ wlCloseCollection(); return; }
+  var s=wlOwnStat(items);
+  document.getElementById('wlDName').textContent='📁 '+wlOpenCol;
+  document.getElementById('wlDCount').textContent=items.length+' bộ';
+  document.getElementById('wlDOwn').textContent='✅ '+s.have+' đã có · 🕒 '+s.wait+' chưa có';
+  document.getElementById('wlDGrid').innerHTML=items.map(wlCardHtml).join('');
+}
+function wlRenameCollection(){
+  if(!wlOpenCol) return;
+  var moi=prompt('Đổi tên bộ sưu tập:', wlOpenCol);
+  if(moi===null) return; moi=moi.trim(); if(!moi || moi===wlOpenCol) return;
   google.script.run
     .withSuccessHandler(function(r){
       if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; }
-      showToast('✅ '+r.message);
-      wlData=wlData.filter(function(i){ return i.id!==id; });
-      renderWishlist();
+      wlData.forEach(function(x){ if((x.folder||'')===wlOpenCol) x.folder=moi; });
+      wlOpenCol=moi; showToast('✅ Đã đổi tên'); wlRenderDetail();
     })
+    .withFailureHandler(function(e){ showToast(''+e,true); })
+    .renameWishlistFolder(wlOpenCol, moi);
+}
+
+/* ---- thao tác trên 1 mục ---- */
+function wlFind(id){ return wlData.filter(function(x){ return x.id===id; })[0]; }
+function wlAfterChange(){ if(wlOpenCol) wlRenderDetail(); else if(wlFilterQ) wlRenderFilter(); else wlRenderLanding(); }
+
+function wlToggleOwned(id){
+  var x=wlFind(id); if(!x) return;
+  var moi=!x.daCo; x.daCo=moi; wlAfterChange();  // cập nhật ngay (optimistic)
+  google.script.run
+    .withSuccessHandler(function(r){ if(!r||!r.success){ x.daCo=!moi; wlAfterChange(); showToast((r&&r.message)||'Lỗi',true); } })
+    .withFailureHandler(function(e){ x.daCo=!moi; wlAfterChange(); showToast(''+e,true); })
+    .setWishlistOwned(id, moi);
+}
+function wlEditItem(id){
+  var x=wlFind(id); if(!x) return;
+  var ghiChu=prompt('Ghi chú:', x.ghiChu||''); if(ghiChu===null) return;
+  var giaStr=prompt('Giá dự kiến (VNĐ, để trống nếu không rõ):', x.gia||''); if(giaStr===null) return;
+  var gia=parseInt(String(giaStr).replace(/[^0-9]/g,''))||0;
+  google.script.run
+    .withSuccessHandler(function(r){ if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; } showToast('✅ Đã cập nhật'); wlData=wlData.map(function(i){ return i.id===id?r.item:i; }); wlAfterChange(); })
+    .withFailureHandler(function(e){ showToast(''+e,true); })
+    .updateWishlistItem(id,{ghiChu:ghiChu,gia:gia});
+}
+function wlMoveItem(id){
+  var x=wlFind(id); if(!x) return;
+  var cols=wlCollections().map(function(c){return c.name;});
+  var msg='Chuyển "'+(x.ten||'')+'" tới bộ sưu tập nào?\n\n- Gõ tên bộ (mới hoặc có sẵn)\n- Để TRỐNG = đưa ra "Chưa vào bộ sưu tập"';
+  if(cols.length) msg+='\n\nĐang có: '+cols.join(', ');
+  var moi=prompt(msg, x.folder||''); if(moi===null) return; moi=moi.trim();
+  google.script.run
+    .withSuccessHandler(function(r){ if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; } showToast('✅ Đã chuyển'); wlData=wlData.map(function(i){ return i.id===id?r.item:i; }); wlAfterChange(); })
+    .withFailureHandler(function(e){ showToast(''+e,true); })
+    .updateWishlistItem(id,{folder:moi});
+}
+function wlRemoveItem(id){
+  var x=wlFind(id); if(!x) return;
+  if(!confirm('Xoá "'+(x.ten||'')+'" khỏi wishlist?')) return;
+  google.script.run
+    .withSuccessHandler(function(r){ if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; } showToast('✅ '+r.message); wlData=wlData.filter(function(i){ return i.id!==id; }); wlAfterChange(); })
     .withFailureHandler(function(e){ showToast(''+e,true); })
     .deleteWishlistItem(id);
 }
 
-/* ---- modal tìm & thêm ---- */
-function openWishlistSearch(){
-  document.getElementById('wlModalOverlay').classList.add('open');
-  document.getElementById('wlModal').classList.add('open');
-  // gợi ý folder từ dữ liệu hiện có + folder đang lọc
-  var dl=document.getElementById('wlFolderList');
-  var f=wlFolders();
-  dl.innerHTML=f.order.map(function(n){ return '<option value="'+escapeAttr(n)+'">'; }).join('');
-  var fi=document.getElementById('wlFolderInput');
-  if(!fi.value && wlFolderFilter) fi.value=wlFolderFilter;
-  setTimeout(function(){ document.getElementById('wlKeyword').focus(); },80);
+/* ---- trang Thêm mục ---- */
+function wlFillDest(){
+  var sel=document.getElementById('wlDest');
+  var cur=sel.value;
+  var opts='<option value="">🗂️ Chưa vào bộ sưu tập</option>'+
+    wlCollections().map(function(c){ return '<option value="'+escapeAttr(c.name)+'">📁 '+escapeHtml(c.name)+'</option>'; }).join('')+
+    '<option value="__new__">➕ Bộ sưu tập mới…</option>';
+  sel.innerHTML=opts;
+  if(cur) sel.value=cur;
 }
-function closeWishlistSearch(){
-  document.getElementById('wlModalOverlay').classList.remove('open');
-  document.getElementById('wlModal').classList.remove('open');
+function wlOpenAdd(){
+  wlFillDest();
+  document.getElementById('wlDest').value = wlOpenCol || '';
+  wlAddedCount=0; wlUpdAddedPill();
+  document.getElementById('wlResults').innerHTML='<div class="wl-empty">Nhập từ khoá rồi bấm <b>Tìm</b> để tra trên Rebrickable. Thêm được nhiều bộ liên tục, xong bấm <b>← Wishlist</b>.</div>';
+  document.getElementById('wlResT').textContent='Kết quả';
+  document.getElementById('wlKw').value='';
+  wlShowView('add');
+  window.scrollTo({top:0,behavior:'auto'});
+  setTimeout(function(){ document.getElementById('wlKw').focus(); },70);
 }
-function setWlLoai(loai, el){
+function wlCloseAdd(){
+  if(wlOpenCol){ wlShowView('detail'); wlRenderDetail(); }
+  else { wlShowView('landing'); wlRenderLanding(); }
+  window.scrollTo({top:0,behavior:'auto'});
+}
+function wlUpdAddedPill(){
+  var p=document.getElementById('wlAddedPill');
+  if(wlAddedCount>0){ p.style.display=''; p.textContent='✓ Đã thêm '+wlAddedCount+' bộ'; } else p.style.display='none';
+}
+function wlSetLoai(loai, el){
   wlLoai=loai;
   document.querySelectorAll('#wlSeg .wl-seg-btn').forEach(function(b){ b.classList.toggle('active', b===el); });
 }
-
-function doWishlistSearch(){
-  var kw=(document.getElementById('wlKeyword').value||'').trim();
-  var box=document.getElementById('wlResults');
-  var title=document.getElementById('wlResultTitle');
+function wlDoSearch(){
+  var kw=(document.getElementById('wlKw').value||'').trim();
+  var box=document.getElementById('wlResults'), t=document.getElementById('wlResT');
   if(!kw){ box.innerHTML='<div class="wl-empty">Nhập từ khoá để tìm.</div>'; return; }
-  title.textContent='Đang tìm...';
+  t.textContent='Đang tìm...';
   box.innerHTML='<div class="wl-empty">⏳ Đang tra Rebrickable...</div>';
   google.script.run
     .withSuccessHandler(function(r){
-      if(!r||!r.success){ title.textContent='Kết quả'; box.innerHTML='<div class="wl-empty" style="color:#b4232a;">'+escapeHtml((r&&r.message)||'Lỗi')+'</div>'; return; }
+      if(!r||!r.success){ t.textContent='Kết quả'; box.innerHTML='<div class="wl-empty" style="color:#b4232a;">'+escapeHtml((r&&r.message)||'Lỗi')+'</div>'; return; }
       var ds=r.data||[];
-      title.textContent='Kết quả — '+ds.length+' mục (bấm để thêm)';
+      t.textContent='Kết quả — '+ds.length+' mục (bấm để thêm)';
       if(!ds.length){ box.innerHTML='<div class="wl-empty">Không tìm thấy. Thử đổi từ khoá hoặc Set/Minifig.</div>'; return; }
       window._wlResults=ds;
       box.innerHTML=ds.map(function(x,i){
-        return '<div class="wl-ro" onclick="addFromSearch('+i+',this)">'+
+        return '<div class="wl-ro" onclick="wlAddFromSearch('+i+',this)">'+
           '<span class="radd">＋</span>'+
           '<img src="'+escapeAttr(x.url)+'" loading="lazy" alt="" onerror="this.style.opacity=.2">'+
           '<div class="rn">'+escapeHtml(x.ten)+'</div>'+
@@ -4695,22 +4814,22 @@ function doWishlistSearch(){
           '</div>';
       }).join('');
     })
-    .withFailureHandler(function(e){ title.textContent='Kết quả'; box.innerHTML='<div class="wl-empty" style="color:#b4232a;">'+escapeHtml(''+e)+'</div>'; })
+    .withFailureHandler(function(e){ t.textContent='Kết quả'; box.innerHTML='<div class="wl-empty" style="color:#b4232a;">'+escapeHtml(''+e)+'</div>'; })
     .timUngVien(wlLoai, kw);
 }
-
-function addFromSearch(i, el){
-  var ds=window._wlResults||[];
-  var x=ds[i]; if(!x) return;
-  var folder=(document.getElementById('wlFolderInput').value||'').trim();
-  if(el){ el.style.pointerEvents='none'; el.style.opacity=.55; }
+function wlAddFromSearch(i, el){
+  var x=(window._wlResults||[])[i]; if(!x) return;
+  var dest=document.getElementById('wlDest').value;
+  var folder=dest;
+  if(dest==='__new__'){ var nm=prompt('Tên bộ sưu tập mới:'); if(nm===null) return; folder=nm.trim(); }
+  if(el){ el.style.pointerEvents='none'; el.style.opacity=.6; }
   google.script.run
     .withSuccessHandler(function(r){
       if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); if(el){ el.style.pointerEvents=''; el.style.opacity=''; } return; }
-      showToast('✅ Đã thêm vào wishlist');
-      wlData.unshift(r.item);
+      wlData.unshift(r.item); wlAddedCount++; wlUpdAddedPill();
+      if(dest==='__new__'){ wlFillDest(); document.getElementById('wlDest').value=folder; }
       if(el){ var b=el.querySelector('.radd'); if(b){ b.textContent='✓'; b.style.opacity=1; b.style.background='#0f7a3d'; } }
-      renderWishlist();
+      showToast('✅ Đã thêm vào wishlist');
     })
     .withFailureHandler(function(e){ showToast(''+e,true); if(el){ el.style.pointerEvents=''; el.style.opacity=''; } })
     .addWishlistItem({ setNo:x.ma, ten:x.ten, anh:x.url, folder:folder });
