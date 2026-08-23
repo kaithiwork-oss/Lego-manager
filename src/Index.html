@@ -1267,9 +1267,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <h2 id="wlDName"></h2>
       <span class="wl-pill count" id="wlDCount"></span>
       <span class="wl-pill own" id="wlDOwn"></span>
-      <button class="wl-crumb" style="margin:0 0 0 auto;" onclick="wlMarkCollectionOwned(true)">✅ Cả bộ đã có</button>
-      <button class="wl-crumb" onclick="wlMarkCollectionOwned(false)">🕒 Cả bộ chưa có</button>
-      <button class="wl-crumb" onclick="wlRenameCollection()">✏️ Đổi tên</button>
+      <button class="wl-crumb" style="margin:0 0 0 auto;" onclick="wlRenameCollection()">✏️ Đổi tên</button>
     </div>
     <div class="wl-grid" id="wlDGrid"></div>
   </div>
@@ -4776,19 +4774,6 @@ function wlRenameCollection(){
     })
     .withFailureHandler(function(e){ showToast(''+e,true); })
     .renameWishlistFolder(wlOpenCol, moi);
-}
-function wlMarkCollectionOwned(daCo){
-  if(!wlOpenCol && wlOpenCol!=='') return;
-  var folder=wlOpenCol;
-  google.script.run
-    .withSuccessHandler(function(r){
-      if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; }
-      wlData.forEach(function(x){ if((x.folder||'')===folder) x.daCo=(daCo===true); });
-      showToast('✅ '+(daCo?'Đã đánh dấu cả bộ đã có':'Đã bỏ đánh dấu cả bộ'));
-      wlRenderDetail();
-    })
-    .withFailureHandler(function(e){ showToast(''+e,true); })
-    .setCollectionOwned(folder, daCo===true);
 }
 /* Mở đúng mặt hàng (giao dịch) trong tab Mặt hàng. Có maGD -> mở chi tiết;
    không có (mục cũ) -> mở tab Mặt hàng và lọc theo tên. */
