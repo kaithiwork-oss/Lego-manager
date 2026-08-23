@@ -127,7 +127,8 @@ Danh sách bộ Lego muốn mua, tổ chức **2 tầng kiểu Google Drive**.
    **← Wishlist**.
 4. Mỗi thẻ đánh dấu **đã có / chưa có** (bấm là đổi ngay), và có nút ✏️ (sửa ghi
    chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá). Thẻ nguồn **Mặt hàng** có thêm
-   🔗 để nhảy sang tab Mặt hàng (lọc theo tên mặt hàng đó).
+   🔗 để mở **thẳng chi tiết giao dịch** của mặt hàng đó (lưu `MaGD` khi thêm;
+   mục cũ chưa có `MaGD` thì mở tab Mặt hàng và lọc theo tên).
    Trong trang một bộ sưu tập có nút **✅ Cả bộ đã có / 🕒 Cả bộ chưa có** để đánh
    dấu hàng loạt (`setCollectionOwned`).
 5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã.
@@ -143,7 +144,7 @@ wishlist (lấy luôn tên + ảnh đã duyệt của mặt hàng). Không cần
 Lưu ở tab Sheet **`DataWishlist`** (tự tạo lần đầu mở tab). Cột:
 
 ```
-ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo | Nguon
+ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo | Nguon | MaGD
 ```
 
 - **Folder rỗng** = mục lẻ (chưa vào bộ sưu tập); **Folder có tên** = thuộc bộ sưu
@@ -151,7 +152,9 @@ ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo | Nguon
 - **DaCo** (TRUE/FALSE) = đã sở hữu hay chưa.
 - **Nguon**: `mat_hang` = thêm từ tab Mặt hàng (mặc định **đã có**); rỗng = thêm thủ
   công (tìm Rebrickable). Thêm từ Mặt hàng luôn `DaCo=TRUE` — nhưng vẫn bấm đổi lại *chưa có* được.
-- Tab cũ thiếu cột `DaCo`/`Nguon` sẽ **tự bổ sung** khi mở lại (xem `_wishlistSheet`).
+- **MaGD**: mã giao dịch của mặt hàng (chỉ có khi thêm từ tab Mặt hàng) — dùng cho
+  nút 🔗 mở đúng chi tiết mặt hàng.
+- Tab cũ thiếu cột `DaCo`/`Nguon`/`MaGD` sẽ **tự bổ sung** khi mở lại (xem `_wishlistSheet`).
 
 ### Gộp trùng (dedup)
 

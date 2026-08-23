@@ -16,9 +16,9 @@
 // =============================================
 
 var TAB_WISHLIST = 'DataWishlist';
-var HEADERS_WISHLIST = ['ID', 'SetNo', 'Ten', 'Anh', 'Folder', 'GhiChu', 'Gia', 'NgayThem', 'DaCo', 'Nguon'];
+var HEADERS_WISHLIST = ['ID', 'SetNo', 'Ten', 'Anh', 'Folder', 'GhiChu', 'Gia', 'NgayThem', 'DaCo', 'Nguon', 'MaGD'];
 
-var WL_COL = { ID: 0, SETNO: 1, TEN: 2, ANH: 3, FOLDER: 4, GHICHU: 5, GIA: 6, NGAYTHEM: 7, DACO: 8, NGUON: 9 };
+var WL_COL = { ID: 0, SETNO: 1, TEN: 2, ANH: 3, FOLDER: 4, GHICHU: 5, GIA: 6, NGAYTHEM: 7, DACO: 8, NGUON: 9, MAGD: 10 };
 var WL_FOLDER_MAC_DINH = ''; // rỗng = mục lẻ (chưa vào bộ sưu tập)
 var WL_NGUON_MAT_HANG = 'mat_hang';
 
@@ -57,7 +57,8 @@ function _wlRowToItem(row) {
       ? Utilities.formatDate(new Date(row[WL_COL.NGAYTHEM]), 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy')
       : '',
     daCo:     row[WL_COL.DACO] === true || row[WL_COL.DACO] === 'TRUE' || row[WL_COL.DACO] === 'x',
-    nguon:    String(row[WL_COL.NGUON] || '')
+    nguon:    String(row[WL_COL.NGUON] || ''),
+    maGD:     String(row[WL_COL.MAGD] || '')
   };
 }
 
@@ -91,6 +92,7 @@ function addWishlistItem(item) {
     var folder = String(item.folder || '').trim();
     var daCo = item.daCo === true;
     var nguon = String(item.nguon || '').trim();
+    var maGD = String(item.maGD || '').trim();
 
     sh.appendRow([
       id,
@@ -102,7 +104,8 @@ function addWishlistItem(item) {
       Number(item.gia) || 0,
       new Date(),
       daCo,
-      nguon
+      nguon,
+      maGD
     ]);
 
     return {
@@ -118,7 +121,8 @@ function addWishlistItem(item) {
         gia: Number(item.gia) || 0,
         ngayThem: Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy'),
         daCo: daCo,
-        nguon: nguon
+        nguon: nguon,
+        maGD: maGD
       }
     };
   } catch (e) {

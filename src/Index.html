@@ -4216,7 +4216,7 @@ function renderGmhCard(rows){
         '<div style="font-size:17px;font-weight:800;color:'+ac.color+';">'+(r.donGia?fmtFull(r.donGia):'—')+'</div>'+
         '<div style="font-size:11px;color:#aaa;margin-top:4px;">'+(r.tenShop||'')+(r.ngay?' · '+r.ngay.split('-').reverse().join('/'):'')+'</div>'+
         '<div style="display:flex;gap:6px;margin-top:8px;">'+
-          '<button class="row-btn gmh-wl-btn" onclick="gmhAddToCollection(\''+tenSafe+'\')" title="Thêm vào wishlist / bộ sưu tập">💖</button>'+
+          '<button class="row-btn gmh-wl-btn" onclick="gmhAddToCollection(\''+tenSafe+'\',\''+maGDSafe+'\')" title="Thêm vào wishlist / bộ sưu tập">💖</button>'+
           '<button class="row-btn gmh-anh-btn" onclick="suaAnh(\''+tenSafe+'\')" title="Sửa ảnh sản phẩm">🖼</button>'+
         '</div>'+
         '</div>';
@@ -4311,7 +4311,7 @@ function renderGiaMH(){
       '<td><span class="badge '+lb+'">'+(r.loaiGD||'—')+'</span></td>'+
       '<td>'+(r.tenShop||'—')+'</td>'+
       '<td><div class="row-action">'+
-        '<button class="row-btn gmh-wl-btn" onclick="gmhAddToCollection(\''+tenSafe+'\')" title="Thêm vào wishlist / bộ sưu tập">💖</button>'+
+        '<button class="row-btn gmh-wl-btn" onclick="gmhAddToCollection(\''+tenSafe+'\',\''+maGDSafe+'\')" title="Thêm vào wishlist / bộ sưu tập">💖</button>'+
         '<button class="row-btn gmh-anh-btn" onclick="suaAnh(\''+tenSafe+'\')" title="Sửa ảnh sản phẩm">🖼</button>'+
       '</div></td>'+
       '</tr>';
@@ -4790,12 +4790,21 @@ function wlMarkCollectionOwned(daCo){
     .withFailureHandler(function(e){ showToast(''+e,true); })
     .setCollectionOwned(folder, daCo===true);
 }
-/* Mở mặt hàng tương ứng trong tab Mặt hàng (lọc theo tên) */
+/* Mở đúng mặt hàng (giao dịch) trong tab Mặt hàng. Có maGD -> mở chi tiết;
+   không có (mục cũ) -> mở tab Mặt hàng và lọc theo tên. */
 function wlGoToMatHang(id){
   var x=wlFind(id); if(!x) return;
-  var s=document.getElementById('gmhSearch'); if(s) s.value=x.ten||'';
-  if(typeof gmhPage!=='undefined') gmhPage=1;
-  switchTab('giamh');
+  if(x.maGD){
+    switchTab('giamh');
+    var openIt=function(){ openEditFromList(x.maGD); };
+    if(typeof _appCache!=='undefined' && _appCache && _appCache.gdData){ openIt(); }
+    else if(typeof getAppData==='function'){ getAppData(function(){ openIt(); }); }
+    else { openIt(); }
+  } else {
+    var s=document.getElementById('gmhSearch'); if(s) s.value=x.ten||'';
+    if(typeof gmhPage!=='undefined') gmhPage=1;
+    switchTab('giamh');
+  }
 }
 
 /* ---- thao tác trên 1 mục ---- */
@@ -4918,7 +4927,7 @@ function wlAddFromSearch(i, el){
 }
 
 /* ---- Thêm mặt hàng vào bộ sưu tập (từ tab Mặt hàng) ---- */
-var _gmhWlTen='', _gmhWlImg='';
+var _gmhWlTen='', _gmhWlImg='', _gmhWlMaGD='';
 function wlEnsureData(cb){
   if(wlLoaded){ cb(); return; }
   google.script.run
@@ -4926,8 +4935,8 @@ function wlEnsureData(cb){
     .withFailureHandler(function(){ cb(); })
     .getWishlist();
 }
-function gmhAddToCollection(tenSP){
-  _gmhWlTen=tenSP;
+function gmhAddToCollection(tenSP, maGD){
+  _gmhWlTen=tenSP; _gmhWlMaGD=maGD||'';
   _gmhWlImg=(typeof anhCua==='function'?anhCua(tenSP):'')||(typeof anhCuaBatKy==='function'?anhCuaBatKy(tenSP):'')||'';
   var it=document.getElementById('gmhWlItem');
   it.innerHTML=(_gmhWlImg?'<img src="'+escapeAttr(_gmhWlImg)+'" alt="" onerror="this.outerHTML=\'<div class=&quot;noimg&quot;>🧱</div>\'">':'<div class="noimg">🧱</div>')+
@@ -4962,7 +4971,7 @@ function gmhConfirmAddToWl(){
       gmhCloseAddModal();
     })
     .withFailureHandler(function(e){ btn.disabled=false; showToast(''+e,true); })
-    .addWishlistItem({ ten:_gmhWlTen, anh:_gmhWlImg, setNo:'', folder:folder, daCo:true, nguon:'mat_hang' });
+    .addWishlistItem({ ten:_gmhWlTen, anh:_gmhWlImg, setNo:'', folder:folder, daCo:true, nguon:'mat_hang', maGD:_gmhWlMaGD });
 }
 </script>
 </body>
