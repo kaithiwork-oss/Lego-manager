@@ -129,7 +129,9 @@ Danh sách bộ Lego muốn mua, tổ chức **2 tầng kiểu Google Drive**.
    chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá). Thẻ nguồn **Mặt hàng** có thêm
    🔗 để mở **thẳng chi tiết giao dịch** của mặt hàng đó (lưu `MaGD` khi thêm;
    mục cũ chưa có `MaGD` thì mở tab Mặt hàng và lọc theo tên).
-5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã.
+5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã. Nút **🕒 Chưa có**
+   gom phẳng chỉ các mục **chưa sở hữu** (ẩn mục đã có) — dùng chung với ô lọc, và
+   áp dụng cả trong trang một bộ sưu tập.
 
 ### Thêm từ tab Mặt hàng
 

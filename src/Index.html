@@ -687,7 +687,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .wl-add-btn:hover{background:var(--lego-red-dark);}
 .wl-add-btn:active{transform:scale(.96);}
 .wl-add-btn span{font-size:16px;line-height:1;}
-.wl-bar{margin-bottom:20px;}
+.wl-bar{display:flex;gap:9px;align-items:center;margin-bottom:20px;}
+.wl-wait-btn{flex-shrink:0;font:inherit;font-size:13px;font-weight:700;color:#6b6455;background:#fff;border:1.5px solid #e3ddc9;border-radius:999px;padding:9px 15px;cursor:pointer;white-space:nowrap;transition:all .12s;}
+.wl-wait-btn:hover{border-color:#b46b00;color:#b46b00;}
+.wl-wait-btn.active{background:#b46b00;border-color:#b46b00;color:#fff;}
 
 .wl-sec-h{display:flex;align-items:baseline;gap:9px;margin:0 2px 13px;}
 .wl-sec-t{font-size:15px;font-weight:800;color:#2b2620;}
@@ -1243,6 +1246,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
   <div class="wl-bar" id="wlFilterBar">
     <input type="text" id="wlSearch" class="search-input" aria-label="Lọc wishlist" placeholder="🔍 Lọc theo tên hoặc mã trong wishlist..." oninput="wlApplyFilter()">
+    <button class="wl-wait-btn" id="wlWaitBtn" onclick="wlToggleOnlyWait()" title="Chỉ hiện các mục chưa có">🕒 Chưa có</button>
   </div>
 
   <!-- LANDING: bộ sưu tập + mục chưa vào bộ -->
@@ -1254,7 +1258,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="wl-grid" id="wlLooseGrid"></div>
     </div>
     <div id="wlSearchView" style="display:none;">
-      <div class="wl-sec-h"><span class="wl-sec-t">🔍 Kết quả lọc</span><span class="wl-sec-c" id="wlFCount">0</span></div>
+      <div class="wl-sec-h"><span class="wl-sec-t" id="wlFTitle">🔍 Kết quả lọc</span><span class="wl-sec-c" id="wlFCount">0</span></div>
       <div class="wl-grid" id="wlFGrid"></div>
     </div>
     <div id="wlLoading"><div class="loading-state">⏳ Đang tải...</div></div>
@@ -4611,6 +4615,7 @@ var wlData=[];               // toàn bộ mục
 var wlLoai='set';            // set | mini (tab tìm)
 var wlOpenCol=null;          // tên bộ sưu tập đang mở, null = landing
 var wlFilterQ='';            // từ khoá lọc
+var wlOnlyWait=false;        // chỉ hiện mục chưa có
 var wlAddedCount=0;          // đếm số đã thêm ở trang Thêm mục
 var wlLoaded=false;
 var WL_LOOSE='';             // giá trị folder cho mục chưa vào bộ
@@ -4650,8 +4655,9 @@ function wlCollections(){   // [{name, items}] giữ thứ tự xuất hiện
 function wlOwnStat(items){ var have=items.filter(function(x){return x.daCo;}).length; return {have:have,total:items.length,wait:items.length-have}; }
 
 function loadWishlist(force){
-  wlOpenCol=null; wlFilterQ='';
+  wlOpenCol=null; wlFilterQ=''; wlOnlyWait=false;
   var q=document.getElementById('wlSearch'); if(q) q.value='';
+  var wb=document.getElementById('wlWaitBtn'); if(wb) wb.classList.remove('active');
   wlShowView('landing');
   var ld=document.getElementById('wlLoading');
   if(!wlLoaded || force){ ld.style.display='block'; ld.innerHTML='<div class="loading-state">⏳ Đang tải...</div>'; }
@@ -4684,7 +4690,7 @@ function wlRenderLanding(){
     ld.innerHTML='<div class="wl-empty-state"><div class="ic">💖</div><div class="t">Wishlist trống</div><div class="s">Bấm “＋ Thêm mục” để tra Rebrickable và lưu bộ Lego bạn muốn mua.</div></div>';
     return;
   }
-  if(wlFilterQ){ wlRenderFilter(); return; }
+  if(wlFilterQ || wlOnlyWait){ wlRenderFilter(); return; }
   document.getElementById('wlNormal').style.display='';
   document.getElementById('wlSearchView').style.display='none';
 
@@ -4737,14 +4743,26 @@ function wlApplyFilter(){
   wlFilterQ=(document.getElementById('wlSearch').value||'').trim().toLowerCase();
   wlRenderLanding();
 }
+function wlToggleOnlyWait(){
+  wlOnlyWait=!wlOnlyWait;
+  var b=document.getElementById('wlWaitBtn'); if(b) b.classList.toggle('active', wlOnlyWait);
+  if(wlOpenCol) wlRenderDetail(); else wlRenderLanding();
+}
 function wlRenderFilter(){
   document.getElementById('wlNormal').style.display='none';
   var sv=document.getElementById('wlSearchView'); sv.style.display='';
-  var hits=wlVisibleData().filter(function(x){ return ((x.ten||'')+' '+(x.setNo||'')+' '+(x.ghiChu||'')).toLowerCase().indexOf(wlFilterQ)>=0; });
+  var hits=wlVisibleData().filter(function(x){
+    if(wlOnlyWait && x.daCo) return false;
+    if(wlFilterQ && ((x.ten||'')+' '+(x.setNo||'')+' '+(x.ghiChu||'')).toLowerCase().indexOf(wlFilterQ)<0) return false;
+    return true;
+  });
+  var title = wlOnlyWait ? (wlFilterQ?'🕒 Chưa có · khớp lọc':'🕒 Chưa có') : '🔍 Kết quả lọc';
+  document.getElementById('wlFTitle').textContent=title;
   document.getElementById('wlFCount').textContent=hits.length;
+  var emptyMsg = wlOnlyWait ? 'Tất cả đều đã có 🎉' : ('Không có mục nào khớp “'+escapeHtml(wlFilterQ)+'”.');
   document.getElementById('wlFGrid').innerHTML = hits.length
     ? hits.map(wlCardHtml).join('')
-    : '<div style="grid-column:1/-1;color:#a29b88;font-size:13px;padding:8px 2px;">Không có mục nào khớp “'+escapeHtml(wlFilterQ)+'”.</div>';
+    : '<div style="grid-column:1/-1;color:#a29b88;font-size:13px;padding:8px 2px;">'+emptyMsg+'</div>';
 }
 
 /* ---- chi tiết bộ sưu tập ---- */
@@ -4754,13 +4772,16 @@ function wlOpenCollection(name){
 }
 function wlCloseCollection(){ wlOpenCol=null; wlShowView('landing'); wlRenderLanding(); window.scrollTo({top:0,behavior:'auto'}); }
 function wlRenderDetail(){
-  var items=wlVisibleData().filter(function(x){ return (x.folder||'')===wlOpenCol; });
-  if(!items.length){ wlCloseCollection(); return; }
-  var s=wlOwnStat(items);
+  var all=wlVisibleData().filter(function(x){ return (x.folder||'')===wlOpenCol; });
+  if(!all.length){ wlCloseCollection(); return; }
+  var s=wlOwnStat(all);
   document.getElementById('wlDName').textContent='📁 '+wlOpenCol;
-  document.getElementById('wlDCount').textContent=items.length+' bộ';
+  document.getElementById('wlDCount').textContent=all.length+' bộ';
   document.getElementById('wlDOwn').textContent='✅ '+s.have+' đã có · 🕒 '+s.wait+' chưa có';
-  document.getElementById('wlDGrid').innerHTML=items.map(wlCardHtml).join('');
+  var items = wlOnlyWait ? all.filter(function(x){ return !x.daCo; }) : all;
+  document.getElementById('wlDGrid').innerHTML = items.length
+    ? items.map(wlCardHtml).join('')
+    : '<div style="grid-column:1/-1;color:#a29b88;font-size:13px;padding:8px 2px;">Cả bộ đã có 🎉</div>';
 }
 function wlRenameCollection(){
   if(!wlOpenCol) return;
