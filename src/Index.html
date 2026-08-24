@@ -1271,7 +1271,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <h2 id="wlDName"></h2>
       <span class="wl-pill count" id="wlDCount"></span>
       <span class="wl-pill own" id="wlDOwn"></span>
-      <button class="wl-crumb" style="margin:0 0 0 auto;" onclick="wlRenameCollection()">✏️ Đổi tên</button>
+      <button class="wl-wait-btn" id="wlDWaitBtn" style="margin:0 0 0 auto;padding:6px 13px;font-size:12.5px;" onclick="wlToggleOnlyWait()" title="Chỉ hiện các mục chưa có trong bộ này">🕒 Chưa có</button>
+      <button class="wl-crumb" onclick="wlRenameCollection()">✏️ Đổi tên</button>
     </div>
     <div class="wl-grid" id="wlDGrid"></div>
   </div>
@@ -4657,7 +4658,7 @@ function wlOwnStat(items){ var have=items.filter(function(x){return x.daCo;}).le
 function loadWishlist(force){
   wlOpenCol=null; wlFilterQ=''; wlOnlyWait=false;
   var q=document.getElementById('wlSearch'); if(q) q.value='';
-  var wb=document.getElementById('wlWaitBtn'); if(wb) wb.classList.remove('active');
+  wlSyncWaitBtns();
   wlShowView('landing');
   var ld=document.getElementById('wlLoading');
   if(!wlLoaded || force){ ld.style.display='block'; ld.innerHTML='<div class="loading-state">⏳ Đang tải...</div>'; }
@@ -4743,9 +4744,12 @@ function wlApplyFilter(){
   wlFilterQ=(document.getElementById('wlSearch').value||'').trim().toLowerCase();
   wlRenderLanding();
 }
+function wlSyncWaitBtns(){
+  ['wlWaitBtn','wlDWaitBtn'].forEach(function(idv){ var b=document.getElementById(idv); if(b) b.classList.toggle('active', wlOnlyWait); });
+}
 function wlToggleOnlyWait(){
   wlOnlyWait=!wlOnlyWait;
-  var b=document.getElementById('wlWaitBtn'); if(b) b.classList.toggle('active', wlOnlyWait);
+  wlSyncWaitBtns();
   if(wlOpenCol) wlRenderDetail(); else wlRenderLanding();
 }
 function wlRenderFilter(){
@@ -4778,6 +4782,7 @@ function wlRenderDetail(){
   document.getElementById('wlDName').textContent='📁 '+wlOpenCol;
   document.getElementById('wlDCount').textContent=all.length+' bộ';
   document.getElementById('wlDOwn').textContent='✅ '+s.have+' đã có · 🕒 '+s.wait+' chưa có';
+  wlSyncWaitBtns();
   var items = wlOnlyWait ? all.filter(function(x){ return !x.daCo; }) : all;
   document.getElementById('wlDGrid').innerHTML = items.length
     ? items.map(wlCardHtml).join('')
