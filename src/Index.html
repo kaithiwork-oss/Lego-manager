@@ -1051,8 +1051,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <div id="gmhContent" style="display:none;">
     <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;">
       <div class="view-switch" id="gmhViewSwitch">
-        <button class="view-btn active" title="Bảng" onclick="setGmhView('table',this)">⊞</button>
-        <button class="view-btn" title="Card" onclick="setGmhView('card',this)">▤</button>
+        <button class="view-btn" title="Bảng" onclick="setGmhView('table',this)">⊞</button>
+        <button class="view-btn active" title="Card" onclick="setGmhView('card',this)">▤</button>
         <button class="view-btn" title="Compact" onclick="setGmhView('compact',this)">≡</button>
       </div>
     </div>
@@ -1830,7 +1830,7 @@ function closeMoreSheet(){
    1. STATE
    ===================================================== */
 var dbRawGD=[], dbRawTT=[], dbFiltered=[];
-var listViewMode='table', gmhViewMode='table';
+var listViewMode='table', gmhViewMode='card';
 var listData=[], listFiltered=[], listPage=1, listPageSize=30;
 var listSortKey='ngay', listSortDir=-1;
 var allShipping=[];
