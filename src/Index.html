@@ -861,6 +861,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
         <div class="import-option" onclick="openSidebar('create');closeCreateDD()">＋ Tạo giao dịch mới</div>
         <div class="import-option" onclick="openSidebar('importImage');closeCreateDD()">📷 Import ảnh bill <span class="ai-badge">AI</span></div>
         <div class="import-option" onclick="openSidebar('importExcel');closeCreateDD()">📊 Import Excel</div>
+        <div class="import-option" onclick="openShipInfo();closeCreateDD()">📦 Địa chỉ giao hàng</div>
       </div>
     </div>
   </div>
@@ -1198,6 +1199,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       </div>
       <div class="field"><label>Người giao dịch (Tên Shop)</label><input type="text" id="sbTenShop" list="sbShopList" placeholder="Tên shop hoặc người bán/mua — gõ để xem gợi ý" oninput="onSbTenShopInput(this.value)"><datalist id="sbShopList"></datalist></div>
       <div class="field"><label>Link liên hệ (Zalo/FB)</label><input type="text" id="sbLinkLH" placeholder="https://..."></div>
+      <div class="field" id="sbShipCopyRow" style="margin-bottom:0;">
+        <label>📋 Copy địa chỉ giao hàng (gửi người bán)</label>
+        <div id="sbShipCopyBtns" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;"></div>
+      </div>
       <div id="sbMaVanDonWrap">
         <div class="field"><label>Mã vận đơn</label><input type="text" id="sbMaVanDon" placeholder="GHTK-123456" oninput="renderSbTrackingLink()" onchange="renderSbTrackingLink()"></div>
         <div id="sbTrackingLinkWrap" style="margin-top:-4px;margin-bottom:4px;"></div>
@@ -1288,6 +1293,25 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
   <div class="sidebar-footer">
     <button class="btn-save-full" id="sbSaveBtn" onclick="handleSbSave()">💾 Lưu giao dịch</button>
+  </div>
+</div>
+
+<!-- SIDEBAR: THÔNG TIN GIAO HÀNG CỦA TÔI -->
+<div class="sidebar" id="sb-shipinfo">
+  <div class="sidebar-header">
+    <button class="sidebar-close" aria-label="Đóng" onclick="closeSidebar()">×</button>
+    <h2>📦 Thông tin giao hàng của tôi</h2>
+    <span style="font-size:12px;color:#aaa;">Địa chỉ nhận hàng để gửi cho người bán</span>
+  </div>
+  <div class="sidebar-body">
+    <div style="font-size:12.5px;color:#888;background:#fbf9f2;border:1px solid #f0eee4;border-radius:10px;padding:9px 12px;margin-bottom:12px;">
+      Lưu sẵn địa chỉ theo từng hãng vận chuyển (VD Shopee Express, VTP dùng map khác nhau). Khi chốt đơn chỉ cần bấm <b>📋 Copy</b> rồi dán cho người bán.
+    </div>
+    <div id="shipInfoRows"></div>
+    <button class="add-prod-btn" onclick="addShipInfoRow()">＋ Thêm hãng vận chuyển</button>
+  </div>
+  <div class="sidebar-footer">
+    <button class="btn-save-full" id="shipInfoSaveBtn" onclick="handleSaveShipInfo()">💾 Lưu thông tin</button>
   </div>
 </div>
 
@@ -1770,6 +1794,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   loadAnhMap(veLaiAnh);   // ảnh đã duyệt — tải sớm để mọi màn có ngay
   napBadgeDuyet();        // Duyệt ảnh nằm trong tab con nên phải biết số tồn từ đầu
+  loadShipInfo();         // nạp địa chỉ giao hàng để nút copy trong sidebar sẵn sàng
 
   getAppData(function(cache){
     var sk=document.getElementById('app-skeleton');
@@ -1837,7 +1862,9 @@ function openSidebar(type){
   document.querySelectorAll('.sidebar').forEach(function(s){ s.classList.remove('open'); });
   document.getElementById('overlay').classList.add('open');
   document.getElementById('sb-'+type).classList.add('open');
-  if(type==='create'){ initCreateSidebar(); loadKnownContacts(); }
+  if(type==='create'){ initCreateSidebar(); loadKnownContacts();
+    if(shipInfoCache===null) loadShipInfo(); else renderSbShipCopyBtns();
+  }
 }
 function closeSidebar(){
   document.querySelectorAll('.sidebar').forEach(function(s){ s.classList.remove('open'); });
@@ -1847,6 +1874,146 @@ function toggleImportDD(){ var d=document.getElementById('importDD'); if(d) d.cl
 function closeImportDD(){ var d=document.getElementById('importDD'); if(d) d.classList.remove('open'); }
 function toggleCreateDD(){ var d=document.getElementById('createDD'); if(d) d.classList.toggle('open'); }
 function closeCreateDD(){ var d=document.getElementById('createDD'); if(d) d.classList.remove('open'); }
+
+/* =====================================================
+   THÔNG TIN GIAO HÀNG CỦA TÔI (địa chỉ nhận hàng)
+   ===================================================== */
+var shipInfoCache = null;
+
+function loadShipInfo(cb){
+  google.script.run
+    .withSuccessHandler(function(list){
+      shipInfoCache = Array.isArray(list) ? list : [];
+      renderSbShipCopyBtns();
+      if(cb) cb(shipInfoCache);
+    })
+    .withFailureHandler(function(){ if(cb) cb(shipInfoCache || []); })
+    .getShipInfo();
+}
+
+function copyPlainText(text){
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text);
+      return true;
+    }
+  }catch(e){}
+  try{
+    var ta=document.createElement('textarea');
+    ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    var ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  }catch(e){ return false; }
+}
+
+function copyShipText(text){
+  if(!text || !text.trim()){ showToast('Chưa có nội dung để copy', true); return; }
+  if(copyPlainText(text)) showToast('📋 Đã copy địa chỉ giao hàng — dán cho người bán');
+  else showToast('Không copy được, hãy copy tay', true);
+}
+
+function copyShipByIndex(i){
+  var it=(shipInfoCache || [])[i];
+  if(it) copyShipText(it.text);
+}
+
+/* Nút copy nhanh trong sidebar Tạo giao dịch */
+function renderSbShipCopyBtns(){
+  var wrap=document.getElementById('sbShipCopyBtns');
+  if(!wrap) return;
+  var list=shipInfoCache || [];
+  var hasAny=list.some(function(it){ return it.text && it.text.trim(); });
+  if(!hasAny){
+    wrap.innerHTML='<span style="font-size:12.5px;color:#999;">Chưa lưu địa chỉ — </span>'
+      +'<button type="button" class="pill" onclick="openShipInfo()">＋ Thêm</button>';
+    return;
+  }
+  var html=list.map(function(it,i){
+    if(!it.text || !it.text.trim()) return '';
+    return '<button type="button" class="pill" onclick="copyShipByIndex('+i+')">📋 '
+      + escapeHtml(it.name || ('Địa chỉ '+(i+1))) + '</button>';
+  }).join('');
+  wrap.innerHTML=html+'<button type="button" class="pill" onclick="openShipInfo()" title="Sửa">✎</button>';
+}
+
+/* Mở sidebar sửa thông tin giao hàng */
+function openShipInfo(){
+  closeCreateDD();
+  document.querySelectorAll('.sidebar').forEach(function(s){ s.classList.remove('open'); });
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('sb-shipinfo').classList.add('open');
+  document.getElementById('shipInfoRows').innerHTML='<div style="color:#999;font-size:13px;padding:8px 2px;">⏳ Đang tải...</div>';
+  loadShipInfo(function(list){
+    renderShipInfoRows((list && list.length) ? list : [{name:'',text:''}]);
+  });
+}
+
+function renderShipInfoRows(list){
+  var wrap=document.getElementById('shipInfoRows');
+  wrap.innerHTML=list.map(function(it, i){
+    return '<div class="card shipinfo-item" style="padding:14px;margin-bottom:12px;">'
+      + '<div class="field"><label>Tên hãng vận chuyển</label>'
+      +   '<input type="text" class="shipinfo-name" placeholder="VD: Shopee Express / VTP"></div>'
+      + '<div class="field" style="margin-bottom:8px;"><label>Nội dung copy (tên + SĐT + địa chỉ)</label>'
+      +   '<textarea class="shipinfo-text" rows="4" placeholder="Nguyễn Văn A\n0900000000\nSố nhà, đường, phường, quận, tỉnh" '
+      +   'style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:9px;font-size:14px;background:#fafafa;color:#1a1a1a;outline:none;resize:vertical;"></textarea></div>'
+      + '<div style="display:flex;gap:8px;">'
+      +   '<button type="button" class="pill" onclick="copyShipFromEditor(this)">📋 Copy</button>'
+      +   '<button type="button" class="pill" onclick="removeShipInfoRow(this)" style="color:#b4232a;">🗑 Xoá</button>'
+      + '</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(wrap.querySelectorAll('.shipinfo-item'), function(el, i){
+    el.querySelector('.shipinfo-name').value = list[i].name || '';
+    el.querySelector('.shipinfo-text').value = list[i].text || '';
+  });
+}
+
+function collectShipInfoRows(){
+  var items=document.querySelectorAll('#shipInfoRows .shipinfo-item');
+  return Array.prototype.map.call(items, function(el){
+    return {
+      name: el.querySelector('.shipinfo-name').value.trim(),
+      text: el.querySelector('.shipinfo-text').value.trim()
+    };
+  });
+}
+
+function addShipInfoRow(){
+  var cur=collectShipInfoRows();
+  cur.push({name:'', text:''});
+  renderShipInfoRows(cur);
+}
+
+function removeShipInfoRow(btn){
+  var item=btn.closest('.shipinfo-item');
+  if(item) item.remove();
+}
+
+function copyShipFromEditor(btn){
+  var item=btn.closest('.shipinfo-item');
+  if(!item) return;
+  copyShipText(item.querySelector('.shipinfo-text').value);
+}
+
+function handleSaveShipInfo(){
+  var list=collectShipInfoRows().filter(function(it){ return it.name || it.text; });
+  var btn=document.getElementById('shipInfoSaveBtn');
+  var old=btn.textContent; btn.disabled=true; btn.textContent='⏳ Đang lưu...';
+  google.script.run
+    .withSuccessHandler(function(r){
+      btn.disabled=false; btn.textContent=old;
+      if(r && r.success){
+        shipInfoCache=r.data || list;
+        renderSbShipCopyBtns();
+        showToast('✅ '+r.message);
+        closeSidebar();
+      } else showToast((r && r.message) || 'Lưu thất bại', true);
+    })
+    .withFailureHandler(function(e){ btn.disabled=false; btn.textContent=old; showToast(''+e, true); })
+    .saveShipInfo(list);
+}
 document.addEventListener('click', function(e){
   if (!e.target.closest('.btn-import-wrap')){ closeImportDD(); closeCreateDD(); }
 });

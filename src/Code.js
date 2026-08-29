@@ -79,6 +79,62 @@ function kiemTraCauHinh() {
   return msg;
 }
 
+
+// ---------------------------------------------
+// THÔNG TIN GIAO HÀNG CỦA TÔI (địa chỉ nhận hàng)
+// Lưu ở Script Property SHIP_INFO dạng JSON:
+//   [ { "name": "Shopee Express", "text": "..." }, { "name": "VTP", "text": "..." } ]
+// Mỗi "text" là nguyên đoạn để copy dán cho người bán.
+// ---------------------------------------------
+
+var SHIP_INFO_PROP = 'SHIP_INFO';
+
+var SHIP_INFO_DEFAULT = [
+  { name: 'Shopee Express', text: '' },
+  { name: 'VTP', text: '' }
+];
+
+
+/** Trả về danh sách thông tin giao hàng đã lưu (rỗng thì trả mặc định 2 mục). */
+function getShipInfo() {
+  var raw = _prop(SHIP_INFO_PROP);
+  if (!raw) return SHIP_INFO_DEFAULT.slice();
+  try {
+    var arr = JSON.parse(raw);
+    if (!Array.isArray(arr) || !arr.length) return SHIP_INFO_DEFAULT.slice();
+    return arr.map(function(it) {
+      return {
+        name: String((it && it.name) || '').trim(),
+        text: String((it && it.text) || '')
+      };
+    });
+  } catch (e) {
+    return SHIP_INFO_DEFAULT.slice();
+  }
+}
+
+
+/** Lưu danh sách thông tin giao hàng vào Script Property. */
+function saveShipInfo(list) {
+  try {
+    if (!Array.isArray(list)) return { success: false, message: 'Dữ liệu không hợp lệ' };
+    var clean = list
+      .map(function(it) {
+        return {
+          name: String((it && it.name) || '').trim(),
+          text: String((it && it.text) || '').trim()
+        };
+      })
+      .filter(function(it) { return it.name || it.text; });
+    PropertiesService.getScriptProperties()
+      .setProperty(SHIP_INFO_PROP, JSON.stringify(clean));
+    return { success: true, message: 'Đã lưu thông tin giao hàng!', data: clean };
+  } catch (e) {
+    return { success: false, message: 'Lỗi: ' + e.toString() };
+  }
+}
+
+
 var TAB_GIAODICH  = 'DataGiaoDich';
 var TAB_THANHTOAN = 'DataThanhToan';
 var TAB_THONGKE   = 'ThongKe';
