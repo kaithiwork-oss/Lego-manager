@@ -475,13 +475,27 @@ tr.click-open:hover{background:#faf9f4;}
 .fab-sheet.open .fab-sheet-option:nth-of-type(1){animation-delay:.05s}
 .fab-sheet.open .fab-sheet-option:nth-of-type(2){animation-delay:.10s}
 .fab-sheet.open .fab-sheet-option:nth-of-type(3){animation-delay:.15s}
-.fab-sheet.open .fab-sheet-option:nth-of-type(4){animation-delay:.20s}
 .fab-sheet-option:active{background:#fcfaf3;transform:scale(.98);}
 .fab-sheet-option .fso-ic{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .fab-sheet-option.create .fso-ic{background:#fff3da;}
 .fab-sheet-option.img .fso-ic{background:#f1e6fa;}
 .fab-sheet-option.xlsx .fso-ic{background:#e3f6e9;}
-.fab-sheet-option.ship .fso-ic{background:#e6f0ff;}
+
+/* Thanh copy địa chỉ nhận hàng — trang Vận chuyển */
+.ship-copy-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1.5px solid #ece8df;border-radius:14px;padding:10px 12px;margin-bottom:14px;}
+.scb-label{font-size:12px;font-weight:800;color:#8b8473;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+.scb-btns{display:flex;gap:8px;flex-wrap:wrap;flex:1 1 auto;min-width:0;}
+.scb-btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 16px;border:none;border-radius:100px;background:var(--lego-yellow);color:#1a1200;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 var(--lego-yellow-dark);transition:transform var(--t-fast) var(--ease-brick),box-shadow var(--t-fast);}
+.scb-btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--lego-yellow-dark);}
+.scb-btn.empty{background:#f4f3ef;color:#8b8473;box-shadow:none;border:1.5px dashed #ddd6c4;font-weight:700;}
+.scb-edit{flex-shrink:0;width:40px;height:40px;border:1.5px solid #e3ddc9;border-radius:100px;background:#fff;font-size:15px;color:#8b8473;cursor:pointer;transition:background .15s,transform var(--t-fast) var(--ease-brick);}
+.scb-edit:hover{background:#fcfaf3;}
+.scb-edit:active{transform:scale(.92);}
+@media(max-width:700px){
+  .ship-copy-bar{gap:8px;padding:10px;}
+  .scb-label{flex:1 1 100%;font-size:11px;}
+  .scb-btn{flex:1 1 0;min-width:0;justify-content:center;padding:0 8px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+}
 
 .gmh-mode-btn{height:var(--ctrl-h);padding:0 16px;border:1.5px solid #e3ddc9;border-radius:100px;background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:#555;white-space:nowrap;transition:background .15s,color .15s,border-color .15s,transform var(--t-fast) var(--ease-brick);}
 .gmh-mode-btn:hover{background:#fcfaf3;}
@@ -858,7 +872,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
         <div class="import-option" onclick="openSidebar('create');closeCreateDD()">＋ Tạo giao dịch mới</div>
         <div class="import-option" onclick="openSidebar('importImage');closeCreateDD()">📷 Import ảnh bill <span class="ai-badge">AI</span></div>
         <div class="import-option" onclick="openSidebar('importExcel');closeCreateDD()">📊 Import Excel</div>
-        <div class="import-option" onclick="openShipInfo();closeCreateDD()">📦 Địa chỉ giao hàng</div>
       </div>
     </div>
     </div>
@@ -986,7 +999,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
         <div class="import-option" onclick="openSidebar('create');closeCreateDD()">＋ Tạo giao dịch mới</div>
         <div class="import-option" onclick="openSidebar('importImage');closeCreateDD()">📷 Import ảnh bill <span class="ai-badge">AI</span></div>
         <div class="import-option" onclick="openSidebar('importExcel');closeCreateDD()">📊 Import Excel</div>
-        <div class="import-option" onclick="openShipInfo();closeCreateDD()">📦 Địa chỉ giao hàng</div>
       </div>
     </div>
   </div>
@@ -1214,10 +1226,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
         <div class="import-option" onclick="openSidebar('create');closeCreateDD()">＋ Tạo giao dịch mới</div>
         <div class="import-option" onclick="openSidebar('importImage');closeCreateDD()">📷 Import ảnh bill <span class="ai-badge">AI</span></div>
         <div class="import-option" onclick="openSidebar('importExcel');closeCreateDD()">📊 Import Excel</div>
-        <div class="import-option" onclick="openShipInfo();closeCreateDD()">📦 Địa chỉ giao hàng</div>
       </div>
     </div>
     </div>
+  </div>
+  <div class="ship-copy-bar" id="shipCopyBar">
+    <span class="scb-label">📦 Địa chỉ nhận hàng</span>
+    <div class="scb-btns" id="shipCopyBtns"></div>
+    <button class="scb-edit" onclick="openShipInfo()" aria-label="Sửa địa chỉ" title="Sửa địa chỉ">✎</button>
   </div>
   <div class="status-bar">
     <div class="status-bar-item vc" onclick="setShipFilterVal('Đang vận chuyển')">
@@ -1407,10 +1423,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       </div>
       <div class="field"><label>Người giao dịch (Tên Shop)</label><input type="text" id="sbTenShop" list="sbShopList" placeholder="Tên shop hoặc người bán/mua — gõ để xem gợi ý" oninput="onSbTenShopInput(this.value)"><datalist id="sbShopList"></datalist></div>
       <div class="field"><label>Link liên hệ (Zalo/FB)</label><input type="text" id="sbLinkLH" placeholder="https://..."></div>
-      <div class="field" id="sbShipCopyRow" style="margin-bottom:0;">
-        <label>📋 Copy địa chỉ giao hàng (gửi người bán)</label>
-        <div id="sbShipCopyBtns" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;"></div>
-      </div>
       <div id="sbMaVanDonWrap">
         <div class="field"><label>Mã vận đơn</label><input type="text" id="sbMaVanDon" placeholder="GHTK-123456" oninput="renderSbTrackingLink()" onchange="renderSbTrackingLink()"></div>
         <div id="sbTrackingLinkWrap" style="margin-top:-4px;margin-bottom:4px;"></div>
@@ -1708,9 +1720,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
   <div class="fab-sheet-option xlsx" onclick="closeFabSheet();openSidebar('importExcel')">
     <span class="fso-ic">📊</span>Import Excel
-  </div>
-  <div class="fab-sheet-option ship" onclick="closeFabSheet();openShipInfo()">
-    <span class="fso-ic">📦</span>Địa chỉ giao hàng
   </div>
 </div>
 
@@ -2070,7 +2079,7 @@ function switchTab(tab, el){
   closeMoreSheet(); closeFilterTray();
   if (el){ var ic=el.querySelector('.nav-ic')||el.querySelector('.bn-ic')||el.querySelector('svg'); pop(ic, 1.3); }
   loadAnhMap(veLaiAnh);   // ảnh đã duyệt dùng chung cho mọi màn
-  if(tab==='shipping') loadShipping();
+  if(tab==='shipping'){ loadShipping(); renderShipCopyBar(); }
   if(tab==='changelog') loadAllLogs();
   if(tab==='list') loadList();
   if(tab==='nguoigd') loadNguoiGD();
@@ -2092,9 +2101,7 @@ function openSidebar(type){
   document.querySelectorAll('.sidebar').forEach(function(s){ s.classList.remove('open'); });
   document.getElementById('overlay').classList.add('open');
   document.getElementById('sb-'+type).classList.add('open');
-  if(type==='create'){ initCreateSidebar(); loadKnownContacts();
-    if(shipInfoCache===null) loadShipInfo(); else renderSbShipCopyBtns();
-  }
+  if(type==='create'){ initCreateSidebar(); loadKnownContacts(); }
 }
 function closeSidebar(){
   document.querySelectorAll('.sidebar').forEach(function(s){ s.classList.remove('open'); });
@@ -2124,7 +2131,7 @@ function loadShipInfo(cb){
   google.script.run
     .withSuccessHandler(function(list){
       shipInfoCache = Array.isArray(list) ? list : [];
-      renderSbShipCopyBtns();
+      renderShipCopyBar();
       if(cb) cb(shipInfoCache);
     })
     .withFailureHandler(function(){ if(cb) cb(shipInfoCache || []); })
@@ -2160,22 +2167,20 @@ function copyShipByIndex(i){
 }
 
 /* Nút copy nhanh trong sidebar Tạo giao dịch */
-function renderSbShipCopyBtns(){
-  var wrap=document.getElementById('sbShipCopyBtns');
+/* Thanh copy nhanh trên trang Vận chuyển — 1 chạm là copy */
+function renderShipCopyBar(){
+  var wrap=document.getElementById('shipCopyBtns');
   if(!wrap) return;
-  var list=shipInfoCache || [];
-  var hasAny=list.some(function(it){ return it.text && it.text.trim(); });
-  if(!hasAny){
-    wrap.innerHTML='<span style="font-size:12.5px;color:#999;">Chưa lưu địa chỉ — </span>'
-      +'<button type="button" class="pill" onclick="openShipInfo()">＋ Thêm</button>';
+  var list=(shipInfoCache || []).filter(function(it){ return it.text && it.text.trim(); });
+  if(!list.length){
+    wrap.innerHTML='<button type="button" class="scb-btn empty" onclick="openShipInfo()">＋ Thêm địa chỉ nhận hàng</button>';
     return;
   }
-  var html=list.map(function(it,i){
-    if(!it.text || !it.text.trim()) return '';
-    return '<button type="button" class="pill" onclick="copyShipByIndex('+i+')">📋 '
+  wrap.innerHTML=list.map(function(it){
+    var i=shipInfoCache.indexOf(it);
+    return '<button type="button" class="scb-btn" onclick="copyShipByIndex('+i+')">📋 '
       + escapeHtml(it.name || ('Địa chỉ '+(i+1))) + '</button>';
   }).join('');
-  wrap.innerHTML=html+'<button type="button" class="pill" onclick="openShipInfo()" title="Sửa">✎</button>';
 }
 
 /* Mở sidebar sửa thông tin giao hàng */
@@ -2246,7 +2251,7 @@ function handleSaveShipInfo(){
       btn.disabled=false; btn.textContent=old;
       if(r && r.success){
         shipInfoCache=r.data || list;
-        renderSbShipCopyBtns();
+        renderShipCopyBar();
         showToast('✅ '+r.message);
         closeSidebar();
       } else showToast((r && r.message) || 'Lưu thất bại', true);
