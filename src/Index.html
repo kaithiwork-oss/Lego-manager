@@ -475,11 +475,13 @@ tr.click-open:hover{background:#faf9f4;}
 .fab-sheet.open .fab-sheet-option:nth-of-type(1){animation-delay:.05s}
 .fab-sheet.open .fab-sheet-option:nth-of-type(2){animation-delay:.10s}
 .fab-sheet.open .fab-sheet-option:nth-of-type(3){animation-delay:.15s}
+.fab-sheet.open .fab-sheet-option:nth-of-type(4){animation-delay:.20s}
 .fab-sheet-option:active{background:#fcfaf3;transform:scale(.98);}
 .fab-sheet-option .fso-ic{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .fab-sheet-option.create .fso-ic{background:#fff3da;}
 .fab-sheet-option.img .fso-ic{background:#f1e6fa;}
 .fab-sheet-option.xlsx .fso-ic{background:#e3f6e9;}
+.fab-sheet-option.ship .fso-ic{background:#e6f0ff;}
 
 .gmh-mode-btn{height:var(--ctrl-h);padding:0 16px;border:1.5px solid #e3ddc9;border-radius:100px;background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:#555;white-space:nowrap;transition:background .15s,color .15s,border-color .15s,transform var(--t-fast) var(--ease-brick);}
 .gmh-mode-btn:hover{background:#fcfaf3;}
@@ -849,7 +851,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <button class="gd-linkbtn red" onclick="loadDashboard()">🔄 Làm mới</button>
       <button class="gd-hist-btn" aria-label="Lịch sử thay đổi" title="Lịch sử thay đổi" onclick="switchTab('changelog')">🕓</button>
       <button class="filter-icon-btn" aria-label="Bộ lọc" onclick="openFilterTray('dbFilters')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8Z"/></svg><span class="fi-dot"></span></button>
-      <button class="btn-primary" onclick="openSidebar('create')">＋ Tạo mới</button>
+      <div class="btn-import-wrap">
+      <button class="btn-primary" onclick="openSidebar('create')" style="border-radius:100px 0 0 100px;box-shadow:none;">＋ Tạo mới</button>
+      <button class="btn-create-chev" aria-label="Thêm tùy chọn tạo / import" onclick="toggleCreateDD(this)">▾</button>
+      <div class="import-dropdown">
+        <div class="import-option" onclick="openSidebar('create');closeCreateDD()">＋ Tạo giao dịch mới</div>
+        <div class="import-option" onclick="openSidebar('importImage');closeCreateDD()">📷 Import ảnh bill <span class="ai-badge">AI</span></div>
+        <div class="import-option" onclick="openSidebar('importExcel');closeCreateDD()">📊 Import Excel</div>
+        <div class="import-option" onclick="openShipInfo();closeCreateDD()">📦 Địa chỉ giao hàng</div>
+      </div>
+    </div>
     </div>
   </div>
 
@@ -970,8 +981,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     </div>
     <div class="btn-import-wrap">
       <button class="btn-primary" onclick="openSidebar('create')" style="border-radius:100px 0 0 100px;box-shadow:none;">＋ Tạo mới</button>
-      <button class="btn-create-chev" aria-label="Thêm tùy chọn tạo / import" onclick="toggleCreateDD()" id="createChev">▾</button>
-      <div class="import-dropdown" id="createDD">
+      <button class="btn-create-chev" aria-label="Thêm tùy chọn tạo / import" onclick="toggleCreateDD(this)">▾</button>
+      <div class="import-dropdown">
         <div class="import-option" onclick="openSidebar('create');closeCreateDD()">＋ Tạo giao dịch mới</div>
         <div class="import-option" onclick="openSidebar('importImage');closeCreateDD()">📷 Import ảnh bill <span class="ai-badge">AI</span></div>
         <div class="import-option" onclick="openSidebar('importExcel');closeCreateDD()">📊 Import Excel</div>
@@ -1194,7 +1205,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="container" style="max-width:1000px;">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
     <h2 style="font-size:18px;font-weight:700;">🚚 Vận chuyển</h2>
-    <button onclick="refreshShipping()" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button onclick="refreshShipping()" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
+      <div class="btn-import-wrap">
+      <button class="btn-primary" onclick="openSidebar('create')" style="border-radius:100px 0 0 100px;box-shadow:none;">＋ Tạo mới</button>
+      <button class="btn-create-chev" aria-label="Thêm tùy chọn tạo / import" onclick="toggleCreateDD(this)">▾</button>
+      <div class="import-dropdown">
+        <div class="import-option" onclick="openSidebar('create');closeCreateDD()">＋ Tạo giao dịch mới</div>
+        <div class="import-option" onclick="openSidebar('importImage');closeCreateDD()">📷 Import ảnh bill <span class="ai-badge">AI</span></div>
+        <div class="import-option" onclick="openSidebar('importExcel');closeCreateDD()">📊 Import Excel</div>
+        <div class="import-option" onclick="openShipInfo();closeCreateDD()">📦 Địa chỉ giao hàng</div>
+      </div>
+    </div>
+    </div>
   </div>
   <div class="status-bar">
     <div class="status-bar-item vc" onclick="setShipFilterVal('Đang vận chuyển')">
@@ -1686,6 +1709,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <div class="fab-sheet-option xlsx" onclick="closeFabSheet();openSidebar('importExcel')">
     <span class="fso-ic">📊</span>Import Excel
   </div>
+  <div class="fab-sheet-option ship" onclick="closeFabSheet();openShipInfo()">
+    <span class="fso-ic">📦</span>Địa chỉ giao hàng
+  </div>
 </div>
 
 <!-- ====== PICKER: THÊM MẶT HÀNG VÀO BỘ SƯU TẬP ====== -->
@@ -2076,8 +2102,18 @@ function closeSidebar(){
 }
 function toggleImportDD(){ var d=document.getElementById('importDD'); if(d) d.classList.toggle('open'); }
 function closeImportDD(){ var d=document.getElementById('importDD'); if(d) d.classList.remove('open'); }
-function toggleCreateDD(){ var d=document.getElementById('createDD'); if(d) d.classList.toggle('open'); }
-function closeCreateDD(){ var d=document.getElementById('createDD'); if(d) d.classList.remove('open'); }
+function toggleCreateDD(btn){
+  var wrap = btn && btn.closest ? btn.closest('.btn-import-wrap') : null;
+  var d = wrap ? wrap.querySelector('.import-dropdown') : document.querySelector('.import-dropdown');
+  if(!d) return;
+  var wasOpen = d.classList.contains('open');
+  closeCreateDD();
+  if(!wasOpen) d.classList.add('open');
+}
+function closeCreateDD(){
+  document.querySelectorAll('.btn-import-wrap .import-dropdown.open')
+    .forEach(function(d){ d.classList.remove('open'); });
+}
 
 /* =====================================================
    THÔNG TIN GIAO HÀNG CỦA TÔI (địa chỉ nhận hàng)
