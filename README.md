@@ -126,12 +126,34 @@ Danh sách bộ Lego muốn mua, tổ chức **2 tầng kiểu Google Drive**.
    bấm kết quả để thêm. Thêm được nhiều bộ liên tục (đếm "Đã thêm N bộ"), xong bấm
    **← Wishlist**.
 4. Mỗi thẻ đánh dấu **đã có / chưa có** (bấm là đổi ngay), và có nút ✏️ (sửa ghi
-   chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá). Thẻ nguồn **Mặt hàng** có thêm
+   chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá). Thẻ có liên kết mặt hàng thì thêm
    🔗 để mở **thẳng chi tiết giao dịch** của mặt hàng đó (lưu `MaGD` khi thêm;
    mục cũ chưa có `MaGD` thì mở tab Mặt hàng và lọc theo tên).
 5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã. Nút **🕒 Chưa có**
    gom phẳng chỉ các mục **chưa sở hữu** (ẩn mục đã có) — dùng chung với ô lọc, và
    áp dụng cả trong trang một bộ sưu tập.
+
+### Tự dò mặt hàng trùng ảnh
+
+Thêm **một mục mới** vào wishlist là app **tự tra danh sách mặt hàng** (dữ liệu trang
+🏷️ Giá mặt hàng) xem có sản phẩm nào **dùng chung link ảnh** với mục vừa thêm không —
+so khớp theo URL ảnh **đã duyệt** của mặt hàng (bỏ qua `http/https`, dấu `/` cuối và
+hoa/thường). Kết quả:
+
+| Số mặt hàng trùng ảnh | App làm gì |
+|---|---|
+| 0 | Không có gì thêm |
+| 1 | Báo “🔗 Trùng ảnh với mặt hàng …”, **lưu luôn `MaGD`** vào mục; thẻ hiện chip *🔗 Trùng ảnh: <tên>* và nút 🔗 mở **thẳng chi tiết giao dịch** |
+| ≥2 | Báo “🔗 Có N mặt hàng trùng ảnh”; thẻ hiện chip *🔗 N mặt hàng trùng ảnh*, bấm vào mở **🏷️ Giá mặt hàng lọc sẵn theo ảnh** — liệt kê **tất cả** mặt hàng dùng chung ảnh đó |
+
+- Chip liên kết cũng được dò lại **mỗi lần mở tab Wishlist**, nên mục thêm từ trước
+  (hoặc mặt hàng mới được duyệt ảnh sau) vẫn hiện liên kết.
+- Trang Giá mặt hàng khi bị lọc theo ảnh sẽ hiện thanh **🖼 Mặt hàng trùng ảnh · N mặt
+  hàng** kèm nút **✕ Bỏ lọc ảnh**; vào tab theo cách thường thì bộ lọc ảnh tự bỏ.
+  Lúc áp bộ lọc ảnh, ô tìm kiếm / lọc loại / chế độ (Mini, Set…) được gỡ để thấy đủ.
+- Danh sách đối chiếu là các dòng có **tên sản phẩm + đơn giá**, bỏ giao dịch **HOÀN**
+  (giống đúng danh sách hiển thị ở trang Giá mặt hàng). Cùng một tên sản phẩm mua ở
+  nhiều giao dịch = nhiều mặt hàng trùng ảnh.
 
 ### Thêm từ tab Mặt hàng
 
@@ -152,8 +174,8 @@ ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo | Nguon | MaGD
 - **DaCo** (TRUE/FALSE) = đã sở hữu hay chưa.
 - **Nguon**: `mat_hang` = thêm từ tab Mặt hàng (mặc định **đã có**); rỗng = thêm thủ
   công (tìm Rebrickable). Thêm từ Mặt hàng luôn `DaCo=TRUE` — nhưng vẫn bấm đổi lại *chưa có* được.
-- **MaGD**: mã giao dịch của mặt hàng (chỉ có khi thêm từ tab Mặt hàng) — dùng cho
-  nút 🔗 mở đúng chi tiết mặt hàng.
+- **MaGD**: mã giao dịch của mặt hàng — có khi thêm từ tab Mặt hàng, hoặc khi tự dò ra
+  **đúng 1** mặt hàng trùng ảnh lúc thêm mục; dùng cho nút 🔗 mở đúng chi tiết mặt hàng.
 - Tab cũ thiếu cột `DaCo`/`Nguon`/`MaGD` sẽ **tự bổ sung** khi mở lại (xem `_wishlistSheet`).
 
 ### Gộp trùng (dedup)
@@ -170,7 +192,7 @@ bản Mặt hàng đi thì bản thủ công hiện lại. Ảnh phải **trùng
 |---|---|
 | `getWishlist()` | Trả toàn bộ mục (mới thêm lên đầu) |
 | `addWishlistItem(item)` | Thêm mục `{setNo,ten,anh,folder,ghiChu,gia,daCo}` |
-| `updateWishlistItem(id, patch)` | Sửa `folder` (rỗng = đưa ra ngoài) / `ghiChu` / `gia` / `ten` / `daCo` |
+| `updateWishlistItem(id, patch)` | Sửa `folder` (rỗng = đưa ra ngoài) / `ghiChu` / `gia` / `ten` / `daCo` / `maGD` |
 | `setWishlistOwned(id, daCo)` | Đánh dấu đã có / chưa có |
 | `deleteWishlistItem(id)` | Xoá mục |
 | `renameWishlistFolder(cũ, mới)` | Đổi tên cả bộ sưu tập |

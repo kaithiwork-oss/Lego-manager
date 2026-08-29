@@ -10,6 +10,8 @@
 //   - Folder RỖNG  => mục "Chưa vào bộ sưu tập" (mục lẻ)
 //   - Folder có tên => thuộc một "bộ sưu tập" cùng tên
 //   - DaCo (TRUE/FALSE) => đã sở hữu bộ đó hay chưa
+//   - MaGD: mã giao dịch của mặt hàng gắn với mục này — có khi thêm từ tab Mặt hàng,
+//     hoặc do tự dò ra đúng 1 mặt hàng dùng chung link ảnh lúc thêm mục mới.
 //   - Nguon: 'mat_hang' = thêm từ tab Mặt hàng (đã sở hữu); '' = thêm thủ công
 //     (tìm Rebrickable). Khi 2 mục cùng Folder + cùng link ảnh Rebrickable thì bản
 //     'mat_hang' được ưu tiên, bản thủ công bị ẩn (xem gộp trùng ở phía giao diện).
@@ -140,7 +142,7 @@ function _wlTimDong(sh, id) {
   return 0;
 }
 
-/* Cập nhật mục. patch có thể chứa: folder, ghiChu, gia, ten */
+/* Cập nhật mục. patch có thể chứa: folder, ghiChu, gia, ten, daCo, maGD */
 function updateWishlistItem(id, patch) {
   try {
     if (!id) return { success: false, message: 'Thiếu ID' };
@@ -165,6 +167,10 @@ function updateWishlistItem(id, patch) {
     }
     if (patch.hasOwnProperty('daCo')) {
       sh.getRange(row, WL_COL.DACO + 1).setValue(patch.daCo === true);
+    }
+    // maGD: lưu liên kết tới mặt hàng (giao dịch) trùng ảnh, dò tự động khi thêm mục
+    if (patch.hasOwnProperty('maGD')) {
+      sh.getRange(row, WL_COL.MAGD + 1).setValue(String(patch.maGD || '').trim());
     }
 
     var updated = sh.getRange(row, 1, 1, HEADERS_WISHLIST.length).getValues()[0];
