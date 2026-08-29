@@ -481,20 +481,16 @@ tr.click-open:hover{background:#faf9f4;}
 .fab-sheet-option.img .fso-ic{background:#f1e6fa;}
 .fab-sheet-option.xlsx .fso-ic{background:#e3f6e9;}
 
-/* Thanh copy địa chỉ nhận hàng — trang Vận chuyển */
-.ship-copy-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1.5px solid #ece8df;border-radius:14px;padding:10px 12px;margin-bottom:14px;}
-.scb-label{font-size:12px;font-weight:800;color:#8b8473;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
-.scb-btns{display:flex;gap:8px;flex-wrap:wrap;flex:1 1 auto;min-width:0;}
-.scb-btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 16px;border:none;border-radius:100px;background:var(--lego-yellow);color:#1a1200;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 var(--lego-yellow-dark);transition:transform var(--t-fast) var(--ease-brick),box-shadow var(--t-fast);}
-.scb-btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--lego-yellow-dark);}
-.scb-btn.empty{background:#f4f3ef;color:#8b8473;box-shadow:none;border:1.5px dashed #ddd6c4;font-weight:700;}
-.scb-edit{flex-shrink:0;width:40px;height:40px;border:1.5px solid #e3ddc9;border-radius:100px;background:#fff;font-size:15px;color:#8b8473;cursor:pointer;transition:background .15s,transform var(--t-fast) var(--ease-brick);}
-.scb-edit:hover{background:#fcfaf3;}
-.scb-edit:active{transform:scale(.92);}
+/* Nút copy địa chỉ nhận hàng — dạng text, nằm ở đầu trang Vận chuyển */
+.scb-btns{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.scb-btn{font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;white-space:nowrap;padding:0;}
+.scb-btn:hover{text-decoration:underline;}
+.scb-btn:active{opacity:.6;}
+.scb-btn.empty{color:#8b8473;}
+.scb-edit{font-size:13px;}
 @media(max-width:700px){
-  .ship-copy-bar{gap:8px;padding:10px;}
-  .scb-label{flex:1 1 100%;font-size:11px;}
-  .scb-btn{flex:1 1 0;min-width:0;justify-content:center;padding:0 8px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .scb-btns{gap:10px;}
+  .scb-btn{font-size:12.5px;}
 }
 
 .gmh-mode-btn{height:var(--ctrl-h);padding:0 16px;border:1.5px solid #e3ddc9;border-radius:100px;background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:#555;white-space:nowrap;transition:background .15s,color .15s,border-color .15s,transform var(--t-fast) var(--ease-brick);}
@@ -861,8 +857,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <div class="gd-page-head">
     <h2 class="gd-page-title">📊 Giao dịch</h2>
     <div class="gd-head-actions">
-      <button class="gd-linkbtn" onclick="runRepair(this)" title="Quét và bổ sung dữ liệu thiếu">🔧 Kiểm tra dữ liệu</button>
-      <button class="gd-linkbtn red" onclick="loadDashboard()">🔄 Làm mới</button>
       <button class="gd-hist-btn" aria-label="Lịch sử thay đổi" title="Lịch sử thay đổi" onclick="switchTab('changelog')">🕓</button>
       <button class="filter-icon-btn" aria-label="Bộ lọc" onclick="openFilterTray('dbFilters')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8Z"/></svg><span class="fi-dot"></span></button>
       <div class="btn-import-wrap">
@@ -953,7 +947,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     </div>
     <div class="gd-head-actions">
       <button class="crumb-next" onclick="switchTab('duyet')">Duyệt ảnh<span class="nav-badge" id="navBadgeDuyet3"></span><span class="crumb-arrow">→</span></button>
-      <button class="gd-linkbtn red" onclick="loadList(true)">🔄 Làm mới</button>
     </div>
   </div>
   <div class="list-toolbar">
@@ -1181,7 +1174,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     </div>
     <div class="gd-head-actions">
       <button class="gd-linkbtn" onclick="resetDuyetTatCa()">↺ Duyệt lại từ đầu</button>
-      <button class="gd-linkbtn red" onclick="loadDuyet(true)">🔄 Làm mới</button>
     </div>
   </div>
 
@@ -1218,7 +1210,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
     <h2 style="font-size:18px;font-weight:700;">🚚 Vận chuyển</h2>
     <div style="display:flex;align-items:center;gap:12px;">
-      <button onclick="refreshShipping()" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
+      <div class="scb-btns" id="shipCopyBtns"></div>
+      <button class="scb-edit gd-linkbtn" onclick="openShipInfo()" aria-label="Sửa địa chỉ nhận hàng" title="Sửa địa chỉ nhận hàng">✎</button>
       <div class="btn-import-wrap">
       <button class="btn-primary" onclick="openSidebar('create')" style="border-radius:100px 0 0 100px;box-shadow:none;">＋ Tạo mới</button>
       <button class="btn-create-chev" aria-label="Thêm tùy chọn tạo / import" onclick="toggleCreateDD(this)">▾</button>
@@ -1229,11 +1222,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       </div>
     </div>
     </div>
-  </div>
-  <div class="ship-copy-bar" id="shipCopyBar">
-    <span class="scb-label">📦 Địa chỉ nhận hàng</span>
-    <div class="scb-btns" id="shipCopyBtns"></div>
-    <button class="scb-edit" onclick="openShipInfo()" aria-label="Sửa địa chỉ" title="Sửa địa chỉ">✎</button>
   </div>
   <div class="status-bar">
     <div class="status-bar-item vc" onclick="setShipFilterVal('Đang vận chuyển')">
@@ -1279,7 +1267,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
     <h2 style="font-size:18px;font-weight:700;">💖 Wishlist</h2>
     <div style="display:flex;gap:8px;">
-      <button onclick="loadWishlist(true)" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
       <button class="wl-add-btn" onclick="wlOpenAdd()"><span>＋</span> Thêm mục</button>
     </div>
   </div>
@@ -1349,7 +1336,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="container" style="max-width:900px;">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
     <h2 style="font-size:18px;font-weight:700;">🕓 Lịch sử thay đổi</h2>
-    <button onclick="loadAllLogs()" style="font-size:13px;color:var(--lego-red-dark);background:none;border:none;cursor:pointer;font-weight:700;">🔄 Làm mới</button>
   </div>
   <div class="card" style="margin-bottom:12px;">
     <input type="text" id="logSearch" aria-label="Tìm lịch sử thay đổi" placeholder="🔍 Tìm mã GD hoặc nội dung thay đổi..." oninput="applyLogView()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:9px;font-size:14px;background:#fafafa;margin-bottom:10px;">
@@ -2045,29 +2031,11 @@ document.addEventListener('DOMContentLoaded', function(){
       if (sk){ sk.style.transition='opacity .3s'; sk.style.opacity='0'; setTimeout(function(){ if(sk.parentNode) sk.remove(); },310); }
     } else {
       if (sk && sk.parentNode) sk.remove();
-      document.getElementById('dbLoading').textContent='Không tải được dữ liệu. Bấm "Làm mới" để thử lại.';
+      document.getElementById('dbLoading').textContent='Không tải được dữ liệu. Tải lại trang để thử lại.';
     }
   });
 });
 
-/* Dọn dữ liệu — chạy thủ công, không còn chặn lúc mở app */
-function runRepair(btn){
-  var old=btn.textContent;
-  btn.disabled=true; btn.textContent='⏳ Đang kiểm tra...';
-  google.script.run
-    .withSuccessHandler(function(r){
-      btn.disabled=false; btn.textContent=old;
-      if (!r || !r.success){ showToast((r && r.message) || 'Kiểm tra thất bại', true); return; }
-      showToast('✅ '+r.message);
-      if (r.changed) invalidateCache(syncAllViews);
-    })
-    .withFailureHandler(function(e){ btn.disabled=false; btn.textContent=old; showToast(''+e, true); })
-    .runDataRepair();
-}
-
-/* =====================================================
-   5. NAV / SIDEBAR / TOAST
-   ===================================================== */
 function switchTab(tab, el){
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.nav-tab').forEach(function(t){
@@ -2280,7 +2248,7 @@ function loadDashboard(){
       populateYearFilter(); applyFilters();
       document.getElementById('dbContent').style.display='block';
     } else {
-      document.getElementById('dbLoading').textContent='Không tải được dữ liệu. Bấm "Làm mới" để thử lại.';
+      document.getElementById('dbLoading').textContent='Không tải được dữ liệu. Tải lại trang để thử lại.';
     }
   });
 }
