@@ -208,6 +208,88 @@ function deleteWishlistItem(id) {
   }
 }
 
+/* =============================================
+   DÒ LIÊN KẾT MẶT HÀNG THEO ẢNH (chạy cho toàn bộ wishlist)
+   Dùng để cập nhật các mục đã có sẵn từ trước — mục nào trùng ảnh với đúng 1
+   mặt hàng thì gắn MaGD, nút 🔗 ở giao diện mở thẳng giao dịch đó.
+   Chạy lại bao nhiêu lần cũng được (chỉ ghi khi MaGD thực sự đổi).
+   ============================================= */
+
+/* Khoá so khớp 2 link ảnh — phải khớp anhKey() bên Index.html */
+function _wlAnhKey(u) {
+  u = String(u || '').trim();
+  if (!u) return '';
+  return u.replace(/^https?:\/\//i, '//').replace(/\/+$/, '').toLowerCase();
+}
+
+/* Chỉ mục: khoá ảnh -> [{maGD, tenSP}] của các mặt hàng ở tab Giá mặt hàng
+   (dòng có tên sản phẩm + đơn giá, bỏ giao dịch HOÀN — giống hệt trang đó) */
+function _wlChiMucAnhMatHang() {
+  var idx = {};
+  var anh = (typeof getAnhMap === 'function') ? getAnhMap() : null;
+  var mapAnh = (anh && anh.success) ? (anh.data || {}) : {};   // chỉ ảnh ĐÃ DUYỆT
+
+  var sh = _openSS().getSheetByName(TAB_GIAODICH);
+  if (!sh || sh.getLastRow() < 2) return idx;
+
+  var soCot = Math.max(8, sh.getLastColumn());
+  var rows = sh.getRange(2, 1, sh.getLastRow() - 1, soCot).getValues();
+  rows.forEach(function (r) {
+    var ten = String(r[5] || '').trim();
+    if (!ten) return;
+    if (!(Number(r[7]) || 0)) return;                 // không có đơn giá
+    if (String(r[4] || '').trim() === 'HOÀN') return; // giao dịch hoàn
+
+    var k = _wlAnhKey(mapAnh[_boDau(ten).trim()]);
+    if (!k) return;
+    (idx[k] = idx[k] || []).push({ maGD: String(r[0] || ''), tenSP: ten });
+  });
+  return idx;
+}
+
+/* Quét cả wishlist, gắn MaGD cho mục trùng ảnh với ĐÚNG 1 mặt hàng */
+function dongBoLienKetWishlist() {
+  try {
+    var sh = _wishlistSheet();
+    var n = sh.getLastRow() - 1;
+    if (n < 1) return { success: true, tong: 0, ganMoi: 0, giuNguyen: 0, nhieuTrung: 0, khongTrung: 0, message: 'Wishlist trống' };
+
+    var vals = sh.getRange(2, 1, n, HEADERS_WISHLIST.length).getValues();
+    var idx = _wlChiMucAnhMatHang();
+
+    var cot = sh.getRange(2, WL_COL.MAGD + 1, n, 1);
+    var maGDs = cot.getValues();
+    var ganMoi = 0, giuNguyen = 0, nhieuTrung = 0, khongTrung = 0, tong = 0;
+
+    for (var i = 0; i < vals.length; i++) {
+      if (!vals[i][WL_COL.ID]) continue;
+      tong++;
+      var k = _wlAnhKey(vals[i][WL_COL.ANH]);
+      var ds = (k && idx[k]) || [];
+      if (ds.length === 1) {
+        if (String(maGDs[i][0] || '').trim() === ds[0].maGD) giuNguyen++;
+        else { maGDs[i][0] = ds[0].maGD; ganMoi++; }
+      } else if (ds.length > 1) {
+        nhieuTrung++;   // nhiều mặt hàng trùng ảnh -> để giao diện mở màn lọc theo ảnh
+      } else {
+        khongTrung++;
+      }
+    }
+
+    if (ganMoi) cot.setValues(maGDs);
+
+    return {
+      success: true,
+      tong: tong, ganMoi: ganMoi, giuNguyen: giuNguyen,
+      nhieuTrung: nhieuTrung, khongTrung: khongTrung,
+      message: 'Dò ' + tong + ' mục: gắn mới ' + ganMoi + ' · sẵn đúng ' + giuNguyen +
+               ' · trùng nhiều ' + nhieuTrung + ' · không trùng ' + khongTrung
+    };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}
+
 /* Đổi tên folder: dời mọi mục từ folderCu sang folderMoi */
 function renameWishlistFolder(folderCu, folderMoi) {
   try {

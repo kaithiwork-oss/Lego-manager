@@ -153,6 +153,13 @@ hoa/thường). Kết quả:
 - Chỉ mục ảnh → mặt hàng dựng **1 lần** rồi dùng lại; thêm mục mới chỉ là 1 phép tra
   khoá. Chỉ mục tự hết hạn khi map ảnh tải lại (duyệt/sửa ảnh) hoặc dữ liệu giao dịch
   đổi (`invalidateCache`).
+- Chỉ so với **ảnh đã duyệt** của mặt hàng (giống mọi màn khác). Mặt hàng còn ảnh
+  ⏳ chưa duyệt thì không tính — duyệt ở tab **Duyệt ảnh** rồi dò lại.
+
+**Nút 🔗 Dò liên kết** (đầu tab Wishlist) chạy `dongBoLienKetWishlist()` — quét **cả
+wishlist** ở phía server (kể cả mục thêm từ lâu), mục nào trùng ảnh với **đúng 1** mặt
+hàng thì gắn `MaGD`, rồi báo `Dò N mục: gắn mới … · sẵn đúng … · trùng nhiều … · không
+trùng …`. Chỉ ghi khi `MaGD` thực sự đổi nên bấm lại bao nhiêu lần cũng an toàn.
 - Trang Giá mặt hàng khi bị lọc theo ảnh sẽ hiện thanh **🖼 Mặt hàng trùng ảnh · N mặt
   hàng** kèm nút **✕ Bỏ lọc ảnh**; vào tab theo cách thường thì bộ lọc ảnh tự bỏ.
   Lúc áp bộ lọc ảnh, ô tìm kiếm / lọc loại / chế độ (Mini, Set…) được gỡ để thấy đủ.
@@ -201,6 +208,7 @@ bản Mặt hàng đi thì bản thủ công hiện lại. Ảnh phải **trùng
 | `setWishlistOwned(id, daCo)` | Đánh dấu đã có / chưa có |
 | `deleteWishlistItem(id)` | Xoá mục |
 | `renameWishlistFolder(cũ, mới)` | Đổi tên cả bộ sưu tập |
+| `dongBoLienKetWishlist()` | Dò cả wishlist, gắn `MaGD` cho mục trùng ảnh với đúng 1 mặt hàng |
 
 > Giá là **nhập tay** (Rebrickable không trả giá). Muốn giá thị trường tự động thì
 > cần cắm BrickLink Price Guide API (OAuth) — chưa làm.
