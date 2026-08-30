@@ -1269,6 +1269,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <h2 style="font-size:18px;font-weight:700;">💖 Wishlist</h2>
     <div style="display:flex;gap:8px;">
       <button class="wl-crumb" id="wlSyncBtn" style="margin:0;" onclick="wlDoLienKetAll()" title="Dò lại liên kết mặt hàng theo ảnh cho toàn bộ wishlist">🔗 Dò liên kết</button>
+      <button class="wl-crumb" style="margin:0;" onclick="wlChanDoan()" title="Soi vì sao một mục không khớp được với mặt hàng">🔍</button>
       <button class="wl-add-btn" onclick="wlOpenAdd()"><span>＋</span> Thêm mục</button>
     </div>
   </div>
@@ -3957,6 +3958,10 @@ function anhCua(tenSP){ return _anhMap[_boDauJS(tenSP)]||''; }
 /* Ảnh bất kỳ kể cả chưa duyệt — chỉ dùng trong sidebar duyệt/sửa ảnh */
 function anhCuaBatKy(tenSP){ return _anhMapTatCa[_boDauJS(tenSP)]||''; }
 
+/* Map ảnh vừa đổi (tải lại / duyệt / sửa / bỏ ảnh) -> chỉ mục ảnh->mặt hàng của
+   Wishlist đã cũ, phải dựng lại; không gọi là mục vừa duyệt ảnh sẽ thiếu nút 🔗. */
+function anhMapDaDoi(){ _wlMhIdx=null; }
+
 /* Khoá so khớp 2 link ảnh: bỏ giao thức + dấu / cuối, không phân biệt hoa thường */
 function anhKey(u){
   u=String(u||'').trim();
@@ -3993,7 +3998,7 @@ function loadAnhMap(cb, force){
         _anhMap=r.data||{};
         _anhMapTatCa=r.dataTatCa||r.data||{};
         _anhDaTai=true;
-        _wlMhIdx=null;   // ảnh đổi -> chỉ mục ảnh->mặt hàng của Wishlist phải dựng lại
+        anhMapDaDoi();
       }
       if(cb) cb();
     })
@@ -4131,6 +4136,7 @@ function luuAnhDaChon(){
       /* luuAnhSanPham(..., true) đã đánh dấu ✓ nên hiện được ngay */
       _anhMap[_boDauJS(mon)]=r.url;
       _anhMapTatCa[_boDauJS(mon)]=r.url;
+      anhMapDaDoi();
       capNhatSauKhiSuaAnh();
       tiepMonTiepTheo();
     })
@@ -4147,6 +4153,7 @@ function boAnh(){
       showToast('✅ '+r.message);
       delete _anhMap[_boDauJS(mon)];
       delete _anhMapTatCa[_boDauJS(mon)];
+      anhMapDaDoi();
       capNhatSauKhiSuaAnh();
       tiepMonTiepTheo();
     })
@@ -4290,6 +4297,7 @@ function danhDauHangLoat(dat){
         if(dat){ if(_anhMapTatCa[k]) _anhMap[k]=_anhMapTatCa[k]; }
         else { delete _anhMap[k]; delete _anhMapTatCa[k]; }
       });
+      anhMapDaDoi();
       veLaiAnh();
       duyetChon={};
       document.getElementById('duyetCheckAll').checked=false;
@@ -4306,6 +4314,7 @@ function resetDuyetTatCa(){
       if(!r.success){ showToast(r.message,true); return; }
       showToast('✅ '+r.message);
       _anhMap={};          // chưa duyệt lại thì không hiện ảnh ở đâu cả
+      anhMapDaDoi();
       veLaiAnh();
       loadDuyet(true);
     })
@@ -4908,6 +4917,45 @@ function wlDoLienKetAll(){
     })
     .withFailureHandler(function(e){ xong(); showToast(''+e,true); })
     .dongBoLienKetWishlist();
+}
+
+/* Soi vì sao 2 ảnh nhìn giống nhau mà không khớp: in URL ảnh 2 bên để so.
+   Khớp là so CHUỖI URL (đã bỏ http/https, dấu / cuối, hoa thường) — ảnh nhìn
+   giống nhau nhưng khác bản ghi Rebrickable thì URL khác nhau, không tính. */
+function wlChanDoan(){
+  var kw=prompt('Soi liên kết ảnh — nhập tên mục wishlist hoặc tên mặt hàng:', '');
+  if(kw===null) return; kw=String(kw).trim(); if(!kw) return;
+  showToast('⏳ Đang soi...');
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r||!r.success){ showToast((r&&r.message)||'Lỗi',true); return; }
+      console.log('[chẩn đoán trùng ảnh]', r);
+      var khoaMH={};
+      (r.matHang||[]).forEach(function(m){ if(m.khoa) khoaMH[m.khoa]=(khoaMH[m.khoa]||0)+1; });
+      var d=[];
+      d.push('WISHLIST — '+(r.wishlist||[]).length+' mục khớp "'+kw+'"');
+      (r.wishlist||[]).forEach(function(x){
+        d.push('• '+x.ten+(x.setNo?' ['+x.setNo+']':''));
+        d.push('    ảnh: '+(x.anh||'(chưa có)'));
+        d.push('    khớp '+(x.khoa?(khoaMH[x.khoa]||0):0)+' mặt hàng'+(x.maGD?' · MaGD đã lưu: '+x.maGD:''));
+      });
+      d.push('');
+      d.push('MẶT HÀNG — '+(r.matHang||[]).length+' dòng khớp');
+      (r.matHang||[]).forEach(function(m){
+        var loai=[];
+        if(!m.daDuyet) loai.push('ẢNH CHƯA DUYỆT');
+        if(!m.donGia) loai.push('KHÔNG CÓ ĐƠN GIÁ');
+        if(m.loaiGD==='HOÀN') loai.push('GIAO DỊCH HOÀN');
+        d.push('• '+m.tenSP+' · '+m.maGD+' · '+m.loaiGD+' · '+m.donGia+(loai.length?' · BỎ QUA: '+loai.join(', '):''));
+        d.push('    ảnh: '+(m.anh||'(chưa có)'));
+      });
+      d.push('');
+      d.push('Khớp = URL ảnh giống nhau. Hai URL khác nhau thì dù ảnh nhìn giống,');
+      d.push('app vẫn coi là 2 sản phẩm khác nhau (xem thêm ở Console).');
+      alert(d.join('\n'));
+    })
+    .withFailureHandler(function(e){ showToast(''+e,true); })
+    .chanDoanTrungAnh(kw);
 }
 
 /* Sau khi thêm mục mới: báo mặt hàng trùng ảnh, trùng đúng 1 thì lưu MaGD */

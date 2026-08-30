@@ -290,6 +290,56 @@ function dongBoLienKetWishlist() {
   }
 }
 
+/* Soi vì sao 2 ảnh "nhìn giống nhau" mà không khớp: trả về mục wishlist và mặt
+   hàng khớp từ khoá, kèm URL ảnh + trạng thái duyệt để so bằng mắt. */
+function chanDoanTrungAnh(tuKhoa) {
+  try {
+    var kw = _boDau(String(tuKhoa || '')).trim();
+    if (!kw) return { success: false, message: 'Nhập từ khoá (tên mục hoặc tên mặt hàng)' };
+
+    var anh = (typeof getAnhMap === 'function') ? getAnhMap() : null;
+    var mapDuyet = (anh && anh.success) ? (anh.data || {}) : {};
+    var mapTatCa = (anh && anh.success) ? (anh.dataTatCa || {}) : {};
+
+    var wl = [];
+    var sh = _wishlistSheet();
+    if (sh.getLastRow() > 1) {
+      sh.getRange(2, 1, sh.getLastRow() - 1, HEADERS_WISHLIST.length).getValues().forEach(function (r) {
+        if (!r[WL_COL.ID]) return;
+        var ten = String(r[WL_COL.TEN] || ''), ma = String(r[WL_COL.SETNO] || '');
+        if (_boDau(ten).indexOf(kw) < 0 && _boDau(ma).indexOf(kw) < 0) return;
+        wl.push({
+          ten: ten, setNo: ma,
+          anh: String(r[WL_COL.ANH] || ''), khoa: _wlAnhKey(r[WL_COL.ANH]),
+          maGD: String(r[WL_COL.MAGD] || '')
+        });
+      });
+    }
+
+    var mh = [];
+    var gsh = _openSS().getSheetByName(TAB_GIAODICH);
+    if (gsh && gsh.getLastRow() > 1) {
+      var soCot = Math.max(8, gsh.getLastColumn());
+      gsh.getRange(2, 1, gsh.getLastRow() - 1, soCot).getValues().forEach(function (r) {
+        var ten = String(r[5] || '');
+        if (!ten || _boDau(ten).indexOf(kw) < 0) return;
+        var k = _boDau(ten).trim();
+        var urlDuyet = String(mapDuyet[k] || '');
+        var url = urlDuyet || String(mapTatCa[k] || '');
+        mh.push({
+          maGD: String(r[0] || ''), tenSP: ten, loaiGD: String(r[4] || ''),
+          donGia: Number(r[7]) || 0,
+          anh: url, daDuyet: !!urlDuyet, khoa: _wlAnhKey(urlDuyet)
+        });
+      });
+    }
+
+    return { success: true, tuKhoa: String(tuKhoa || ''), wishlist: wl, matHang: mh };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}
+
 /* Đổi tên folder: dời mọi mục từ folderCu sang folderMoi */
 function renameWishlistFolder(folderCu, folderMoi) {
   try {

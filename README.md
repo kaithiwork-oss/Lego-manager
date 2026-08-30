@@ -156,6 +156,12 @@ hoa/thường). Kết quả:
 - Chỉ so với **ảnh đã duyệt** của mặt hàng (giống mọi màn khác). Mặt hàng còn ảnh
   ⏳ chưa duyệt thì không tính — duyệt ở tab **Duyệt ảnh** rồi dò lại.
 
+**Nút 🔍** (cạnh 🔗 Dò liên kết) chạy `chanDoanTrungAnh(tuKhoa)` — in URL ảnh của mục
+wishlist và của mặt hàng khớp từ khoá để **so bằng mắt**, kèm lý do bị bỏ qua (ảnh chưa
+duyệt / không có đơn giá / giao dịch HOÀN). Dùng khi "2 ảnh nhìn giống nhau mà không
+khớp": gần như luôn là **2 URL khác nhau** (2 bản ghi Rebrickable khác nhau của cùng
+một minifig) — app so **chuỗi URL**, không so nội dung ảnh.
+
 **Nút 🔗 Dò liên kết** (đầu tab Wishlist) chạy `dongBoLienKetWishlist()` — quét **cả
 wishlist** ở phía server (kể cả mục thêm từ lâu), mục nào trùng ảnh với **đúng 1** mặt
 hàng thì gắn `MaGD`, rồi báo `Dò N mục: gắn mới … · sẵn đúng … · trùng nhiều … · không
@@ -209,6 +215,7 @@ bản Mặt hàng đi thì bản thủ công hiện lại. Ảnh phải **trùng
 | `deleteWishlistItem(id)` | Xoá mục |
 | `renameWishlistFolder(cũ, mới)` | Đổi tên cả bộ sưu tập |
 | `dongBoLienKetWishlist()` | Dò cả wishlist, gắn `MaGD` cho mục trùng ảnh với đúng 1 mặt hàng |
+| `chanDoanTrungAnh(tuKhoa)` | Soi URL ảnh 2 bên + lý do bị bỏ qua, để biết vì sao không khớp |
 
 > Giá là **nhập tay** (Rebrickable không trả giá). Muốn giá thị trường tự động thì
 > cần cắm BrickLink Price Guide API (OAuth) — chưa làm.
