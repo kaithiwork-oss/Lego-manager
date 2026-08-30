@@ -1988,6 +1988,7 @@ function invalidateCache(callback){
   _appCache.loading=false;
   _appCache.gdData=null;
   _appCache.ttData=null;
+  _wlMhIdx=null;   // giao dịch đổi -> chỉ mục ảnh->mặt hàng của Wishlist phải dựng lại
   try { localStorage.removeItem(LS_KEY); } catch(e){}
   if (callback) getAppData(callback);
 }
@@ -3993,6 +3994,7 @@ function loadAnhMap(cb, force){
         _anhMap=r.data||{};
         _anhMapTatCa=r.dataTatCa||r.data||{};
         _anhDaTai=true;
+        _wlMhIdx=null;   // ảnh đổi -> chỉ mục ảnh->mặt hàng của Wishlist phải dựng lại
       }
       if(cb) cb();
     })
@@ -4868,15 +4870,18 @@ function wlBuildMhIndex(){
   _wlMhIdx=idx;
 }
 
-/* Bảo đảm có map ảnh + dữ liệu giao dịch rồi mới dựng chỉ mục.
-   getAppData có thể gọi lại callback (vẽ sớm từ localStorage) nên chặn gọi 2 lần. */
+/* Bảo đảm có map ảnh + dữ liệu giao dịch rồi mới dựng chỉ mục. Dựng 1 lần rồi
+   dùng lại; chỉ mục bị xoá (null) khi map ảnh hoặc dữ liệu giao dịch đổi.
+   getAppData có thể gọi lại callback (vẽ sớm từ localStorage) nên chặn gọi 2 lần.
+   cb(sanCo) — sanCo=true nghĩa là dùng lại chỉ mục cũ, không phải quét lại. */
 function wlEnsureMhIndex(cb){
+  if(_wlMhIdx){ if(cb) cb(true); return; }
   var xong=false;
   loadAnhMap(function(){
     getAppData(function(){
-      wlBuildMhIndex();
+      if(!_wlMhIdx) wlBuildMhIndex();
       if(xong) return; xong=true;
-      if(cb) cb();
+      if(cb) cb(false);
     });
   });
 }
@@ -4953,7 +4958,7 @@ function loadWishlist(force){
       if(!r||!r.success){ ld.style.display='block'; ld.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Không tải được</div><div class="s">'+escapeHtml((r&&r.message)||'')+'</div></div>'; return; }
       wlData=r.data||[];
       wlRenderLanding();
-      wlEnsureMhIndex(function(){ wlAfterChange(); });   // hiện chip "trùng ảnh"
+      wlEnsureMhIndex(function(sanCo){ if(!sanCo) wlAfterChange(); });   // hiện chip "trùng ảnh"
     })
     .withFailureHandler(function(e){ ld.style.display='block'; ld.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Lỗi</div><div class="s">'+escapeHtml(''+e)+'</div></div>'; })
     .getWishlist();
