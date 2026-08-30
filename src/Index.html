@@ -738,8 +738,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .wl-card-name{font-size:13px;font-weight:600;color:#2b2620;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .wl-card-ma{font-size:11.5px;color:#a29b88;font-weight:600;}
 .wl-card-note{font-size:12px;color:#7a7365;line-height:1.35;margin-top:1px;}
-.wl-mh-link{align-self:flex-start;margin-top:3px;font:inherit;font-size:11.5px;font-weight:700;color:#1b5e9a;background:#eaf3fb;border:1px solid #cfe3f4;border-radius:999px;padding:3px 9px;cursor:pointer;line-height:1.3;text-align:left;transition:all .12s;}
-.wl-mh-link:hover{background:#dceaf7;border-color:#a9cdea;}
 .wl-toggle{margin-top:auto;padding-top:9px;}
 .wl-tbtn{width:100%;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border-radius:9px;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .14s;}
 .wl-tbtn.off{color:var(--wl-wait);background:transparent;border:1px solid #ecd9b5;}
@@ -4909,9 +4907,9 @@ function wlDoTrungAnh(item){
           .updateWishlistItem(item.id, { maGD: mh[0].maGD });
       }
     } else {
-      showToast('🔗 Có '+mh.length+' mặt hàng trùng ảnh — bấm 🔗 trên thẻ để xem');
+      showToast('🔗 Có '+mh.length+' mặt hàng trùng ảnh — bấm 🔗 trên thẻ để xem tất cả');
     }
-    wlAfterChange();   // vẽ lại để hiện chip liên kết
+    wlAfterChange();   // vẽ lại để hiện nút 🔗
   });
 }
 
@@ -4958,7 +4956,7 @@ function loadWishlist(force){
       if(!r||!r.success){ ld.style.display='block'; ld.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Không tải được</div><div class="s">'+escapeHtml((r&&r.message)||'')+'</div></div>'; return; }
       wlData=r.data||[];
       wlRenderLanding();
-      wlEnsureMhIndex(function(sanCo){ if(!sanCo) wlAfterChange(); });   // hiện chip "trùng ảnh"
+      wlEnsureMhIndex(function(sanCo){ if(!sanCo) wlAfterChange(); });   // hiện nút 🔗 cho mục trùng ảnh
     })
     .withFailureHandler(function(e){ ld.style.display='block'; ld.innerHTML='<div class="wl-empty-state"><div class="ic">⚠️</div><div class="t">Lỗi</div><div class="s">'+escapeHtml(''+e)+'</div></div>'; })
     .getWishlist();
@@ -5013,22 +5011,14 @@ function wlCardHtml(x){
   var id=escapeAttr(x.id);
   var flag = x.daCo?'<span class="wl-have-flag on">✓ Đã có</span>':'<span class="wl-have-flag off">🕒 Chưa có</span>';
   var tcls = x.daCo?'on':'off', tlabel = x.daCo?'✓ Đã có — bấm để bỏ':'Đánh dấu đã có';
-  /* Mặt hàng dùng chung link ảnh với mục này (dò tự động) */
-  var mh=wlMhTheoAnh(x.anh);
-  var chip='';
-  if(mh.length===1){
-    chip='<button class="wl-mh-link" onclick="wlGoToMatHang(\''+id+'\')" title="Mở mặt hàng trùng ảnh">🔗 Trùng ảnh: '+escapeHtml(mh[0].tenSP)+'</button>';
-  } else if(mh.length>1){
-    chip='<button class="wl-mh-link" onclick="wlGoToMatHang(\''+id+'\')" title="Xem tất cả mặt hàng trùng ảnh ở Giá mặt hàng">🔗 '+mh.length+' mặt hàng trùng ảnh</button>';
-  }
-  var coLink = mh.length>0 || x.nguon==='mat_hang' || !!x.maGD;
+  /* Có mặt hàng dùng chung link ảnh (dò tự động) thì mới hiện nút 🔗 */
+  var coLink = wlMhTheoAnh(x.anh).length>0 || x.nguon==='mat_hang' || !!x.maGD;
   return '<div class="wl-card">'+
     '<div class="wl-thumb-wrap">'+img+flag+'</div>'+
     '<div class="wl-card-body">'+
       '<div class="wl-card-name">'+escapeHtml(x.ten)+'</div>'+
       (x.setNo?'<div class="wl-card-ma">'+escapeHtml(x.setNo)+'</div>':'')+
       (x.ghiChu?'<div class="wl-card-note">'+escapeHtml(x.ghiChu)+'</div>':'')+
-      chip+
       '<div class="wl-toggle"><button class="wl-tbtn '+tcls+'" onclick="wlToggleOwned(\''+id+'\')">'+tlabel+'</button></div>'+
     '</div>'+
     '<div class="wl-card-acts">'+

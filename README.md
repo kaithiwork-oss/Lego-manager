@@ -143,11 +143,16 @@ hoa/thường). Kết quả:
 | Số mặt hàng trùng ảnh | App làm gì |
 |---|---|
 | 0 | Không có gì thêm |
-| 1 | Báo “🔗 Trùng ảnh với mặt hàng …”, **lưu luôn `MaGD`** vào mục; thẻ hiện chip *🔗 Trùng ảnh: <tên>* và nút 🔗 mở **thẳng chi tiết giao dịch** |
-| ≥2 | Báo “🔗 Có N mặt hàng trùng ảnh”; thẻ hiện chip *🔗 N mặt hàng trùng ảnh*, bấm vào mở **🏷️ Giá mặt hàng lọc sẵn theo ảnh** — liệt kê **tất cả** mặt hàng dùng chung ảnh đó |
+| 1 | Báo “🔗 Trùng ảnh với mặt hàng …”, **lưu luôn `MaGD`** vào mục; nút 🔗 trên thẻ mở **thẳng chi tiết giao dịch** |
+| ≥2 | Báo “🔗 Có N mặt hàng trùng ảnh”; nút 🔗 trên thẻ mở **🏷️ Giá mặt hàng lọc sẵn theo ảnh** — liệt kê **tất cả** mặt hàng dùng chung ảnh đó |
 
-- Chip liên kết cũng được dò lại **mỗi lần mở tab Wishlist**, nên mục thêm từ trước
-  (hoặc mặt hàng mới được duyệt ảnh sau) vẫn hiện liên kết.
+- Thẻ **không hiện nhãn** gì thêm — chỉ mục nào dò ra mặt hàng (hoặc có sẵn `MaGD`)
+  thì mới có nút 🔗 trong hàng nút.
+- Liên kết được dò lại **mỗi lần mở tab Wishlist**, nên mục thêm từ trước (hoặc mặt
+  hàng mới được duyệt ảnh sau) vẫn có nút 🔗.
+- Chỉ mục ảnh → mặt hàng dựng **1 lần** rồi dùng lại; thêm mục mới chỉ là 1 phép tra
+  khoá. Chỉ mục tự hết hạn khi map ảnh tải lại (duyệt/sửa ảnh) hoặc dữ liệu giao dịch
+  đổi (`invalidateCache`).
 - Trang Giá mặt hàng khi bị lọc theo ảnh sẽ hiện thanh **🖼 Mặt hàng trùng ảnh · N mặt
   hàng** kèm nút **✕ Bỏ lọc ảnh**; vào tab theo cách thường thì bộ lọc ảnh tự bỏ.
   Lúc áp bộ lọc ảnh, ô tìm kiếm / lọc loại / chế độ (Mini, Set…) được gỡ để thấy đủ.
