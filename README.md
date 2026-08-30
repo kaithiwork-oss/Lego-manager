@@ -126,12 +126,52 @@ Danh sách bộ Lego muốn mua, tổ chức **2 tầng kiểu Google Drive**.
    bấm kết quả để thêm. Thêm được nhiều bộ liên tục (đếm "Đã thêm N bộ"), xong bấm
    **← Wishlist**.
 4. Mỗi thẻ đánh dấu **đã có / chưa có** (bấm là đổi ngay), và có nút ✏️ (sửa ghi
-   chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá). Thẻ nguồn **Mặt hàng** có thêm
+   chú/giá), 📁 (chuyển bộ sưu tập), 🗑️ (xoá). Thẻ có liên kết mặt hàng thì thêm
    🔗 để mở **thẳng chi tiết giao dịch** của mặt hàng đó (lưu `MaGD` khi thêm;
    mục cũ chưa có `MaGD` thì mở tab Mặt hàng và lọc theo tên).
 5. Ô **lọc** trên trang chính lọc nhanh toàn wishlist theo tên/mã. Nút **🕒 Chưa có**
    gom phẳng chỉ các mục **chưa sở hữu** (ẩn mục đã có) — dùng chung với ô lọc, và
    áp dụng cả trong trang một bộ sưu tập.
+
+### Tự dò mặt hàng trùng ảnh
+
+Thêm **một mục mới** vào wishlist là app **tự tra danh sách mặt hàng** (dữ liệu trang
+🏷️ Giá mặt hàng) xem có sản phẩm nào **dùng chung link ảnh** với mục vừa thêm không —
+so khớp theo URL ảnh **đã duyệt** của mặt hàng (bỏ qua `http/https`, dấu `/` cuối và
+hoa/thường). Kết quả:
+
+| Số mặt hàng trùng ảnh | App làm gì |
+|---|---|
+| 0 | Không có gì thêm |
+| 1 | Báo “🔗 Trùng ảnh với mặt hàng …”, **lưu luôn `MaGD`** vào mục; nút 🔗 trên thẻ mở **thẳng chi tiết giao dịch** |
+| ≥2 | Báo “🔗 Có N mặt hàng trùng ảnh”; nút 🔗 trên thẻ mở **🏷️ Giá mặt hàng lọc sẵn theo ảnh** — liệt kê **tất cả** mặt hàng dùng chung ảnh đó |
+
+- Thẻ **không hiện nhãn** gì thêm — chỉ mục nào dò ra mặt hàng (hoặc có sẵn `MaGD`)
+  thì mới có nút 🔗 trong hàng nút.
+- Liên kết được dò lại **mỗi lần mở tab Wishlist**, nên mục thêm từ trước (hoặc mặt
+  hàng mới được duyệt ảnh sau) vẫn có nút 🔗.
+- Chỉ mục ảnh → mặt hàng dựng **1 lần** rồi dùng lại; thêm mục mới chỉ là 1 phép tra
+  khoá. Chỉ mục tự hết hạn khi map ảnh tải lại (duyệt/sửa ảnh) hoặc dữ liệu giao dịch
+  đổi (`invalidateCache`).
+- Chỉ so với **ảnh đã duyệt** của mặt hàng (giống mọi màn khác). Mặt hàng còn ảnh
+  ⏳ chưa duyệt thì không tính — duyệt ở tab **Duyệt ảnh** rồi dò lại.
+
+**Nút 🔍** (cạnh 🔗 Dò liên kết) chạy `chanDoanTrungAnh(tuKhoa)` — in URL ảnh của mục
+wishlist và của mặt hàng khớp từ khoá để **so bằng mắt**, kèm lý do bị bỏ qua (ảnh chưa
+duyệt / không có đơn giá / giao dịch HOÀN). Dùng khi "2 ảnh nhìn giống nhau mà không
+khớp": gần như luôn là **2 URL khác nhau** (2 bản ghi Rebrickable khác nhau của cùng
+một minifig) — app so **chuỗi URL**, không so nội dung ảnh.
+
+**Nút 🔗 Dò liên kết** (đầu tab Wishlist) chạy `dongBoLienKetWishlist()` — quét **cả
+wishlist** ở phía server (kể cả mục thêm từ lâu), mục nào trùng ảnh với **đúng 1** mặt
+hàng thì gắn `MaGD`, rồi báo `Dò N mục: gắn mới … · sẵn đúng … · trùng nhiều … · không
+trùng …`. Chỉ ghi khi `MaGD` thực sự đổi nên bấm lại bao nhiêu lần cũng an toàn.
+- Trang Giá mặt hàng khi bị lọc theo ảnh sẽ hiện thanh **🖼 Mặt hàng trùng ảnh · N mặt
+  hàng** kèm nút **✕ Bỏ lọc ảnh**; vào tab theo cách thường thì bộ lọc ảnh tự bỏ.
+  Lúc áp bộ lọc ảnh, ô tìm kiếm / lọc loại / chế độ (Mini, Set…) được gỡ để thấy đủ.
+- Danh sách đối chiếu là các dòng có **tên sản phẩm + đơn giá**, bỏ giao dịch **HOÀN**
+  (giống đúng danh sách hiển thị ở trang Giá mặt hàng). Cùng một tên sản phẩm mua ở
+  nhiều giao dịch = nhiều mặt hàng trùng ảnh.
 
 ### Thêm từ tab Mặt hàng
 
@@ -152,8 +192,8 @@ ID | SetNo | Ten | Anh | Folder | GhiChu | Gia | NgayThem | DaCo | Nguon | MaGD
 - **DaCo** (TRUE/FALSE) = đã sở hữu hay chưa.
 - **Nguon**: `mat_hang` = thêm từ tab Mặt hàng (mặc định **đã có**); rỗng = thêm thủ
   công (tìm Rebrickable). Thêm từ Mặt hàng luôn `DaCo=TRUE` — nhưng vẫn bấm đổi lại *chưa có* được.
-- **MaGD**: mã giao dịch của mặt hàng (chỉ có khi thêm từ tab Mặt hàng) — dùng cho
-  nút 🔗 mở đúng chi tiết mặt hàng.
+- **MaGD**: mã giao dịch của mặt hàng — có khi thêm từ tab Mặt hàng, hoặc khi tự dò ra
+  **đúng 1** mặt hàng trùng ảnh lúc thêm mục; dùng cho nút 🔗 mở đúng chi tiết mặt hàng.
 - Tab cũ thiếu cột `DaCo`/`Nguon`/`MaGD` sẽ **tự bổ sung** khi mở lại (xem `_wishlistSheet`).
 
 ### Gộp trùng (dedup)
@@ -170,10 +210,12 @@ bản Mặt hàng đi thì bản thủ công hiện lại. Ảnh phải **trùng
 |---|---|
 | `getWishlist()` | Trả toàn bộ mục (mới thêm lên đầu) |
 | `addWishlistItem(item)` | Thêm mục `{setNo,ten,anh,folder,ghiChu,gia,daCo}` |
-| `updateWishlistItem(id, patch)` | Sửa `folder` (rỗng = đưa ra ngoài) / `ghiChu` / `gia` / `ten` / `daCo` |
+| `updateWishlistItem(id, patch)` | Sửa `folder` (rỗng = đưa ra ngoài) / `ghiChu` / `gia` / `ten` / `daCo` / `maGD` |
 | `setWishlistOwned(id, daCo)` | Đánh dấu đã có / chưa có |
 | `deleteWishlistItem(id)` | Xoá mục |
 | `renameWishlistFolder(cũ, mới)` | Đổi tên cả bộ sưu tập |
+| `dongBoLienKetWishlist()` | Dò cả wishlist, gắn `MaGD` cho mục trùng ảnh với đúng 1 mặt hàng |
+| `chanDoanTrungAnh(tuKhoa)` | Soi URL ảnh 2 bên + lý do bị bỏ qua, để biết vì sao không khớp |
 
 > Giá là **nhập tay** (Rebrickable không trả giá). Muốn giá thị trường tự động thì
 > cần cắm BrickLink Price Guide API (OAuth) — chưa làm.

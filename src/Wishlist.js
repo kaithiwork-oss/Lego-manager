@@ -10,6 +10,8 @@
 //   - Folder RỖNG  => mục "Chưa vào bộ sưu tập" (mục lẻ)
 //   - Folder có tên => thuộc một "bộ sưu tập" cùng tên
 //   - DaCo (TRUE/FALSE) => đã sở hữu bộ đó hay chưa
+//   - MaGD: mã giao dịch của mặt hàng gắn với mục này — có khi thêm từ tab Mặt hàng,
+//     hoặc do tự dò ra đúng 1 mặt hàng dùng chung link ảnh lúc thêm mục mới.
 //   - Nguon: 'mat_hang' = thêm từ tab Mặt hàng (đã sở hữu); '' = thêm thủ công
 //     (tìm Rebrickable). Khi 2 mục cùng Folder + cùng link ảnh Rebrickable thì bản
 //     'mat_hang' được ưu tiên, bản thủ công bị ẩn (xem gộp trùng ở phía giao diện).
@@ -140,7 +142,7 @@ function _wlTimDong(sh, id) {
   return 0;
 }
 
-/* Cập nhật mục. patch có thể chứa: folder, ghiChu, gia, ten */
+/* Cập nhật mục. patch có thể chứa: folder, ghiChu, gia, ten, daCo, maGD */
 function updateWishlistItem(id, patch) {
   try {
     if (!id) return { success: false, message: 'Thiếu ID' };
@@ -165,6 +167,10 @@ function updateWishlistItem(id, patch) {
     }
     if (patch.hasOwnProperty('daCo')) {
       sh.getRange(row, WL_COL.DACO + 1).setValue(patch.daCo === true);
+    }
+    // maGD: lưu liên kết tới mặt hàng (giao dịch) trùng ảnh, dò tự động khi thêm mục
+    if (patch.hasOwnProperty('maGD')) {
+      sh.getRange(row, WL_COL.MAGD + 1).setValue(String(patch.maGD || '').trim());
     }
 
     var updated = sh.getRange(row, 1, 1, HEADERS_WISHLIST.length).getValues()[0];
@@ -197,6 +203,138 @@ function deleteWishlistItem(id) {
     if (!row) return { success: false, message: 'Không tìm thấy mục' };
     sh.deleteRow(row);
     return { success: true, message: 'Đã xoá khỏi wishlist' };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}
+
+/* =============================================
+   DÒ LIÊN KẾT MẶT HÀNG THEO ẢNH (chạy cho toàn bộ wishlist)
+   Dùng để cập nhật các mục đã có sẵn từ trước — mục nào trùng ảnh với đúng 1
+   mặt hàng thì gắn MaGD, nút 🔗 ở giao diện mở thẳng giao dịch đó.
+   Chạy lại bao nhiêu lần cũng được (chỉ ghi khi MaGD thực sự đổi).
+   ============================================= */
+
+/* Khoá so khớp 2 link ảnh — phải khớp anhKey() bên Index.html */
+function _wlAnhKey(u) {
+  u = String(u || '').trim();
+  if (!u) return '';
+  return u.replace(/^https?:\/\//i, '//').replace(/\/+$/, '').toLowerCase();
+}
+
+/* Chỉ mục: khoá ảnh -> [{maGD, tenSP}] của các mặt hàng ở tab Giá mặt hàng
+   (dòng có tên sản phẩm + đơn giá, bỏ giao dịch HOÀN — giống hệt trang đó) */
+function _wlChiMucAnhMatHang() {
+  var idx = {};
+  var anh = (typeof getAnhMap === 'function') ? getAnhMap() : null;
+  var mapAnh = (anh && anh.success) ? (anh.data || {}) : {};   // chỉ ảnh ĐÃ DUYỆT
+
+  var sh = _openSS().getSheetByName(TAB_GIAODICH);
+  if (!sh || sh.getLastRow() < 2) return idx;
+
+  var soCot = Math.max(8, sh.getLastColumn());
+  var rows = sh.getRange(2, 1, sh.getLastRow() - 1, soCot).getValues();
+  rows.forEach(function (r) {
+    var ten = String(r[5] || '').trim();
+    if (!ten) return;
+    if (!(Number(r[7]) || 0)) return;                 // không có đơn giá
+    if (String(r[4] || '').trim() === 'HOÀN') return; // giao dịch hoàn
+
+    var k = _wlAnhKey(mapAnh[_boDau(ten).trim()]);
+    if (!k) return;
+    (idx[k] = idx[k] || []).push({ maGD: String(r[0] || ''), tenSP: ten });
+  });
+  return idx;
+}
+
+/* Quét cả wishlist, gắn MaGD cho mục trùng ảnh với ĐÚNG 1 mặt hàng */
+function dongBoLienKetWishlist() {
+  try {
+    var sh = _wishlistSheet();
+    var n = sh.getLastRow() - 1;
+    if (n < 1) return { success: true, tong: 0, ganMoi: 0, giuNguyen: 0, nhieuTrung: 0, khongTrung: 0, message: 'Wishlist trống' };
+
+    var vals = sh.getRange(2, 1, n, HEADERS_WISHLIST.length).getValues();
+    var idx = _wlChiMucAnhMatHang();
+
+    var cot = sh.getRange(2, WL_COL.MAGD + 1, n, 1);
+    var maGDs = cot.getValues();
+    var ganMoi = 0, giuNguyen = 0, nhieuTrung = 0, khongTrung = 0, tong = 0;
+
+    for (var i = 0; i < vals.length; i++) {
+      if (!vals[i][WL_COL.ID]) continue;
+      tong++;
+      var k = _wlAnhKey(vals[i][WL_COL.ANH]);
+      var ds = (k && idx[k]) || [];
+      if (ds.length === 1) {
+        if (String(maGDs[i][0] || '').trim() === ds[0].maGD) giuNguyen++;
+        else { maGDs[i][0] = ds[0].maGD; ganMoi++; }
+      } else if (ds.length > 1) {
+        nhieuTrung++;   // nhiều mặt hàng trùng ảnh -> để giao diện mở màn lọc theo ảnh
+      } else {
+        khongTrung++;
+      }
+    }
+
+    if (ganMoi) cot.setValues(maGDs);
+
+    return {
+      success: true,
+      tong: tong, ganMoi: ganMoi, giuNguyen: giuNguyen,
+      nhieuTrung: nhieuTrung, khongTrung: khongTrung,
+      message: 'Dò ' + tong + ' mục: gắn mới ' + ganMoi + ' · sẵn đúng ' + giuNguyen +
+               ' · trùng nhiều ' + nhieuTrung + ' · không trùng ' + khongTrung
+    };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}
+
+/* Soi vì sao 2 ảnh "nhìn giống nhau" mà không khớp: trả về mục wishlist và mặt
+   hàng khớp từ khoá, kèm URL ảnh + trạng thái duyệt để so bằng mắt. */
+function chanDoanTrungAnh(tuKhoa) {
+  try {
+    var kw = _boDau(String(tuKhoa || '')).trim();
+    if (!kw) return { success: false, message: 'Nhập từ khoá (tên mục hoặc tên mặt hàng)' };
+
+    var anh = (typeof getAnhMap === 'function') ? getAnhMap() : null;
+    var mapDuyet = (anh && anh.success) ? (anh.data || {}) : {};
+    var mapTatCa = (anh && anh.success) ? (anh.dataTatCa || {}) : {};
+
+    var wl = [];
+    var sh = _wishlistSheet();
+    if (sh.getLastRow() > 1) {
+      sh.getRange(2, 1, sh.getLastRow() - 1, HEADERS_WISHLIST.length).getValues().forEach(function (r) {
+        if (!r[WL_COL.ID]) return;
+        var ten = String(r[WL_COL.TEN] || ''), ma = String(r[WL_COL.SETNO] || '');
+        if (_boDau(ten).indexOf(kw) < 0 && _boDau(ma).indexOf(kw) < 0) return;
+        wl.push({
+          ten: ten, setNo: ma,
+          anh: String(r[WL_COL.ANH] || ''), khoa: _wlAnhKey(r[WL_COL.ANH]),
+          maGD: String(r[WL_COL.MAGD] || '')
+        });
+      });
+    }
+
+    var mh = [];
+    var gsh = _openSS().getSheetByName(TAB_GIAODICH);
+    if (gsh && gsh.getLastRow() > 1) {
+      var soCot = Math.max(8, gsh.getLastColumn());
+      gsh.getRange(2, 1, gsh.getLastRow() - 1, soCot).getValues().forEach(function (r) {
+        var ten = String(r[5] || '');
+        if (!ten || _boDau(ten).indexOf(kw) < 0) return;
+        var k = _boDau(ten).trim();
+        var urlDuyet = String(mapDuyet[k] || '');
+        var url = urlDuyet || String(mapTatCa[k] || '');
+        mh.push({
+          maGD: String(r[0] || ''), tenSP: ten, loaiGD: String(r[4] || ''),
+          donGia: Number(r[7]) || 0,
+          anh: url, daDuyet: !!urlDuyet, khoa: _wlAnhKey(urlDuyet)
+        });
+      });
+    }
+
+    return { success: true, tuKhoa: String(tuKhoa || ''), wishlist: wl, matHang: mh };
   } catch (e) {
     return { success: false, message: e.toString() };
   }
